@@ -1,0 +1,12 @@
+{
+  "profile":{"name":"박상득","anchor":"한국형 지자체 AI 행정 5단계 모형 개발","title":"교육과정 및 행정지원 앱 개발 · AI교육","claim":"설계한 사람이 직접 진행합니다.","career":["현) 한국공공자치연구원 AI행정혁신연구소장","전) 한국공공자치연구원 연구기획본부장","전) 국가안보전략연구원 선임연구원","전) 한국능률협회 국제사업본부 일본지역 팀장"],"portrait":""},
+  "metrics":{"institutions":"○○","hours":"○○○","learners":"○,○○○"},
+  "assets":[{"title":"교육과정","desc":"2시간부터 49시간까지, 최고위부터 실무자까지","image":""},{"title":"교육생용 교재","desc":"직접 집필·인쇄·배포, 저작권 등록 진행","image":""},{"title":"실습용 웹 응용프로그램","desc":"과정별 전용, 교육 중 실제 사용","image":""},{"title":"진단 모형","desc":"한국형 지자체 AI 행정 5단계 모형(KAIM)","image":""}],
+  "records":[],
+  "courses":[{"name":"최고위 정책 워크숍","target":"단체장·간부","hours":"2H","content":"AI가 하지 못하는 것과 부서에 줄 기준"},{"name":"AI 활용 역량강화","target":"전 직원","hours":"7H","content":"업무를 지시 가능한 형태로 분해하는 방법"},{"name":"직무 심화","target":"실무자","hours":"14H","content":"문서·데이터·민원 업무의 AI 적용과 검증"},{"name":"제로빌드 정책기획","target":"기획 부서","hours":"14H","content":"기 확보 자원을 재배열하는 정책 재설계"},{"name":"문제해결형 혁신리더","target":"핵심 인력","hours":"49H","content":"6회차 과제 수행형 리더 양성"}],
+  "kaim":["개인 활용","전원 활용","업무 표준","조직 자산","정책 활용"],
+  "diagnosis":{"url":"","duration":"20분","cost":"무상","button":"예비진단 시작하기"},
+  "book":{"title":"출근길 3분 AI","intro":"","publisher":"","year":"","image":""},
+  "channels":{"youtube":"","blog":"","library":"/library/"},
+  "contact":{"phone":"010-9145-1318","email":"ai.happybrain@gmail.com","site":"https://happybrain.ai.kr"}
+}
