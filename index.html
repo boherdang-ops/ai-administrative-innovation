@@ -322,6 +322,8 @@ body.review .band-deep [data-block]::before{background:var(--navy-900);color:var
 #s3-numbers li{text-align:left;}
 #s3-numbers .n{font-size:var(--t-big);font-weight:700;line-height:1;letter-spacing:-.035em;
                color:var(--navy-800);font-variant-numeric:tabular-nums;}
+#s3-numbers .n.is-text{font-size:var(--t-lead);line-height:1.4;letter-spacing:0;
+               word-break:keep-all;overflow-wrap:break-word;}
 #s3-numbers .l{margin-top:var(--sp-1);font-size:var(--t-small);color:var(--sub);font-weight:500;}
 .s3-row{display:grid;grid-template-columns:1fr;gap:var(--sp-5);margin-top:var(--sp-4);}
 #s3-orgs .lb{font-size:13px;letter-spacing:.14em;color:var(--cap);font-weight:700;}
@@ -472,6 +474,7 @@ body.review .band-deep [data-block]::before{background:var(--navy-900);color:var
   #s1-metrics .n{font-size:15pt;} #s1-metrics .l{font-size:8pt;}
   #s3-numbers{border-bottom:1pt solid #000;}
   #s3-numbers .n{font-size:22pt;}
+  #s3-numbers .n.is-text{font-size:10.5pt;}
   .s3-row{grid-template-columns:1fr;gap:8pt;}
   #print-only{display:block;}
   #s4-courses{break-before:page;}
