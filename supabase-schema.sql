@@ -1,113 +1,73 @@
--- AI 행정혁신 연구원 CMS cloud schema
+-- Park Sang-deuk V12 CMS — Supabase schema
+-- Run in Supabase SQL Editor. Then create an Auth user and add that email to cms_admins.
 
--- Admin allowlist: only emails listed here can operate the CMS.
--- After creating the first Supabase Auth user, insert its email here.
 create table if not exists public.cms_admins (
   email text primary key,
   created_at timestamptz not null default now()
 );
-
 alter table public.cms_admins enable row level security;
-drop policy if exists "admins can read own allowlist row" on public.cms_admins;
-create policy "admins can read own allowlist row" on public.cms_admins
-for select to authenticated
-using (lower(email) = lower(coalesce(auth.jwt()->>'email','')));
+drop policy if exists "admin reads own allowlist" on public.cms_admins;
+create policy "admin reads own allowlist" on public.cms_admins for select to authenticated
+using (lower(email)=lower(coalesce(auth.jwt()->>'email','')));
 
--- Helper condition used by CMS write policies:
--- EXISTS (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email','')))
-
-create table if not exists public.site_state (
+create table if not exists public.site_published (
   id text primary key,
-  published_data jsonb not null default '{}'::jsonb,
-  published_text jsonb not null default '{}'::jsonb,
-  published_images jsonb not null default '{}'::jsonb,
+  content jsonb not null default '{}'::jsonb,
   updated_at timestamptz not null default now(),
-  draft_data jsonb not null default '{}'::jsonb,
-  draft_text jsonb not null default '{}'::jsonb,
-  draft_images jsonb not null default '{}'::jsonb,
-  draft_updated_at timestamptz
+  updated_by uuid references auth.users(id) on delete set null
 );
+insert into public.site_published(id) values('main') on conflict(id) do nothing;
+alter table public.site_published enable row level security;
+drop policy if exists "public reads published" on public.site_published;
+create policy "public reads published" on public.site_published for select to anon, authenticated using(id='main');
+drop policy if exists "admin updates published" on public.site_published;
+create policy "admin updates published" on public.site_published for update to authenticated
+using(id='main' and exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))))
+with check(id='main' and exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
 
-insert into public.site_state(id) values ('main') on conflict (id) do nothing;
+create table if not exists public.site_drafts (
+  id text primary key,
+  content jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id) on delete set null
+);
+insert into public.site_drafts(id) values('main') on conflict(id) do nothing;
+alter table public.site_drafts enable row level security;
+drop policy if exists "admin reads drafts" on public.site_drafts;
+create policy "admin reads drafts" on public.site_drafts for select to authenticated
+using(exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
+drop policy if exists "admin updates drafts" on public.site_drafts;
+create policy "admin updates drafts" on public.site_drafts for update to authenticated
+using(exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))))
+with check(exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
 
-alter table public.site_state add column if not exists draft_data jsonb not null default '{}'::jsonb;
-alter table public.site_state add column if not exists draft_text jsonb not null default '{}'::jsonb;
-alter table public.site_state add column if not exists draft_images jsonb not null default '{}'::jsonb;
-alter table public.site_state add column if not exists draft_updated_at timestamptz;
-
-alter table public.site_state enable row level security;
-
--- Public website can read the published state.
-drop policy if exists "public read published state" on public.site_state;
-create policy "public read published state" on public.site_state
-for select using (id='main');
-
--- Only signed-in admins may write. For a first deployment, restrict this policy further
--- with a Supabase Auth role/allowlist if multiple accounts will exist.
-drop policy if exists "authenticated write state" on public.site_state;
-create policy "authenticated write state" on public.site_state
-for update to authenticated
-using (id='main' and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))))
-with check (id='main' and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
-
--- Storage bucket for future image uploads.
-insert into storage.buckets (id,name,public) values ('site-assets','site-assets',true) on conflict (id) do nothing;
-
-
--- Authenticated administrators may upload/list files in the site-assets bucket.
-drop policy if exists "authenticated upload site assets" on storage.objects;
-create policy "authenticated upload site assets" on storage.objects
-for insert to authenticated
-with check (bucket_id='site-assets' and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
-
-drop policy if exists "authenticated list site assets" on storage.objects;
-create policy "authenticated list site assets" on storage.objects
-for select to authenticated
-using (bucket_id='site-assets' and (public=true or exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email','')))));
-
-drop policy if exists "authenticated update site assets" on storage.objects;
-create policy "authenticated update site assets" on storage.objects
-for update to authenticated
-using (bucket_id='site-assets' and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))))
-with check (bucket_id='site-assets' and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
-
-drop policy if exists "authenticated delete site assets" on storage.objects;
-create policy "authenticated delete site assets" on storage.objects
-for delete to authenticated
-using (bucket_id='site-assets' and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
-
-
--- Server-side revision history: each published version is stored centrally.
 create table if not exists public.site_revisions (
-  id bigint generated by default as identity primary key,
-  site_id text not null references public.site_state(id) on delete cascade,
-  published_data jsonb not null default '{}'::jsonb,
-  published_text jsonb not null default '{}'::jsonb,
-  published_images jsonb not null default '{}'::jsonb,
-  published_at timestamptz not null default now(),
-  published_by uuid references auth.users(id) on delete set null,
-  summary jsonb not null default '{}'::jsonb
+ id bigint generated by default as identity primary key,
+ site_id text not null default 'main',
+ content jsonb not null default '{}'::jsonb,
+ published_at timestamptz not null default now(),
+ published_by uuid references auth.users(id) on delete set null,
+ summary jsonb not null default '{}'::jsonb
 );
-
 alter table public.site_revisions enable row level security;
-drop policy if exists "authenticated read revisions" on public.site_revisions;
-create policy "authenticated read revisions" on public.site_revisions
-for select to authenticated
-using (exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
-drop policy if exists "authenticated create revisions" on public.site_revisions;
-create policy "authenticated create revisions" on public.site_revisions
-for insert to authenticated
-with check (auth.uid() = published_by and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
+drop policy if exists "admin reads revisions" on public.site_revisions;
+create policy "admin reads revisions" on public.site_revisions for select to authenticated
+using(exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
+drop policy if exists "admin creates revisions" on public.site_revisions;
+create policy "admin creates revisions" on public.site_revisions for insert to authenticated
+with check(auth.uid()=published_by and exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
 
--- Allow authenticated admins to save draft fields and read the state.
-drop policy if exists "authenticated read state" on public.site_state;
-create policy "authenticated read state" on public.site_state
-for select to authenticated using (id='main');
-drop policy if exists "authenticated write state" on public.site_state;
-create policy "authenticated write state" on public.site_state
-for update to authenticated
-using (id='main' and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))))
-with check (id='main' and exists (select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
-
-create index if not exists site_revisions_site_published_idx
-on public.site_revisions(site_id, published_at desc);
+insert into storage.buckets(id,name,public) values('site-assets','site-assets',true) on conflict(id) do update set public=true;
+drop policy if exists "admin reads asset metadata" on storage.objects;
+create policy "admin reads asset metadata" on storage.objects for select to authenticated
+using(bucket_id='site-assets' and exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
+drop policy if exists "admin uploads assets" on storage.objects;
+create policy "admin uploads assets" on storage.objects for insert to authenticated
+with check(bucket_id='site-assets' and exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
+drop policy if exists "admin updates assets" on storage.objects;
+create policy "admin updates assets" on storage.objects for update to authenticated
+using(bucket_id='site-assets' and exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))))
+with check(bucket_id='site-assets' and exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));
+drop policy if exists "admin deletes assets" on storage.objects;
+create policy "admin deletes assets" on storage.objects for delete to authenticated
+using(bucket_id='site-assets' and exists(select 1 from public.cms_admins a where lower(a.email)=lower(coalesce(auth.jwt()->>'email',''))));

@@ -1,132 +1,34 @@
-const KEY='labPortfolioCMS';
-const defaults={"profile":{"name":"박상득","anchor":"지방행정 AI 도입 및 정책 기획 전문가","title":"현장 실무 중심의 AI 행정혁신 모델 설계 및 교육","claim":"'새로운 예산과 시스템'이 아닌, '기존 자원의 재배열(Zero-build)'을 통해 실질적인 행정 성과를 창출합니다.","career":["현) 한국공공자치연구원 AI행정혁신연구소장","전) 한국공공자치연구원 연구기획본부장","전) 국가안보전략연구원 선임연구원","전) 한국능률협회 국제사업본부 일본지역 팀장"],"portrait":""},"metrics":{"institutions":"출강 지자체 및 공공기관 (진행 예정)","hours":"누적 교육 시간 (진행 예정)","learners":"총 이수 공직자 (진행 예정)"},"assets":[{"title":"공공행정 특화 교육/연수","desc":"단체장 최고위 과정부터 실무자 심화 과정까지, 직급과 직무에 최적화된 맞춤형 커리큘럼","image":""},{"title":"실무 밀착형 교재 및 매뉴얼","desc":"행정 현장의 언어로 직접 집필한 교재 제공 (저작권 등록 완료/진행)","image":""},{"title":"행정망 맞춤 실습 프로그램","desc":"외부 데이터 유출 리스크 없이, 안전하게 실무에 적용할 수 있는 자체 개발 웹 응용프로그램 활용","image":""},{"title":"한국형 지자체 AI 행정 5단계 모형 (KAIM)","desc":"개인 활용을 넘어, 조직의 자산과 정책으로 이어지는 체계적인 AI 도입 로드맵 제시","image":""}],"records":[],"courses":[{"name":"최고위 정책 워크숍","target":"단체장·간부","hours":"2H","content":"AI 도입의 환상을 넘은 실질적 판단 기준, '휴먼 프리미엄'과 조직 내 보안/윤리 가이드라인 제시"},{"name":"AI 활용 실무 역량 강화","target":"전 직원","hours":"7H","content":"'할루시네이션(임의 생성)' 방어 및 실제 업무를 AI 지시 형태로 분해·구조화하는 방법론 학습"},{"name":"행정 직무 심화","target":"실무자","hours":"14H","content":"민감 정보 보호 원칙 하에, 문서 기안·데이터 분석·민원 처리 업무의 실전 AI 적용 및 검증"},{"name":"제로빌드(Zero-build) 정책기획","target":"기획/사업 부서","hours":"14H","content":"신규 예산 편성 없이, 기 확보된 유휴 자원을 융합·재배열하여 현안을 돌파하는 정책 재설계 훈련"},{"name":"문제해결형 혁신 리더 양성","target":"핵심 인력","hours":"49H","content":"조직 내 실제 당면 과제를 주제로, 6회차에 걸쳐 기획안을 완성하고 결재권자를 설득하는 실무 과제 수행형 과정"}],"kaim":["1단계: 개인별 도구 활용","2단계: 부서 전원 활용","3단계: 행정 업무 표준화","4단계: 조직 내 지식 자산화","5단계: 선제적 정책 활용"],"diagnosis":{"url":"","duration":"지자체별 맞춤 설계","cost":"별도 문의","button":"KAIM 기반 AI 역량 진단 문의"},"book":{"title":"출근길 3분 AI","intro":"공직자를 위한 실전 AI 활용 가이드 (가제, 출간 준비 중)","publisher":"-","year":"-","image":""},"channels":{"youtube":"","blog":"","library":"/library/"},"contact":{"phone":"010-9145-1318","email":"ai.happybrain@gmail.com","site":"https://happybrain.ai.kr"}};
-let data=load(), current='dashboard';
-function clone(x){return JSON.parse(JSON.stringify(x))}
-function load(){try{const s=localStorage.getItem(KEY);return s?JSON.parse(s):clone(defaults)}catch(e){return clone(defaults)}}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function input(path,value,placeholder=''){return `<input data-k="${esc(path)}" value="${esc(value)}" placeholder="${esc(placeholder)}">`}
-function area(path,value,placeholder=''){return `<textarea data-k="${esc(path)}" placeholder="${esc(placeholder)}">${esc(value)}</textarea>`}
-function setPath(path,v){const parts=path.split('.');let o=data;for(let i=0;i<parts.length-1;i++)o=o[parts[i]];o[parts.at(-1)]=v}
-function getRowsConfig(){return {courses:{title:'교육과정',fields:[['name','과정명'],['target','대상'],['hours','시간'],['content','핵심 내용']]},assets:{title:'포트폴리오',fields:[['title','제목'],['desc','설명'],['image','이미지 경로']]},records:{title:'교육실적',fields:[['org','기관명'],['course','과정명'],['period','실시 시기'],['hours','교육시간'],['learners','수강인원']]}}[current]}
-function rowTemplate(index,fields,obj={}){return `<div class="row" data-i="${index}">${fields.map(([k,label])=>`<div class="field"><label>${label}</label>${input(k,obj[k]||'')}</div>`).join('')}<button type="button" class="del" data-i="${index}">삭제</button></div>`}
-function list(title,arr,fields){return `<div class="card"><div class="card-head"><div><h2>${title}</h2><p class="hint">필요한 만큼 추가하고 저장하세요.</p></div><button type="button" class="add" id="add">+ 추가</button></div><div id="list">${arr.map((o,i)=>rowTemplate(i,fields,o)).join('')}</div></div>`}
-function dashboard(){
- const draft=localStorage.getItem('labPortfolioCMSDraft');
- const pub=localStorage.getItem('labPortfolioCMSPublished');
- const history=(()=>{try{return JSON.parse(localStorage.getItem('labPortfolioCMSHistory')||'[]')}catch(e){return []}})();
- const hasCloud=!!window.CMS_CLOUD?.ready?.();
- const universal=(()=>{try{return Object.keys(JSON.parse(localStorage.getItem('labPortfolioUniversal')||'{}')).length}catch(e){return 0}})();
- const media=(()=>{try{return Object.keys(JSON.parse(localStorage.getItem('labPortfolioImages')||'{}')).length}catch(e){return 0}})();
- const last=history[0]?.at;
- const records=Array.isArray(data.records)?data.records.length:0, courses=Array.isArray(data.courses)?data.courses.length:0, assets=Array.isArray(data.assets)?data.assets.length:0;
- return `<div class="dashboard-grid">
-   <div class="dash-card dash-wide"><div class="dash-label">홈페이지 운영 상태</div><div class="dash-title">${pub?'공개본이 있습니다':'아직 공개 이력이 없습니다'}</div><div class="dash-meta">${last?'마지막 공개: '+new Date(last).toLocaleString('ko-KR'):'임시저장과 공개를 시작하세요.'}</div><div class="dash-actions"><a href="../?edit=1" target="_blank">직접 편집</a><a href="../?preview=1" target="_blank">미리보기</a></div></div>
-   <div class="dash-card"><div class="dash-label">콘텐츠</div><div class="dash-number">${courses}</div><div class="dash-meta">교육과정</div><button data-go="courses">관리하기 →</button></div>
-   <div class="dash-card"><div class="dash-label">실적</div><div class="dash-number">${records}</div><div class="dash-meta">교육실적</div><button data-go="records">관리하기 →</button></div>
-   <div class="dash-card"><div class="dash-label">포트폴리오</div><div class="dash-number">${assets}</div><div class="dash-meta">포트폴리오 항목</div><button data-go="assets">관리하기 →</button></div>
-   <div class="dash-card"><div class="dash-label">전체 문구</div><div class="dash-number">${universal}</div><div class="dash-meta">직접 수정된 문구</div><button data-go="alltext">편집하기 →</button></div>
-   <div class="dash-card"><div class="dash-label">이미지</div><div class="dash-number">${media}</div><div class="dash-meta">등록된 이미지 정보</div><button data-go="media">자료실 →</button></div>
-   <div class="dash-card"><div class="dash-label">클라우드</div><div class="dash-status"><i class="dot ${hasCloud?'on':'off'}"></i>${hasCloud?'연결 설정됨':'로컬 모드'}</div><div class="dash-meta">Supabase 연결 상태</div><button data-go="cloud">설정하기 →</button></div>
-   <div class="dash-card dash-wide"><div class="dash-label">최근 작업</div><div class="recent-list">${history.slice(0,5).map((x,i)=>`<div><span>${i+1}</span><b>${new Date(x.at).toLocaleString('ko-KR')}</b><small>공개본 백업</small></div>`).join('')||'<div class="empty">최근 공개 기록이 없습니다.</div>'}</div></div>
-   <div class="dash-card dash-wide"><div class="dash-label">빠른 작업</div><div class="quick-grid"><button data-go="profile">프로필 수정</button><button data-go="metrics">실적 수치</button><button data-go="alltext">홈페이지 전체 편집</button><button data-go="media">이미지 자료실</button><button id="dashPublish" class="publish">저장 및 즉시 반영</button></div></div>
- </div>`;
+const KEY='psV12CMS',DRAFT='psV12CMSDraft',PUB='psV12CMSPublished';let data,current='dashboard';
+const tabs=[['dashboard','대시보드'],['profile','프로필/사진'],['problems','문제인식'],['records','주요실적'],['method','방법론/KAIM'],['courses','교육과정'],['works','개발성과/이미지'],['archive','아카이브'],['contact','연락처'],['revisions','버전관리']];
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));const clone=x=>JSON.parse(JSON.stringify(x));
+async function init(){
+ const local=localStorage.getItem(KEY);data=local?JSON.parse(local):await (await fetch('../data/site-default.json')).json();
+ if(V12_CLOUD.ready()){try{const d=await V12_CLOUD.getDraft();if(d?.content)data=d.content;document.getElementById('cloudStatus').textContent='Supabase 연결 · 관리자 인증 완료'}catch(e){document.getElementById('cloudStatus').textContent='Cloud 초안 불러오기 실패'}}
+ document.getElementById('tabs').innerHTML=tabs.map(([k,n])=>`<button data-tab="${k}">${n}</button>`).join('');document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{collect();current=b.dataset.tab;panel()});panel()
 }
-
-function panel(){
- const p=document.getElementById('panel');let h='';
- if(current==='dashboard')h=dashboard();
- else if(current==='profile')h=`<div class="card"><h2>프로필</h2><div class="grid"><div><label>이름</label>${input('profile.name',data.profile.name)}</div><div><label>대표 문구</label>${input('profile.anchor',data.profile.anchor)}</div></div><label>직함/소개</label>${input('profile.title',data.profile.title)}<label>대표 문장</label>${input('profile.claim',data.profile.claim)}<label>경력 — 한 줄에 하나</label>${area('profile.career',data.profile.career.join('\n'))}<label>인물 사진 경로</label>${input('profile.portrait',data.profile.portrait,'예: images/profile.jpg')}</div>`;
- else if(current==='metrics')h=`<div class="card"><h2>실적 수치</h2><p class="hint">첫 화면과 교육실적 영역에 표시되는 공개 수치입니다.</p><div class="grid"><div><label>실시 기관</label>${input('metrics.institutions',data.metrics.institutions)}</div><div><label>누적 교육시간</label>${input('metrics.hours',data.metrics.hours)}</div><div><label>누적 수강인원</label>${input('metrics.learners',data.metrics.learners)}</div></div></div>`;
- else if(['courses','assets','records'].includes(current)){const c=getRowsConfig();h=list(c.title,data[current],c.fields)}
- else if(current==='kaim')h=`<div class="card"><h2>KAIM 5단계</h2><p class="hint">단계명만 관리합니다. 설명문은 현재 원문 구조를 유지합니다.</p>${data.kaim.map((v,i)=>`<label>제${i+1}단계</label>${input('kaim.'+i,v)}`).join('')}</div>`;
- else if(current==='diagnosis')h=`<div class="card"><h2>AI 행정 예비진단</h2><label>서비스 URL</label>${input('diagnosis.url',data.diagnosis.url,'예: /diagnosis/ 또는 https://...')}<div class="grid"><div><label>소요시간</label>${input('diagnosis.duration',data.diagnosis.duration)}</div><div><label>비용</label>${input('diagnosis.cost',data.diagnosis.cost)}</div></div><label>버튼 문구</label>${input('diagnosis.button',data.diagnosis.button)}</div>`;
- else if(current==='book')h=`<div class="card"><h2>도서</h2><label>도서명</label>${input('book.title',data.book.title)}<label>한 줄 소개</label>${input('book.intro',data.book.intro)}<div class="grid"><div><label>출판사</label>${input('book.publisher',data.book.publisher)}</div><div><label>발행연도</label>${input('book.year',data.book.year)}</div></div><label>표지 이미지 경로</label>${input('book.image',data.book.image,'예: images/book-cover.jpg')}</div>`;
- else if(current==='media')h=`<div class="card"><div class="card-head"><div><h2>이미지 자료실</h2><p class="hint">관리자 로그인 후 이미지를 Supabase Storage에 업로드하고, 홈페이지에서 사용할 수 있는 주소를 복사합니다.</p></div></div><div class="media-upload"><input id="mediaFile" type="file" accept="image/*"><button type="button" id="uploadMedia" class="primary">이미지 업로드</button></div><p id="mediaStatus" class="hint">이미지 목록을 불러오는 중…</p><div id="mediaGrid" class="media-grid"></div></div>`
- else if(current==='cloud')h=`<div class="card"><h2>클라우드 CMS 운영</h2><p class="hint">Supabase를 연결하면 콘텐츠를 여러 기기에서 공유할 수 있습니다. 연결하지 않으면 기존 LocalStorage 방식으로 동작합니다.</p><label>Supabase Project URL</label>${input('cloud.url',window.CMS_CLOUD?.config?.().url||'','https://xxxx.supabase.co')}<label>Supabase anon public key</label>${input('cloud.anonKey',window.CMS_CLOUD?.config?.().anonKey||'','anon public key')}<div class="cloud-actions"><button type="button" id="saveCloudConfig">연결 설정 저장</button></div><hr><h3>관리자 로그인</h3><div class="grid"><div><label>이메일</label><input id="cloudEmail" type="email" placeholder="관리자 이메일"></div><div><label>비밀번호</label><input id="cloudPassword" type="password" placeholder="Supabase Auth 비밀번호"></div></div><div class="cloud-actions"><button type="button" id="cloudLogin">로그인</button><button type="button" id="cloudLogout">로그아웃</button></div><hr><h3>콘텐츠 동기화</h3><div class="cloud-actions"><button type="button" id="cloudPull">공개본 불러오기</button><button type="button" id="cloudPush" class="publish">현재 콘텐츠를 클라우드에 공개</button><button type="button" id="cloudHistory">서버 백업 이력</button></div><p id="cloudStatus" class="hint">상태 확인 중…</p><div class="cloud-note"><b>주의</b><br>service_role 키는 입력하지 마세요. anon public key만 사용하세요.</div></div>`
- 
- else if(current==='channels')h=`<div class="card"><h2>채널 / 문의</h2><label>YouTube 주소</label>${input('channels.youtube',data.channels.youtube,'https://...')}<label>블로그 주소</label>${input('channels.blog',data.channels.blog,'https://...')}<label>자료실 주소</label>${input('channels.library',data.channels.library,'/library/')}<div class="grid"><div><label>전화</label>${input('contact.phone',data.contact.phone)}</div><div><label>이메일</label>${input('contact.email',data.contact.email)}</div></div><label>대표 사이트 주소</label>${input('contact.site',data.contact.site)}</div>`;
- else if(current==='alltext')h=`<div class="card alltext-card"><div class="card-head"><div><h2>홈페이지 전체 문구 편집</h2><p class="hint">화면에 실제 표시되는 모든 글자와 숫자를 한 화면에서 수정합니다. 저장하면 홈페이지에 즉시 반영됩니다.</p></div><button type="button" class="add" id="refreshText">화면 다시 읽기</button></div><div class="editor-tools"><input id="filterText" placeholder="검색: 예) 교육, AI, 49H, 박상득"><span id="textCount"></span></div><div id="allTextList"><div class="loading">홈페이지 화면을 읽는 중입니다…</div></div><div class="alltext-actions"><button type="button" class="primary" id="saveAllText">전체 문구 저장</button><button type="button" class="danger" id="clearAllText">전체 문구 수정내용 초기화</button></div></div>`;
- p.innerHTML=h;bindPanel();
-}
-let allTextItems=[];
-function loadAllTextEditor(){
- const list=document.getElementById('allTextList'); if(!list)return;
- const frame=document.getElementById('universalFrame');
- const read=()=>{
-   try{
-     if(frame?.contentWindow?.CMS_UNIVERSAL){
-       allTextItems=frame.contentWindow.CMS_UNIVERSAL.getItems(); renderAllText(); return;
-     }
-   }catch(e){}
-   list.innerHTML='<div class="loading error">홈페이지 화면에 접근하지 못했습니다. 아래 미리보기 링크를 먼저 열어 같은 주소에서 관리자 페이지를 실행해 주세요.</div>';
- };
- if(!frame){
-   const f=document.createElement('iframe'); f.id='universalFrame'; f.src='../?editorPreview=1'; f.setAttribute('aria-hidden','true'); f.style.cssText='position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;border:0'; document.body.appendChild(f);
-   f.addEventListener('load',()=>setTimeout(read,700));
- } else {setTimeout(read,300)}
- const refresh=document.getElementById('refreshText'); if(refresh)refresh.onclick=()=>loadAllTextEditor();
- const filter=document.getElementById('filterText'); if(filter)filter.oninput=renderAllText;
- const saveBtn=document.getElementById('saveAllText'); if(saveBtn)saveBtn.onclick=saveAllText;
- const clearBtn=document.getElementById('clearAllText'); if(clearBtn)clearBtn.onclick=clearAllText;
-}
-function renderAllText(){
- const list=document.getElementById('allTextList'); if(!list)return;
- const q=(document.getElementById('filterText')?.value||'').trim().toLowerCase();
- const visible=allTextItems.filter(x=>(x.value||'').toLowerCase().includes(q)||(x.parentText||'').toLowerCase().includes(q));
- const count=document.getElementById('textCount'); if(count)count.textContent=`전체 ${allTextItems.length}개 · 표시 ${visible.length}개`;
- list.innerHTML=visible.map(x=>`<div class="text-row" data-key="${esc(x.key)}"><div class="text-meta"><span class="num">${x.index}</span><span class="tag">${esc(x.element)}</span><span class="context">${esc(x.parentText||'')}</span></div><textarea data-text-key="${esc(x.key)}">${esc(x.value)}</textarea></div>`).join('') || '<div class="loading">검색 결과가 없습니다.</div>';
-}
-function saveAllText(){
- const frame=document.getElementById('universalFrame'); if(!frame?.contentWindow?.CMS_UNIVERSAL){alert('홈페이지 편집 연결이 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.');return}
- const map=new Map(allTextItems.map(x=>[x.key,x])); document.querySelectorAll('[data-text-key]').forEach(el=>{const x=map.get(el.dataset.textKey);if(x)x.value=el.value});
- try{frame.contentWindow.CMS_UNIVERSAL.save(allTextItems);localStorage.setItem('labPortfolioUniversal',JSON.stringify(Object.fromEntries(allTextItems.map(x=>[x.key,x.value]))));document.getElementById('status').textContent='전체 문구 저장됨 · '+new Date().toLocaleTimeString('ko-KR');setTimeout(()=>frame.contentWindow.location.reload(),100)}catch(e){alert('저장에 실패했습니다. 홈페이지와 관리자 페이지가 같은 사이트에서 열려 있는지 확인해 주세요.')}
-}
-function clearAllText(){if(!confirm('전체 문구에서 직접 수정한 내용을 모두 초기화할까요? 기존 프로필·교육과정 데이터는 삭제하지 않습니다.'))return;localStorage.removeItem('labPortfolioUniversal');const frame=document.getElementById('universalFrame');try{frame.contentWindow.CMS_UNIVERSAL.clear()}catch(e){}setTimeout(loadAllTextEditor,500)}
-
-
-async function loadMedia(){
- const grid=document.getElementById('mediaGrid'),statusEl=document.getElementById('mediaStatus'); if(!grid)return;
- try{
-   if(!window.CMS_CLOUD?.ready()){statusEl.textContent='Supabase 연결 설정이 필요합니다.';return}
-   const items=await window.CMS_CLOUD.listImages();
-   grid.innerHTML=items.length?items.map(x=>`<div class="media-item"><img src="${esc(x.url)}" alt=""><div class="media-name">${esc(x.name)}</div><input value="${esc(x.url)}" readonly><button type="button" class="copy-url" data-url="${esc(x.url)}">주소 복사</button></div>`).join(''):'<div class="loading">업로드된 이미지가 없습니다.</div>';
-   grid.querySelectorAll('.copy-url').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(b.dataset.url);b.textContent='복사됨'}catch(e){alert(b.dataset.url)}});
- }catch(e){statusEl.textContent='이미지 목록을 불러오지 못했습니다: '+e.message}
- const upload=document.getElementById('uploadMedia'); if(upload)upload.onclick=async()=>{
-   const f=document.getElementById('mediaFile')?.files?.[0]; if(!f){alert('업로드할 이미지를 선택하세요.');return}
-   upload.disabled=true;statusEl.textContent='업로드 중…';
-   try{const x=await window.CMS_CLOUD.uploadImage(f);statusEl.textContent='업로드 완료: '+x.name;await loadMedia()}catch(e){statusEl.textContent='업로드 실패: '+e.message}finally{upload.disabled=false}
- };
-}
-
-function bindPanel(){
- document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{collect();current=b.dataset.go;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===current));panel()});
- document.getElementById('dashPublish')?.addEventListener('click',()=>document.getElementById('save')?.click());
- document.querySelectorAll('[data-k]').forEach(e=>e.addEventListener('input',()=>setPath(e.dataset.k,e.value)));
- const add=document.getElementById('add');if(add)add.onclick=()=>{const cfg=getRowsConfig();data[current].push(Object.fromEntries(cfg.fields.map(([k])=>[k,''])));panel();setTimeout(()=>document.querySelector(`#list .row:last-child input`)?.focus(),0)};
- document.querySelectorAll('.del').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.i);if(confirm('이 항목을 삭제할까요?')){data[current].splice(i,1);panel()}});
- if(current==='alltext')loadAllTextEditor();
- if(current==='cloud'&&window.CMS_ADMIN_CLOUD?.bind)window.CMS_ADMIN_CLOUD.bind();
- if(current==='media')loadMedia();
-}
-function collect(){if(current==='profile'){data.profile.career=(document.querySelector('[data-k="profile.career"]')?.value||'').split('\n').map(x=>x.trim()).filter(Boolean)}if(current==='kaim'){document.querySelectorAll('[data-k^="kaim."]').forEach(e=>data.kaim[Number(e.dataset.k.split('.')[1])]=e.value)}if(['courses','assets','records'].includes(current)){const cfg=getRowsConfig();data[current]=[...document.querySelectorAll('#list .row')].map(r=>{const o={};cfg.fields.forEach(([k],i)=>{o[k]=r.querySelectorAll('input')[i]?.value||''});return o})}}
-function save(){collect();localStorage.setItem(KEY,JSON.stringify(data));document.getElementById('status').textContent='저장됨 · '+new Date().toLocaleTimeString('ko-KR');}
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{collect();current=b.dataset.tab;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));panel();window.CMS_ADMIN_CLOUD?.bind()});
-document.getElementById('save').onclick=save;
-document.getElementById('reset').onclick=()=>{if(confirm('현재 브라우저의 저장 데이터를 초기 데이터로 복원할까요?')){data=clone(defaults);localStorage.setItem(KEY,JSON.stringify(data));current='profile';document.querySelectorAll('nav button').forEach((x,i)=>x.classList.toggle('active',i===0));panel();document.getElementById('status').textContent='초기 데이터로 복원됨'}};
-document.getElementById('export').onclick=()=>{collect();const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='site-data.json';a.click();URL.revokeObjectURL(a.href)};
-document.getElementById('import').onclick=()=>document.getElementById('importFile').click();
-document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{data=JSON.parse(r.result);localStorage.setItem(KEY,JSON.stringify(data));panel();alert('JSON 데이터를 불러왔습니다.')}catch(err){alert('JSON 형식이 올바르지 않습니다.')}};r.readAsText(f);e.target.value=''};
-document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===current));panel(); window.CMS_ADMIN_CLOUD?.bind();
-
-/* v12 : localStorage가 비어 있으면 data/site-default.json을 초기 데이터로 사용한다.
-   (하드코딩 defaults와 JSON 파일이 어긋나 저장 시 옛 내용으로 되돌아가는 문제 방지) */
-(async()=>{
-  if(localStorage.getItem(KEY))return;
-  try{
-    const res=await fetch('../data/site-default.json',{cache:'no-store'});
-    if(!res.ok)return;
-    const d=await res.json();
-    if(d&&d.profile){data=d;panel();window.CMS_ADMIN_CLOUD?.bind();}
-  }catch(e){/* file:// 등 fetch 불가 환경은 defaults 사용 */}
-})();
+function inp(k,v,type='text'){return `<input data-k="${k}" type="${type}" value="${esc(v)}">`}function ta(k,v){return `<textarea data-k="${k}">${esc(v)}</textarea>`}function card(title,hint,body){return `<div class="card"><h2>${title}</h2><p class="hint">${hint}</p>${body}</div>`}
+function panel(){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===current));let h='';
+if(current==='dashboard')h=`<div class="dashboard"><div class="dash">교육·워크숍<strong>${esc(data.recordCount)}</strong><span>실시 회차</span></div><div class="dash">교육과정<strong>${data.courses.length}</strong><span>프로그램</span></div><div class="dash">개발성과<strong>${data.works.length}</strong><span>관리 항목</span></div><div class="dash">프로필 사진<strong>${data.profile.portrait?'등록':'미등록'}</strong><span>이미지 상태</span></div></div>`;
+if(current==='profile')h=card('프로필 / 이미지','프로필 사진과 로고를 업로드하고 첫 화면의 핵심 문구를 관리합니다.',`<div class="uploadbox"><div class="preview">${data.profile.portrait?`<img src="${esc(data.profile.portrait)}">`:'사진 없음'}</div><div><label>프로필 사진</label><input id="portraitFile" type="file" accept="image/*"><button class="add" id="clearPortrait">사진 삭제</button><label>이름</label>${inp('profile.name',data.profile.name)}<label>영문/키커</label>${inp('profile.kicker',data.profile.kicker)}<label>메인 문장</label>${ta('profile.headline',data.profile.headline)}<label>소개</label>${ta('profile.lead',data.profile.lead)}<label>경력 — 한 줄에 하나</label>${ta('profile.career',data.profile.career.join('\n'))}<label>로고 이미지 경로</label>${inp('profile.logo',data.profile.logo)}</div></div>`);
+if(current==='problems')h=card('행정의 문제인식','4개의 문제와 연결 문장을 수정합니다.',data.problems.map((x,i)=>`<div class="grid"><div><label>${i+1}. 제목</label>${inp(`problems.${i}.title`,x.title)}</div><div><label>설명</label>${ta(`problems.${i}.desc`,x.desc)}</div></div>`).join('')+`<label>핵심 연결 문장</label>${inp('problemBridge',data.problemBridge)}`);
+if(current==='records')h=card('주요 실적','연도별 테마와 실적을 관리합니다. 실적은 한 줄에 하나씩 입력합니다.',data.records.map((x,i)=>`<div class="row record"><div>${inp(`records.${i}.year`,x.year)}</div><div>${inp(`records.${i}.theme`,x.theme)}</div><div>${ta(`records.${i}.items`,x.items.join('\n'))}</div><button class="del" data-delrecord="${i}">삭제</button></div>`).join('')+`<button class="add" id="addRecord">+ 연도 추가</button><label>총 실시 회차</label>${inp('recordCount',data.recordCount)}`);
+if(current==='method')h=card('방법론 / KAIM','5단계 방법론과 KAIM 설명을 관리합니다.',data.method.map((x,i)=>`<label>제${i+1}단계</label>${inp(`method.${i}`,x)}`).join('')+`<label>KAIM 제목</label>${inp('kaim.title',data.kaim.title)}<label>KAIM 설명</label>${ta('kaim.desc',data.kaim.desc)}`);
+if(current==='courses')h=card('교육과정','과정명·대상·시간을 관리합니다.',data.courses.map((x,i)=>`<div class="row"><div>${inp(`courses.${i}.name`,x.name)}</div><div>${inp(`courses.${i}.target`,x.target)}</div><div>${inp(`courses.${i}.hours`,x.hours)}</div><span></span><button class="del" data-delcourse="${i}">삭제</button></div>`).join('')+`<button class="add" id="addCourse">+ 과정 추가</button>`);
+if(current==='works')h=card('개발성과 / 포트폴리오 이미지','각 개발성과에 대표 이미지를 업로드할 수 있습니다.',data.works.map((x,i)=>`<div class="card"><div class="uploadbox"><div class="preview workpreview">${x.image?`<img src="${esc(x.image)}">`:'이미지 없음'}</div><div><label>제목</label>${inp(`works.${i}.title`,x.title)}<label>설명</label>${ta(`works.${i}.desc`,x.desc)}<label>대표 이미지</label><input type="file" accept="image/*" data-workfile="${i}"><button class="del" data-delwork="${i}">항목 삭제</button></div></div></div>`).join('')+`<button class="add" id="addWork">+ 개발성과 추가</button>`);
+if(current==='archive')h=card('생각 / 아카이브','도서와 글·연구·영상 아카이브 항목을 관리합니다.',`<label>대표 도서명</label>${inp('book.title',data.book.title)}<label>아카이브 — 한 줄에 하나</label>${ta('archive',data.archive.join('\n'))}`);
+if(current==='contact')h=card('연락처','공개 사이트 하단 연락처입니다.',`<div class="grid"><div><label>이메일</label>${inp('contact.email',data.contact.email,'email')}</div><div><label>전화</label>${inp('contact.phone',data.contact.phone)}</div></div>`);
+if(current==='revisions')h=card('버전 관리','공개할 때마다 이전 공개본을 서버에 보관합니다.',`<div id="revisionList" class="hint">불러오는 중…</div>`);
+document.getElementById('panel').innerHTML=h;bind();if(current==='revisions')loadRevisions()}
+function pathSet(path,v){const p=path.split('.');let o=data;for(let i=0;i<p.length-1;i++){const k=/^\d+$/.test(p[i])?+p[i]:p[i];o=o[k]}const last=/^\d+$/.test(p.at(-1))?+p.at(-1):p.at(-1);o[last]=v}
+function collect(){document.querySelectorAll('[data-k]').forEach(e=>{let v=e.value;if(e.dataset.k==='profile.career'||e.dataset.k==='archive'||/records\.\d+\.items/.test(e.dataset.k))v=v.split('\n').map(x=>x.trim()).filter(Boolean);pathSet(e.dataset.k,v)});localStorage.setItem(KEY,JSON.stringify(data))}
+async function fileData(file,cb,folder='uploads'){try{if(V12_CLOUD.ready()){const x=await V12_CLOUD.uploadImage(file,folder);cb(x.url);return}if(file.size>1500000&&!confirm('이미지가 큽니다. 브라우저 저장공간을 많이 사용할 수 있습니다. 계속할까요?'))return;const r=new FileReader();r.onload=()=>cb(r.result);r.readAsDataURL(file)}catch(e){alert('이미지 업로드 실패: '+e.message)}}
+function bind(){document.querySelectorAll('[data-k]').forEach(e=>e.oninput=()=>{let v=e.value;if(e.dataset.k==='profile.career'||e.dataset.k==='archive'||/records\.\d+\.items/.test(e.dataset.k))v=v.split('\n').map(x=>x.trim()).filter(Boolean);pathSet(e.dataset.k,v)});const pf=document.getElementById('portraitFile');if(pf)pf.onchange=e=>{const f=e.target.files[0];if(f)fileData(f,x=>{data.profile.portrait=x;collect();panel()},'profile')};document.getElementById('clearPortrait')?.addEventListener('click',()=>{data.profile.portrait='';collect();panel()});document.querySelectorAll('[data-workfile]').forEach(e=>e.onchange=ev=>{const f=ev.target.files[0],i=+e.dataset.workfile;if(f)fileData(f,x=>{data.works[i].image=x;collect();panel()},'portfolio')});document.querySelectorAll('[data-delrecord]').forEach(b=>b.onclick=()=>{data.records.splice(+b.dataset.delrecord,1);collect();panel()});document.querySelectorAll('[data-delcourse]').forEach(b=>b.onclick=()=>{data.courses.splice(+b.dataset.delcourse,1);collect();panel()});document.querySelectorAll('[data-delwork]').forEach(b=>b.onclick=()=>{data.works.splice(+b.dataset.delwork,1);collect();panel()});document.getElementById('addRecord')?.addEventListener('click',()=>{data.records.push({year:'',theme:'',items:[]});panel()});document.getElementById('addCourse')?.addEventListener('click',()=>{data.courses.push({name:'',target:'',hours:''});panel()});document.getElementById('addWork')?.addEventListener('click',()=>{data.works.push({title:'',desc:'',image:''});panel()})}
+async function saveDraftCloud(){collect();localStorage.setItem(DRAFT,JSON.stringify(data));if(V12_CLOUD.ready())await V12_CLOUD.saveDraft(data)}
+document.getElementById('saveDraft').onclick=async()=>{try{await saveDraftCloud();document.getElementById('status').textContent='임시저장 · '+new Date().toLocaleTimeString('ko-KR')}catch(e){alert('저장 실패: '+e.message)}};
+document.getElementById('preview').onclick=async()=>{try{await saveDraftCloud();window.open('../?preview=1','_blank')}catch(e){alert('미리보기 저장 실패: '+e.message)}};
+document.getElementById('publish').onclick=async()=>{if(!confirm('현재 내용을 공개 사이트에 반영할까요?'))return;try{collect();if(V12_CLOUD.ready())await V12_CLOUD.publish(data,{source:'V12 CMS'});localStorage.setItem(PUB,JSON.stringify(data));localStorage.setItem(DRAFT,JSON.stringify(data));document.getElementById('status').textContent='공개 완료 · '+new Date().toLocaleTimeString('ko-KR')}catch(e){alert('공개 실패: '+e.message)}};
+document.getElementById('export').onclick=()=>{collect();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));a.download='park-sangdeuk-v12-data.json';a.click();URL.revokeObjectURL(a.href)};
+document.getElementById('import').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{data=JSON.parse(r.result);localStorage.setItem(KEY,JSON.stringify(data));panel()}catch(err){alert('올바른 JSON 파일이 아닙니다.')}};r.readAsText(f)};
+async function loadRevisions(){const el=document.getElementById('revisionList');if(!el)return;if(!V12_CLOUD.ready()){el.textContent='Supabase 연결 후 사용할 수 있습니다.';return}try{const xs=await V12_CLOUD.revisions();el.innerHTML=xs.length?xs.map(x=>`<div class="revision-row"><div><b>${new Date(x.published_at).toLocaleString('ko-KR')}</b><small>Revision #${x.id}</small></div><button class="add" data-restore="${x.id}">초안으로 복원</button></div>`).join(''):'아직 공개 이력이 없습니다.';el.querySelectorAll('[data-restore]').forEach(b=>b.onclick=async()=>{if(!confirm('이 버전을 현재 초안으로 복원할까요?'))return;data=await V12_CLOUD.restoreRevision(b.dataset.restore);localStorage.setItem(KEY,JSON.stringify(data));current='dashboard';panel();alert('초안으로 복원했습니다. 공개 사이트에는 아직 반영되지 않았습니다.')})}catch(e){el.textContent='버전 목록 오류: '+e.message}}
+async function boot(){const url=document.getElementById('sbUrl'),key=document.getElementById('sbKey'),gate=document.getElementById('loginGate'),main=document.getElementById('cmsMain'),status=document.getElementById('loginStatus');const c=V12_CLOUD.cfg();url.value=c.url||'';key.value=c.anonKey||'';if(V12_CLOUD.ready()&&await V12_CLOUD.restoreSession()){gate.hidden=true;main.hidden=false;await init();return}document.getElementById('loginForm').onsubmit=async e=>{e.preventDefault();status.textContent='로그인 확인 중…';try{V12_CLOUD.saveConfig({url:url.value.trim(),anonKey:key.value.trim()});await V12_CLOUD.signIn(document.getElementById('loginEmail').value.trim(),document.getElementById('loginPassword').value);gate.hidden=true;main.hidden=false;await init()}catch(err){status.textContent=err.message}}}
+document.getElementById('logout').onclick=()=>{V12_CLOUD.signOut();location.reload()};boot();

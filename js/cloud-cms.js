@@ -1,24 +1,23 @@
-/* Cloud CMS adapter — Supabase REST/Auth, with LocalStorage fallback. */
+/* V12 Cloud CMS adapter — Supabase Auth + REST + Storage. No service_role key in browser. */
 (function(){
-  const CFG_KEY='labPortfolioCloudConfig'; const DEFAULT={url:'',anonKey:''}; let accessToken='';
-  const cfg=()=>{try{return {...DEFAULT,...JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}}catch(e){return DEFAULT}};
-  const headers=(token,extra={})=>{const c=cfg();return {'apikey':c.anonKey,'Authorization':'Bearer '+(token||accessToken||c.anonKey),'Content-Type':'application/json','Accept':'application/json',...extra}};
-  const ready=()=>{const c=cfg();return !!(c.url&&c.anonKey)}; const base=()=>cfg().url.replace(/\/$/,'');
-  const setToken=t=>accessToken=t||'';
-  const storageUrl=path=>base()+'/storage/v1/object/public/site-assets/'+path.split('/').map(encodeURIComponent).join('/');
-  async function uploadImage(file,token){if(!ready())throw Error('cloud not configured');if(!file)throw Error('file missing');const t=token||accessToken;if(!t)throw Error('관리자 로그인이 필요합니다.');const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_'),path='uploads/'+Date.now()+'-'+safe;const r=await fetch(base()+'/storage/v1/object/site-assets/'+path,{method:'POST',headers:{'apikey':cfg().anonKey,'Authorization':'Bearer '+t,'Content-Type':file.type||'application/octet-stream','x-upsert':'false'},body:file});if(!r.ok)throw Error('image upload '+r.status+' '+await r.text());return {path,url:storageUrl(path),name:file.name,type:file.type,size:file.size};}
-  async function listImages(token){if(!ready())return [];const t=token||accessToken;if(!t)throw Error('관리자 로그인이 필요합니다.');const r=await fetch(base()+'/storage/v1/object/list/site-assets',{method:'POST',headers:headers(t),body:JSON.stringify({prefix:'uploads',limit:100,offset:0,sortBy:{column:'created_at',order:'desc'}})});if(!r.ok)throw Error('image list '+r.status+' '+await r.text());return (await r.json()||[]).filter(x=>x.name).map(x=>({...x,path:'uploads/'+x.name,url:storageUrl('uploads/'+x.name)}));}
-  async function getState(token){if(!ready())return null;const r=await fetch(base()+'/rest/v1/site_state?id=eq.main&select=*',{headers:headers(token)});if(!r.ok)throw Error('cloud read '+r.status+' '+await r.text());return (await r.json())[0]||null;}
-  async function updateState(payload,token){if(!ready())throw Error('cloud not configured');const r=await fetch(base()+'/rest/v1/site_state?id=eq.main',{method:'PATCH',headers:headers(token,{'Prefer':'return=representation'}),body:JSON.stringify(payload)});if(!r.ok)throw Error('cloud write '+r.status+' '+await r.text());return (await r.json())[0];}
-  async function saveState(payload,token){return updateState(payload,token)}
-  async function saveDraft(payload,token){return updateState({draft_data:payload.data||{},draft_text:payload.text||{},draft_images:payload.images||{},draft_updated_at:new Date().toISOString()},token)}
-  async function publishState(payload,summary,token,userId){
-    const current=await getState(token); const revision={site_id:'main',published_data:current?.published_data||{},published_text:current?.published_text||{},published_images:current?.published_images||{},published_by:userId||null,summary:summary||{}};
-    if(userId) { const rr=await fetch(base()+'/rest/v1/site_revisions',{method:'POST',headers:headers(token,{'Prefer':'return=minimal'}),body:JSON.stringify(revision)}); if(!rr.ok)throw Error('revision '+rr.status+' '+await rr.text()); }
-    return updateState({published_data:payload.data||{},published_text:payload.text||{},published_images:payload.images||{},updated_at:new Date().toISOString(),draft_data:payload.data||{},draft_text:payload.text||{},draft_images:payload.images||{},draft_updated_at:new Date().toISOString()},token);
-  }
-  async function revisions(token){if(!ready())return [];const r=await fetch(base()+'/rest/v1/site_revisions?site_id=eq.main&select=*&order=published_at.desc&limit=50',{headers:headers(token)});if(!r.ok)throw Error('revision read '+r.status+' '+await r.text());return await r.json();}
-  async function getRevision(id,token){const r=await fetch(base()+'/rest/v1/site_revisions?id=eq.'+encodeURIComponent(id)+'&select=*',{headers:headers(token)});if(!r.ok)throw Error('revision '+r.status+' '+await r.text());return (await r.json())[0]||null;}
-  async function restoreRevision(id,token){const x=await getRevision(id,token);if(!x)throw Error('버전을 찾을 수 없습니다.');return saveDraft({data:x.published_data,text:x.published_text,images:x.published_images},token);}
-  window.CMS_CLOUD={config:cfg,setToken,uploadImage,listImages,storageUrl,saveConfig(c){localStorage.setItem(CFG_KEY,JSON.stringify(c));return c},ready,getState,saveState,saveDraft,publishState,revisions,getRevision,restoreRevision,CFG_KEY};
+ const CFG_KEY='psV12SupabaseConfig'; let token='', user=null;
+ const cfg=()=>{try{return {...(window.SUPABASE_CONFIG||{}),...JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}}catch(e){return window.SUPABASE_CONFIG||{}}};
+ const base=()=>String(cfg().url||'').replace(/\/$/,'');
+ const ready=()=>!!(cfg().url&&cfg().anonKey);
+ const h=(auth,extra={})=>({'apikey':cfg().anonKey,'Authorization':'Bearer '+(auth||token||cfg().anonKey),'Content-Type':'application/json','Accept':'application/json',...extra});
+ async function req(path,opt={}){const r=await fetch(base()+path,opt);let body=null;const t=await r.text();try{body=t?JSON.parse(t):null}catch{body=t}if(!r.ok)throw Error((body&&body.msg)||(body&&body.message)||body||('HTTP '+r.status));return body}
+ async function signIn(email,password){const x=await req('/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':cfg().anonKey,'Content-Type':'application/json'},body:JSON.stringify({email,password})});token=x.access_token;user=x.user;sessionStorage.setItem('psV12Token',token);sessionStorage.setItem('psV12User',JSON.stringify(user));await assertAdmin();return x}
+ async function restoreSession(){token=sessionStorage.getItem('psV12Token')||'';try{user=JSON.parse(sessionStorage.getItem('psV12User')||'null')}catch{};if(token){try{await assertAdmin();return true}catch{signOut()}}return false}
+ function signOut(){token='';user=null;sessionStorage.removeItem('psV12Token');sessionStorage.removeItem('psV12User')}
+ async function assertAdmin(){if(!token)throw Error('로그인이 필요합니다.');const x=await req('/rest/v1/cms_admins?select=email&limit=1',{headers:h(token)});if(!x||!x.length)throw Error('CMS 관리자 권한이 없습니다.');return true}
+ async function getPublished(){if(!ready())return null;const x=await req('/rest/v1/site_published?id=eq.main&select=content,updated_at',{headers:h()});return x&&x[0]||null}
+ async function getDraft(){await assertAdmin();const x=await req('/rest/v1/site_drafts?id=eq.main&select=content,updated_at',{headers:h(token)});return x&&x[0]||null}
+ async function saveDraft(content){await assertAdmin();const x=await req('/rest/v1/site_drafts?id=eq.main',{method:'PATCH',headers:h(token,{'Prefer':'return=representation'}),body:JSON.stringify({content,updated_at:new Date().toISOString(),updated_by:user?.id||null})});return x&&x[0]}
+ async function publish(content,summary={}){await assertAdmin();const old=await getPublished();await req('/rest/v1/site_revisions',{method:'POST',headers:h(token,{'Prefer':'return=minimal'}),body:JSON.stringify({site_id:'main',content:old?.content||{},published_by:user?.id||null,summary})});const x=await req('/rest/v1/site_published?id=eq.main',{method:'PATCH',headers:h(token,{'Prefer':'return=representation'}),body:JSON.stringify({content,updated_at:new Date().toISOString(),updated_by:user?.id||null})});await saveDraft(content);return x&&x[0]}
+ async function revisions(){await assertAdmin();return await req('/rest/v1/site_revisions?site_id=eq.main&select=*&order=published_at.desc&limit=50',{headers:h(token)})}
+ async function restoreRevision(id){await assertAdmin();const x=await req('/rest/v1/site_revisions?id=eq.'+encodeURIComponent(id)+'&select=content&limit=1',{headers:h(token)});if(!x?.[0])throw Error('버전을 찾을 수 없습니다.');await saveDraft(x[0].content);return x[0].content}
+ const storageUrl=p=>base()+'/storage/v1/object/public/site-assets/'+p.split('/').map(encodeURIComponent).join('/');
+ async function uploadImage(file,folder='uploads'){await assertAdmin();const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=folder+'/'+Date.now()+'-'+safe;const r=await fetch(base()+'/storage/v1/object/site-assets/'+path,{method:'POST',headers:{'apikey':cfg().anonKey,'Authorization':'Bearer '+token,'Content-Type':file.type||'application/octet-stream','x-upsert':'false'},body:file});if(!r.ok)throw Error(await r.text());return {path,url:storageUrl(path)} }
+ function saveConfig(c){localStorage.setItem(CFG_KEY,JSON.stringify(c));window.SUPABASE_CONFIG=c;return c}
+ window.V12_CLOUD={ready,cfg,saveConfig,signIn,signOut,restoreSession,assertAdmin,getPublished,getDraft,saveDraft,publish,revisions,restoreRevision,uploadImage,get user(){return user}};
 })();
