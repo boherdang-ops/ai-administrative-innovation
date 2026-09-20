@@ -106,3 +106,14 @@ nav a.active{color:var(--blue)}
 /* V12.5 — user print presets */
 .print-mini-btn{font:inherit;border:1px solid #cbd5e1;background:#fff;padding:8px 9px;font-size:11px;font-weight:700;cursor:pointer}
 .print-mini-btn:hover{border-color:var(--blue);color:var(--blue)}
+
+
+/* V12.6 — cover visibility fix */
+.print-cover-page{display:none!important}
+@media print{
+  body.printing-portfolio:not(.print-cover-off) .print-cover-page{
+    display:flex!important;
+    flex-direction:column;
+  }
+  body.print-cover-off .print-cover-page{display:none!important}
+}
