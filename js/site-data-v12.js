@@ -1,7 +1,7 @@
 (()=>{const KEY='psV12CMS',DRAFT='psV12CMSDraft',PUB='psV12CMSPublished';
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const get=k=>{try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null}};
-async function load(){const preview=new URLSearchParams(location.search).has('preview');let d=preview?(get(DRAFT)||get(KEY)):null;if(!preview&&window.V12_CLOUD?.ready()){try{const x=await V12_CLOUD.getPublished();d=x?.content||null}catch(e){console.warn('Cloud read failed',e)}}if(!d)d=get(PUB)||get(KEY);if(!d){try{d=await (await fetch('data/site-default.json')).json()}catch(e){return}}render(d)}
+async function load(){const preview=new URLSearchParams(location.search).has('preview');let d=preview?(get(DRAFT)||get(KEY)):null;if(!preview&&window.V12_CLOUD?.ready()){try{const x=await V12_CLOUD.getPublished();d=x?.content||x||null}catch(e){console.warn('Cloud read failed',e)}}if(!d)d=get(PUB)||get(KEY);if(!d){try{d=await (await fetch('data/site-default.json')).json()}catch(e){return}}render(d)}
 function render(d){
  const q=s=>document.querySelector(s); const qa=s=>[...document.querySelectorAll(s)];
  if(d.profile){q('.kicker').textContent=d.profile.kicker||d.profile.name;q('#about h1').innerHTML=esc(d.profile.headline).replace(/\n/g,'<br>');q('#about .lead').textContent=d.profile.lead;q('#about .career').innerHTML=(d.profile.career||[]).map(esc).join('<br>');const fig=q('#profile-photo');if(d.profile.portrait)fig.innerHTML=`<img src="${esc(d.profile.portrait)}" alt="${esc(d.profile.name)} 프로필 사진">`;const logo=q('.brand-logo');if(logo&&d.profile.logo)logo.src=d.profile.logo;}
