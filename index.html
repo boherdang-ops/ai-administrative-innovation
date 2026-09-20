@@ -6,9 +6,22 @@
 <meta name="description" content="박상득 — AI 시대, 지방정부의 일하는 방식을 설계합니다.">
 <title>박상득 | AI 시대, 지방정부의 일하는 방식을 설계합니다</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20260920-3">
+<link rel="stylesheet" href="style.css?v=20260920-print1">
 </head>
 <body>
+<div class="print-toolbar" aria-label="포트폴리오 출력 도구">
+  <div class="print-toolbar-inner">
+    <strong>PORTFOLIO PRINT</strong>
+    <label>출력 범위
+      <select id="printMode">
+        <option value="full">전체 포트폴리오</option>
+        <option value="summary">핵심 요약본</option>
+      </select>
+    </label>
+    <button type="button" id="printPortfolio">인쇄 / PDF 저장</button>
+  </div>
+</div>
+
 <header><div class="wrap nav"><a href="#about" class="brand"><img src="assets/kai-logo.png" alt="AI행정혁신연구소" class="brand-logo"><span>PARK SANG-DEUK</span></a><button id="menu">MENU</button>
 <nav id="nav"><a href="#about">ABOUT</a><a href="#problems">PROBLEMS</a><a href="#projects">PROJECTS</a><a href="#method">METHOD</a><a href="#works">WORKS</a><a href="#experience">EXPERIENCE</a><a href="#thinking">THINKING</a><a href="#contact">CONTACT</a></nav></div></header>
 
@@ -92,6 +105,21 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js?v=20260920-3"></script>
 <script src="js/cloud-cms.js?v=20260920-3"></script>
-<script src="js/site-data-v12.js?v=20260920-3"></script>
-<script src="script.js?v=20260920-3"></script>
+<script src="js/site-data-v12.js?v=20260920-print1"></script>
+<script src="script.js?v=20260920-print1"></script>
+<script>
+(function(){
+  const btn=document.getElementById('printPortfolio');
+  const mode=document.getElementById('printMode');
+  if(!btn||!mode)return;
+  btn.addEventListener('click',()=>{
+    document.body.dataset.printMode=mode.value;
+    document.body.classList.add('printing-portfolio');
+    const cleanup=()=>document.body.classList.remove('printing-portfolio');
+    window.addEventListener('afterprint',cleanup,{once:true});
+    setTimeout(()=>window.print(),50);
+  });
+})();
+</script>
+
 </body></html>
