@@ -102,3 +102,7 @@ nav a.active{color:var(--blue)}
   body[data-print-mode="custom"] section.print-section-off{display:none!important}
   body.print-cover-off .print-cover-page{display:none!important}
 }
+
+/* V12.5 — user print presets */
+.print-mini-btn{font:inherit;border:1px solid #cbd5e1;background:#fff;padding:8px 9px;font-size:11px;font-weight:700;cursor:pointer}
+.print-mini-btn:hover{border-color:var(--blue);color:var(--blue)}

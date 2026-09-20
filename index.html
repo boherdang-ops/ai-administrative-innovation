@@ -21,6 +21,8 @@
         <option value="profile">개인 소개용</option>
       </select>
     </label>
+    <button type="button" id="savePrintPreset" class="print-mini-btn">프리셋 저장</button>
+    <button type="button" id="deletePrintPreset" class="print-mini-btn">삭제</button>
     <label>출력 형식
       <select id="printMode">
         <option value="full">전체 포트폴리오</option>
@@ -149,17 +151,30 @@
  const $=id=>document.getElementById(id);
  const btn=$('printPortfolio'),mode=$('printMode'),preset=$('printPreset'),modal=$('printModal');
  const settings=$('printSettings'),close=$('closePrintModal'),apply=$('applyPrintSettings');
+ const savePreset=$('savePrintPreset'),deletePreset=$('deletePrintPreset');
  const title=$('printTitle'),purpose=$('printPurpose'),cover=$('printCover');
  const sections=[...document.querySelectorAll('#printSectionPicker input[type="checkbox"]')];
- const presets={
-  education:{title:'AI 행정혁신 교육 포트폴리오',purpose:'공공기관·지방정부 교육 및 워크숍 제안',mode:'custom',cover:true,sections:['about','projects','method','works','experience','contact']},
-  consulting:{title:'AI 행정혁신 컨설팅 포트폴리오',purpose:'AI 활용체계 구축 · BPR · 공공 AX 컨설팅',mode:'custom',cover:true,sections:['about','problems','projects','method','works','experience','contact']},
-  research:{title:'정책·행정 연구 포트폴리오',purpose:'지역정책 연구 · 정책개발 · 공동 연구 제안',mode:'custom',cover:true,sections:['about','problems','projects','experience','thinking','contact']},
-  profile:{title:'박상득 프로필 포트폴리오',purpose:'전문가 소개 · 강연 · 협력 제안',mode:'custom',cover:true,sections:['about','projects','experience','thinking','contact']}
+ const STORE='park-sangdeuk-print-presets-v1';
+ const builtins={
+  education:{name:'강의·교육 제안용',title:'AI 행정혁신 교육 포트폴리오',purpose:'공공기관·지방정부 교육 및 워크숍 제안',mode:'custom',cover:true,sections:['about','projects','method','works','experience','contact']},
+  consulting:{name:'AI 행정혁신 컨설팅용',title:'AI 행정혁신 컨설팅 포트폴리오',purpose:'AI 활용체계 구축 · BPR · 공공 AX 컨설팅',mode:'custom',cover:true,sections:['about','problems','projects','method','works','experience','contact']},
+  research:{name:'연구·정책개발용',title:'정책·행정 연구 포트폴리오',purpose:'지역정책 연구 · 정책개발 · 공동 연구 제안',mode:'custom',cover:true,sections:['about','problems','projects','experience','thinking','contact']},
+  profile:{name:'개인 소개용',title:'박상득 프로필 포트폴리오',purpose:'전문가 소개 · 강연 · 협력 제안',mode:'custom',cover:true,sections:['about','projects','experience','thinking','contact']}
  };
+ function loadCustom(){try{return JSON.parse(localStorage.getItem(STORE)||'{}')}catch(e){return {}}}
+ function saveCustom(x){localStorage.setItem(STORE,JSON.stringify(x))}
+ function refreshPresetOptions(selectValue){
+   [...preset.querySelectorAll('option[data-custom="1"]')].forEach(o=>o.remove());
+   const custom=loadCustom();
+   Object.entries(custom).forEach(([id,p])=>{
+     const o=document.createElement('option');o.value=id;o.textContent='내 프리셋 · '+p.name;o.dataset.custom='1';preset.appendChild(o);
+   });
+   if(selectValue&&preset.querySelector(`option[value="${CSS.escape(selectValue)}"]`))preset.value=selectValue;
+ }
  function selected(){return sections.filter(x=>x.checked).map(x=>x.value)}
+ function snapshot(name){return {name,title:title.value.trim()||'박상득 포트폴리오',purpose:purpose.value.trim(),mode:'custom',cover:cover.checked,sections:selected()}}
  function applyVisibility(){
-   const m=mode.value, chosen=selected();
+   const m=mode.value,chosen=selected();
    document.body.dataset.printMode=m;
    document.querySelectorAll('section[id]').forEach(sec=>{
      sec.classList.remove('print-section-off');
@@ -169,26 +184,35 @@
    $('printCoverPurpose').textContent=purpose.value.trim();
    document.body.classList.toggle('print-cover-off',!cover.checked);
  }
- function setPreset(name){
-   if(name==='custom')return;
-   const p=presets[name]; if(!p)return;
-   title.value=p.title; purpose.value=p.purpose; cover.checked=p.cover; mode.value=p.mode;
-   sections.forEach(x=>x.checked=p.sections.includes(x.value));
-   applyVisibility();
+ function applyPreset(p){
+   if(!p)return;
+   title.value=p.title||'박상득 포트폴리오';purpose.value=p.purpose||'';cover.checked=p.cover!==false;mode.value=p.mode||'custom';
+   sections.forEach(x=>x.checked=(p.sections||[]).includes(x.value));applyVisibility();
  }
- preset?.addEventListener('change',()=>setPreset(preset.value));
+ preset?.addEventListener('change',()=>{
+   const v=preset.value;if(v==='custom')return;
+   applyPreset(builtins[v]||loadCustom()[v]);
+ });
+ savePreset?.addEventListener('click',()=>{
+   const name=prompt('저장할 프리셋 이름을 입력하세요.','새 출력 프리셋');if(!name)return;
+   const custom=loadCustom();const id='user_'+Date.now();custom[id]=snapshot(name.trim());saveCustom(custom);refreshPresetOptions(id);
+   alert('현재 출력 설정을 내 프리셋으로 저장했습니다.');
+ });
+ deletePreset?.addEventListener('click',()=>{
+   const id=preset.value;if(!id.startsWith('user_')){alert('기본 프리셋은 삭제할 수 없습니다.');return}
+   if(!confirm('선택한 내 프리셋을 삭제할까요?'))return;
+   const custom=loadCustom();delete custom[id];saveCustom(custom);refreshPresetOptions('custom');alert('삭제했습니다.');
+ });
  settings?.addEventListener('click',()=>{modal.hidden=false});
  close?.addEventListener('click',()=>{modal.hidden=true});
  apply?.addEventListener('click',()=>{preset.value='custom';applyVisibility();modal.hidden=true});
  mode?.addEventListener('change',()=>{if(mode.value!=='custom')preset.value='custom';applyVisibility()});
  btn?.addEventListener('click',()=>{
-   applyVisibility();
-   document.body.classList.add('printing-portfolio');
+   applyVisibility();document.body.classList.add('printing-portfolio');
    const cleanup=()=>document.body.classList.remove('printing-portfolio');
-   window.addEventListener('afterprint',cleanup,{once:true});
-   setTimeout(()=>window.print(),80);
+   window.addEventListener('afterprint',cleanup,{once:true});setTimeout(()=>window.print(),80);
  });
- applyVisibility();
+ refreshPresetOptions('custom');applyVisibility();
 })();
 </script>
 
