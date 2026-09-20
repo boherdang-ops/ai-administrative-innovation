@@ -91,7 +91,7 @@ nav a.active{color:var(--blue)}
   body[data-print-mode="summary"] #method .note,
   body[data-print-mode="summary"] #works .course-list,
   body[data-print-mode="summary"] #thinking .archive{display:none!important}
-  body[data-print-mode="summary"] #projects .timeline>div:nth-of-type(n+5){display:none!important}
+  /* 요약본에서도 2024~2026 전체 주요실적을 표시 */
   body[data-print-mode="summary"] .section{padding:8mm 0!important}
   body[data-print-mode="summary"] #about{break-after:auto}
 }
