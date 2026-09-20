@@ -12,6 +12,15 @@
 <div class="print-toolbar" aria-label="포트폴리오 출력 도구">
   <div class="print-toolbar-inner">
     <strong>PORTFOLIO PRINT</strong>
+    <label>프리셋
+      <select id="printPreset">
+        <option value="custom">직접 설정</option>
+        <option value="education">강의·교육 제안용</option>
+        <option value="consulting">AI 행정혁신 컨설팅용</option>
+        <option value="research">연구·정책개발용</option>
+        <option value="profile">개인 소개용</option>
+      </select>
+    </label>
     <label>출력 형식
       <select id="printMode">
         <option value="full">전체 포트폴리오</option>
@@ -133,20 +142,53 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase-config.js?v=20260920-3"></script>
 <script src="js/cloud-cms.js?v=20260920-3"></script>
-<script src="js/site-data-v12.js?v=20260920-print1"></script>
-<script src="script.js?v=20260920-print1"></script>
+<script src="js/site-data-v12.js?v=20260920-print3"></script>
+<script src="script.js?v=20260920-print3"></script>
 <script>
 (function(){
-  const btn=document.getElementById('printPortfolio');
-  const mode=document.getElementById('printMode');
-  if(!btn||!mode)return;
-  btn.addEventListener('click',()=>{
-    document.body.dataset.printMode=mode.value;
-    document.body.classList.add('printing-portfolio');
-    const cleanup=()=>document.body.classList.remove('printing-portfolio');
-    window.addEventListener('afterprint',cleanup,{once:true});
-    setTimeout(()=>window.print(),50);
-  });
+ const $=id=>document.getElementById(id);
+ const btn=$('printPortfolio'),mode=$('printMode'),preset=$('printPreset'),modal=$('printModal');
+ const settings=$('printSettings'),close=$('closePrintModal'),apply=$('applyPrintSettings');
+ const title=$('printTitle'),purpose=$('printPurpose'),cover=$('printCover');
+ const sections=[...document.querySelectorAll('#printSectionPicker input[type="checkbox"]')];
+ const presets={
+  education:{title:'AI 행정혁신 교육 포트폴리오',purpose:'공공기관·지방정부 교육 및 워크숍 제안',mode:'custom',cover:true,sections:['about','projects','method','works','experience','contact']},
+  consulting:{title:'AI 행정혁신 컨설팅 포트폴리오',purpose:'AI 활용체계 구축 · BPR · 공공 AX 컨설팅',mode:'custom',cover:true,sections:['about','problems','projects','method','works','experience','contact']},
+  research:{title:'정책·행정 연구 포트폴리오',purpose:'지역정책 연구 · 정책개발 · 공동 연구 제안',mode:'custom',cover:true,sections:['about','problems','projects','experience','thinking','contact']},
+  profile:{title:'박상득 프로필 포트폴리오',purpose:'전문가 소개 · 강연 · 협력 제안',mode:'custom',cover:true,sections:['about','projects','experience','thinking','contact']}
+ };
+ function selected(){return sections.filter(x=>x.checked).map(x=>x.value)}
+ function applyVisibility(){
+   const m=mode.value, chosen=selected();
+   document.body.dataset.printMode=m;
+   document.querySelectorAll('section[id]').forEach(sec=>{
+     sec.classList.remove('print-section-off');
+     if(m==='custom'&&!chosen.includes(sec.id))sec.classList.add('print-section-off');
+   });
+   $('printCoverTitle').textContent=title.value.trim()||'박상득 포트폴리오';
+   $('printCoverPurpose').textContent=purpose.value.trim();
+   document.body.classList.toggle('print-cover-off',!cover.checked);
+ }
+ function setPreset(name){
+   if(name==='custom')return;
+   const p=presets[name]; if(!p)return;
+   title.value=p.title; purpose.value=p.purpose; cover.checked=p.cover; mode.value=p.mode;
+   sections.forEach(x=>x.checked=p.sections.includes(x.value));
+   applyVisibility();
+ }
+ preset?.addEventListener('change',()=>setPreset(preset.value));
+ settings?.addEventListener('click',()=>{modal.hidden=false});
+ close?.addEventListener('click',()=>{modal.hidden=true});
+ apply?.addEventListener('click',()=>{preset.value='custom';applyVisibility();modal.hidden=true});
+ mode?.addEventListener('change',()=>{if(mode.value!=='custom')preset.value='custom';applyVisibility()});
+ btn?.addEventListener('click',()=>{
+   applyVisibility();
+   document.body.classList.add('printing-portfolio');
+   const cleanup=()=>document.body.classList.remove('printing-portfolio');
+   window.addEventListener('afterprint',cleanup,{once:true});
+   setTimeout(()=>window.print(),80);
+ });
+ applyVisibility();
 })();
 </script>
 
