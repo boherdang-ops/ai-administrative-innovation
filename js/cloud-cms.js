@@ -1,23 +1,317 @@
-/* V12 Cloud CMS adapter — Supabase Auth + REST + Storage. No service_role key in browser. */
-(function(){
- const CFG_KEY='psV12SupabaseConfig'; let token='', user=null;
- const cfg=()=>{try{return {...(window.SUPABASE_CONFIG||{}),...JSON.parse(localStorage.getItem(CFG_KEY)||'{}')}}catch(e){return window.SUPABASE_CONFIG||{}}};
- const base=()=>String(cfg().url||'').replace(/\/$/,'');
- const ready=()=>!!(cfg().url&&cfg().anonKey);
- const h=(auth,extra={})=>({'apikey':cfg().anonKey,'Authorization':'Bearer '+(auth||token||cfg().anonKey),'Content-Type':'application/json','Accept':'application/json',...extra});
- async function req(path,opt={}){const r=await fetch(base()+path,opt);let body=null;const t=await r.text();try{body=t?JSON.parse(t):null}catch{body=t}if(!r.ok)throw Error((body&&body.msg)||(body&&body.message)||body||('HTTP '+r.status));return body}
- async function signIn(email,password){const x=await req('/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':cfg().anonKey,'Content-Type':'application/json'},body:JSON.stringify({email,password})});token=x.access_token;user=x.user;sessionStorage.setItem('psV12Token',token);sessionStorage.setItem('psV12User',JSON.stringify(user));await assertAdmin();return x}
- async function restoreSession(){token=sessionStorage.getItem('psV12Token')||'';try{user=JSON.parse(sessionStorage.getItem('psV12User')||'null')}catch{};if(token){try{await assertAdmin();return true}catch{signOut()}}return false}
- function signOut(){token='';user=null;sessionStorage.removeItem('psV12Token');sessionStorage.removeItem('psV12User')}
- async function assertAdmin(){if(!token)throw Error('로그인이 필요합니다.');const x=await req('/rest/v1/cms_admins?select=email&limit=1',{headers:h(token)});if(!x||!x.length)throw Error('CMS 관리자 권한이 없습니다.');return true}
- async function getPublished(){if(!ready())return null;const x=await req('/rest/v1/site_published?id=eq.main&select=content,updated_at',{headers:h()});return x&&x[0]||null}
- async function getDraft(){await assertAdmin();const x=await req('/rest/v1/site_drafts?id=eq.main&select=content,updated_at',{headers:h(token)});return x&&x[0]||null}
- async function saveDraft(content){await assertAdmin();const x=await req('/rest/v1/site_drafts?id=eq.main',{method:'PATCH',headers:h(token,{'Prefer':'return=representation'}),body:JSON.stringify({content,updated_at:new Date().toISOString(),updated_by:user?.id||null})});return x&&x[0]}
- async function publish(content,summary={}){await assertAdmin();const old=await getPublished();await req('/rest/v1/site_revisions',{method:'POST',headers:h(token,{'Prefer':'return=minimal'}),body:JSON.stringify({site_id:'main',content:old?.content||{},published_by:user?.id||null,summary})});const x=await req('/rest/v1/site_published?id=eq.main',{method:'PATCH',headers:h(token,{'Prefer':'return=representation'}),body:JSON.stringify({content,updated_at:new Date().toISOString(),updated_by:user?.id||null})});await saveDraft(content);return x&&x[0]}
- async function revisions(){await assertAdmin();return await req('/rest/v1/site_revisions?site_id=eq.main&select=*&order=published_at.desc&limit=50',{headers:h(token)})}
- async function restoreRevision(id){await assertAdmin();const x=await req('/rest/v1/site_revisions?id=eq.'+encodeURIComponent(id)+'&select=content&limit=1',{headers:h(token)});if(!x?.[0])throw Error('버전을 찾을 수 없습니다.');await saveDraft(x[0].content);return x[0].content}
- const storageUrl=p=>base()+'/storage/v1/object/public/site-assets/'+p.split('/').map(encodeURIComponent).join('/');
- async function uploadImage(file,folder='uploads'){await assertAdmin();const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');const path=folder+'/'+Date.now()+'-'+safe;const r=await fetch(base()+'/storage/v1/object/site-assets/'+path,{method:'POST',headers:{'apikey':cfg().anonKey,'Authorization':'Bearer '+token,'Content-Type':file.type||'application/octet-stream','x-upsert':'false'},body:file});if(!r.ok)throw Error(await r.text());return {path,url:storageUrl(path)} }
- function saveConfig(c){localStorage.setItem(CFG_KEY,JSON.stringify(c));window.SUPABASE_CONFIG=c;return c}
- window.V12_CLOUD={ready,cfg,saveConfig,signIn,signOut,restoreSession,assertAdmin,getPublished,getDraft,saveDraft,publish,revisions,restoreRevision,uploadImage,get user(){return user}};
+(function () {
+  'use strict';
+
+  let client = null;
+
+  function cfg() {
+    const c = window.SUPABASE_CONFIG || {};
+    return {
+      url: String(c.url || '').trim().replace(/\/$/, ''),
+      anonKey: String(c.anonKey || '').trim()
+    };
+  }
+
+  function saveConfig(config) {
+    const next = {
+      url: String(config?.url || '').trim().replace(/\/$/, ''),
+      anonKey: String(config?.anonKey || '').trim()
+    };
+
+    window.SUPABASE_CONFIG = next;
+
+    try {
+      localStorage.setItem('V12_SUPABASE_CONFIG', JSON.stringify(next));
+    } catch (e) {
+      console.warn('Supabase config could not be saved locally.', e);
+    }
+
+    client = null;
+    return next;
+  }
+
+  function ready() {
+    const c = cfg();
+    return Boolean(c.url && c.anonKey);
+  }
+
+  function getClient() {
+    if (client) return client;
+
+    if (!ready()) {
+      throw new Error('Supabase URL과 Anon public key가 설정되지 않았습니다.');
+    }
+
+    if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+      throw new Error('Supabase JavaScript SDK가 로드되지 않았습니다.');
+    }
+
+    const c = cfg();
+
+    client = window.supabase.createClient(c.url, c.anonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    });
+
+    return client;
+  }
+
+  async function checkAdmin(session) {
+    if (!session?.user?.email) {
+      throw new Error('로그인 세션을 확인할 수 없습니다.');
+    }
+
+    const sb = getClient();
+
+    const { data, error } = await sb
+      .from('cms_admins')
+      .select('email')
+      .eq('email', session.user.email)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      await sb.auth.signOut();
+      throw new Error('CMS 관리자 권한이 등록되지 않은 계정입니다.');
+    }
+
+    return true;
+  }
+
+  async function signIn(email, password) {
+    const sb = getClient();
+
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: String(email || '').trim(),
+      password: String(password || '')
+    });
+
+    if (error) throw error;
+
+    if (!data?.session) {
+      throw new Error('로그인 세션을 생성하지 못했습니다.');
+    }
+
+    await checkAdmin(data.session);
+
+    return data.session;
+  }
+
+  async function signOut() {
+    const sb = getClient();
+    const { error } = await sb.auth.signOut();
+
+    if (error) throw error;
+
+    return true;
+  }
+
+  async function restoreSession() {
+    const sb = getClient();
+
+    const { data, error } = await sb.auth.getSession();
+
+    if (error) throw error;
+
+    const session = data?.session || null;
+
+    if (!session) return null;
+
+    try {
+      await checkAdmin(session);
+      return session;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async function getDraft() {
+    const sb = getClient();
+
+    const { data, error } = await sb
+      .from('site_drafts')
+      .select('content, updated_at, updated_by')
+      .eq('id', 'main')
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data?.content || null;
+  }
+
+  async function saveDraft(content, userId) {
+    const sb = getClient();
+
+    const { data, error } = await sb
+      .from('site_drafts')
+      .update({
+        content: content || {},
+        updated_at: new Date().toISOString(),
+        updated_by: userId || null
+      })
+      .eq('id', 'main')
+      .select('content, updated_at, updated_by')
+      .single();
+
+    if (error) throw error;
+
+    return data;
+  }
+
+  async function getPublished() {
+    const sb = getClient();
+
+    const { data, error } = await sb
+      .from('site_published')
+      .select('content, updated_at, updated_by')
+      .eq('id', 'main')
+      .maybeSingle();
+
+    if (error) throw error;
+
+    return data?.content || null;
+  }
+
+  async function publish(content, summary, userId) {
+    const sb = getClient();
+
+    const payload = content || {};
+    const uid = userId || null;
+
+    const { error: publishError } = await sb
+      .from('site_published')
+      .update({
+        content: payload,
+        updated_at: new Date().toISOString(),
+        updated_by: uid
+      })
+      .eq('id', 'main');
+
+    if (publishError) throw publishError;
+
+    const { error: revisionError } = await sb
+      .from('site_revisions')
+      .insert({
+        site_id: 'main',
+        content: payload,
+        published_by: uid,
+        summary: summary || {}
+      });
+
+    if (revisionError) throw revisionError;
+
+    const { error: draftError } = await sb
+      .from('site_drafts')
+      .update({
+        content: payload,
+        updated_at: new Date().toISOString(),
+        updated_by: uid
+      })
+      .eq('id', 'main');
+
+    if (draftError) throw draftError;
+
+    return true;
+  }
+
+  async function revisions(limit = 30) {
+    const sb = getClient();
+
+    const safeLimit = Number.isFinite(Number(limit))
+      ? Math.max(1, Math.min(Number(limit), 100))
+      : 30;
+
+    const { data, error } = await sb
+      .from('site_revisions')
+      .select('id, site_id, content, published_at, published_by, summary')
+      .eq('site_id', 'main')
+      .order('published_at', { ascending: false })
+      .limit(safeLimit);
+
+    if (error) throw error;
+
+    return Array.isArray(data) ? data : [];
+  }
+
+  async function restoreRevision(id, userId) {
+    const sb = getClient();
+
+    const { data: revision, error: readError } = await sb
+      .from('site_revisions')
+      .select('id, content')
+      .eq('id', id)
+      .eq('site_id', 'main')
+      .single();
+
+    if (readError) throw readError;
+
+    const content = revision?.content || {};
+
+    await saveDraft(content, userId);
+
+    return content;
+  }
+
+  async function uploadImage(file, folder = 'uploads') {
+    if (!(file instanceof File)) {
+      throw new Error('업로드할 이미지 파일이 없습니다.');
+    }
+
+    const sb = getClient();
+
+    const extension =
+      String(file.name || '').split('.').pop()?.toLowerCase() || 'bin';
+
+    const safeFolder = String(folder || 'uploads')
+      .replace(/^\/+|\/+$/g, '')
+      .replace(/[^a-zA-Z0-9/_-]/g, '-');
+
+    const fileName =
+      Date.now() +
+      '-' +
+      Math.random().toString(36).slice(2, 10) +
+      '.' +
+      extension;
+
+    const path = safeFolder + '/' + fileName;
+
+    const { error } = await sb.storage
+      .from('site-assets')
+      .upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType: file.type || undefined
+      });
+
+    if (error) throw error;
+
+    const { data } = sb.storage
+      .from('site-assets')
+      .getPublicUrl(path);
+
+    if (!data?.publicUrl) {
+      throw new Error('이미지 공개 URL을 생성하지 못했습니다.');
+    }
+
+    return data.publicUrl;
+  }
+
+  window.V12_CLOUD = {
+    cfg,
+    saveConfig,
+    ready,
+    signIn,
+    signOut,
+    restoreSession,
+    getDraft,
+    getPublished,
+    saveDraft,
+    publish,
+    uploadImage,
+    revisions,
+    restoreRevision
+  };
 })();
