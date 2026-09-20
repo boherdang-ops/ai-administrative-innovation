@@ -6,20 +6,48 @@
 <meta name="description" content="박상득 — AI 시대, 지방정부의 일하는 방식을 설계합니다.">
 <title>박상득 | AI 시대, 지방정부의 일하는 방식을 설계합니다</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="stylesheet" href="style.css?v=20260920-print1">
+<link rel="stylesheet" href="style.css?v=20260920-print2">
 </head>
 <body>
 <div class="print-toolbar" aria-label="포트폴리오 출력 도구">
   <div class="print-toolbar-inner">
     <strong>PORTFOLIO PRINT</strong>
-    <label>출력 범위
+    <label>출력 형식
       <select id="printMode">
         <option value="full">전체 포트폴리오</option>
         <option value="summary">핵심 요약본</option>
+        <option value="custom">선택 출력</option>
       </select>
     </label>
+    <button type="button" id="printSettings">출력 설정</button>
     <button type="button" id="printPortfolio">인쇄 / PDF 저장</button>
   </div>
+</div>
+<div class="print-modal" id="printModal" hidden>
+ <div class="print-modal-card">
+  <div class="print-modal-head"><div><small>PRINT SETTINGS</small><h2>포트폴리오 출력 설정</h2></div><button type="button" id="closePrintModal">닫기</button></div>
+  <div class="print-form-grid">
+   <label>문서 제목<input id="printTitle" value="박상득 포트폴리오"></label>
+   <label>제출처 / 용도<input id="printPurpose" placeholder="예: ○○시 AI 행정혁신 워크숍 제안"></label>
+  </div>
+  <label class="print-cover-toggle"><input type="checkbox" id="printCover" checked> 별도 표지 페이지 포함</label>
+  <div class="print-section-picker" id="printSectionPicker">
+   <label><input type="checkbox" value="about" checked> 01 소개</label>
+   <label><input type="checkbox" value="problems" checked> 02 문제인식</label>
+   <label><input type="checkbox" value="projects" checked> 03 주요성과</label>
+   <label><input type="checkbox" value="method" checked> 04 방법론</label>
+   <label><input type="checkbox" value="works" checked> 05 개발성과</label>
+   <label><input type="checkbox" value="experience" checked> 06 전문경험</label>
+   <label><input type="checkbox" value="thinking" checked> 07 생각·철학</label>
+   <label><input type="checkbox" value="contact" checked> 08 협력·연결</label>
+  </div>
+  <div class="print-modal-actions"><button type="button" id="applyPrintSettings">설정 적용</button></div>
+ </div>
+</div>
+<div class="print-cover-page" id="printCoverPage" aria-hidden="true">
+ <div class="print-cover-rule"></div><p class="print-cover-kicker">PARK SANG-DEUK · PORTFOLIO</p>
+ <h1 id="printCoverTitle">박상득 포트폴리오</h1><p id="printCoverPurpose"></p>
+ <div class="print-cover-bottom"><strong>AI 시대, 지방정부의 일하는 방식을 설계합니다.</strong><span>AI 행정혁신 · 정책개발 · 공공 AX</span></div>
 </div>
 
 <header><div class="wrap nav"><a href="#about" class="brand"><img src="assets/kai-logo.png" alt="AI행정혁신연구소" class="brand-logo"><span>PARK SANG-DEUK</span></a><button id="menu">MENU</button>

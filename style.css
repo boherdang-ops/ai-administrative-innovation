@@ -95,3 +95,15 @@ nav a.active{color:var(--blue)}
   body[data-print-mode="summary"] .section{padding:8mm 0!important}
   body[data-print-mode="summary"] #about{break-after:auto}
 }
+
+/* V12.4 — Print settings, cover and selective output */
+.print-toolbar button#printSettings{background:#fff;color:var(--ink)}
+.print-modal[hidden]{display:none!important}.print-modal{position:fixed;inset:0;z-index:1200;background:rgba(11,23,42,.55);display:grid;place-items:center;padding:20px}.print-modal-card{width:min(720px,100%);background:#fff;padding:30px;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.2)}.print-modal-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.print-modal-head small{color:var(--blue);font-weight:800;letter-spacing:.14em}.print-modal-head h2{margin:8px 0 24px;font-size:28px}.print-modal-head button{border:0;background:none;font-weight:700;cursor:pointer}.print-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.print-form-grid label{font-size:12px;font-weight:700;color:var(--muted)}.print-form-grid input{width:100%;margin-top:7px;padding:11px;border:1px solid var(--line);font:inherit}.print-cover-toggle{display:block;margin:20px 0;font-size:13px;font-weight:700}.print-section-picker{display:grid;grid-template-columns:repeat(2,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}.print-section-picker label{padding:12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);font-size:13px}.print-modal-actions{display:flex;justify-content:flex-end;margin-top:22px}.print-modal-actions button{border:0;background:var(--navy);color:#fff;padding:11px 18px;font-weight:700;cursor:pointer}.print-cover-page{display:none}
+@media(max-width:640px){.print-form-grid,.print-section-picker{grid-template-columns:1fr}.print-modal-card{padding:22px}}
+@media print{
+ .print-modal{display:none!important}.print-section-off{display:none!important}
+ .print-cover-page{display:flex!important;min-height:270mm;break-after:page;flex-direction:column;padding:14mm 4mm 8mm;position:relative;color:#0B172A;background:#fff}
+ .print-no-cover .print-cover-page{display:none!important}
+ .print-cover-rule{width:22mm;height:2px;background:#2563EB;margin-bottom:18mm}.print-cover-kicker{font-size:8pt;letter-spacing:.22em;color:#2563EB;font-weight:800;margin:0 0 10mm}.print-cover-page h1{font-size:34pt;line-height:1.08;letter-spacing:-.045em;margin:0;max-width:140mm}.print-cover-page>p#printCoverPurpose{margin:9mm 0 0;font-size:12pt;color:#64748B}.print-cover-bottom{margin-top:auto;border-top:1px solid #D9E0E8;padding-top:8mm;display:flex;justify-content:space-between;gap:10mm;align-items:flex-end}.print-cover-bottom strong{font-size:14pt;max-width:105mm}.print-cover-bottom span{font-size:8pt;color:#64748B;text-align:right}
+ body[data-print-mode="summary"] #problems{display:none!important}
+}
