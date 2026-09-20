@@ -158,3 +158,46 @@ nav a.active{color:var(--blue)}
     display:none!important;
   }
 }
+
+
+/* V12.8 — hard print fix */
+.print-cover-page{display:none!important}
+
+@media print{
+  .print-toolbar,
+  .print-modal,
+  #printModal,
+  #printSettings,
+  #printPortfolio,
+  #savePrintPreset,
+  #deletePrintPreset,
+  body > header,
+  footer{
+    display:none!important;
+  }
+
+  body:not(.print-cover-off) #printCoverPage{
+    display:flex!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    height:270mm!important;
+    min-height:270mm!important;
+    margin:0!important;
+    padding:24mm 18mm 18mm!important;
+    flex-direction:column!important;
+    justify-content:space-between!important;
+    page-break-after:always!important;
+    break-after:page!important;
+    background:#fff!important;
+    color:#0B172A!important;
+  }
+
+  body:not(.print-cover-off) #about{
+    page-break-before:always!important;
+    break-before:page!important;
+  }
+
+  body.print-cover-off #printCoverPage{
+    display:none!important;
+  }
+}
