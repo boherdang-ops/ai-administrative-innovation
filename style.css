@@ -117,3 +117,44 @@ nav a.active{color:var(--blue)}
   }
   body.print-cover-off .print-cover-page{display:none!important}
 }
+
+
+/* V12.7 — print reset: controls hidden, cover isolated as page 1 */
+.print-modal[hidden]{display:none!important}
+
+@media print{
+  .print-toolbar,
+  .print-modal,
+  #printModal,
+  body > header,
+  #menu,
+  footer{
+    display:none!important;
+  }
+
+  body.printing-portfolio:not(.print-cover-off) .print-cover-page{
+    display:flex!important;
+    box-sizing:border-box!important;
+    width:100%!important;
+    min-height:270mm!important;
+    height:270mm!important;
+    padding:22mm 16mm 18mm!important;
+    margin:0!important;
+    flex-direction:column!important;
+    justify-content:space-between!important;
+    break-after:page!important;
+    page-break-after:always!important;
+    background:#fff!important;
+    color:#0B172A!important;
+  }
+
+  body.printing-portfolio:not(.print-cover-off) .print-cover-page + header + #about,
+  body.printing-portfolio:not(.print-cover-off) #about{
+    break-before:page!important;
+    page-break-before:always!important;
+  }
+
+  body.print-cover-off .print-cover-page{
+    display:none!important;
+  }
+}
