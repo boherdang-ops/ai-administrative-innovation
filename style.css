@@ -94,3 +94,83 @@ nav a.active{color:var(--blue)}
   body[data-print-mode="summary"] .section{padding:8mm 0!important}
   body[data-print-mode="summary"] #about{break-after:auto}
 }
+
+
+/* CLEAN V2.1 — cover + first content page header only */
+.print-cover,.print-first-header{display:none}
+
+@media print{
+  .print-cover{
+    display:flex!important;
+    height:270mm!important;
+    min-height:270mm!important;
+    box-sizing:border-box!important;
+    padding:18mm 14mm!important;
+    margin:0!important;
+    flex-direction:column!important;
+    justify-content:space-between!important;
+    background:#0B172A!important;
+    color:#fff!important;
+    page-break-after:always!important;
+    break-after:page!important;
+  }
+  .print-cover-top{
+    display:flex!important;
+    justify-content:space-between!important;
+    padding-bottom:5mm!important;
+    border-bottom:0.3mm solid rgba(255,255,255,.28)!important;
+    font-size:7.5pt!important;
+    font-weight:700!important;
+    letter-spacing:.12em!important;
+    color:#CBD5E1!important;
+  }
+  .print-cover-main{margin:auto 0!important}
+  .print-cover-kicker{
+    margin:0 0 6mm!important;
+    font-size:8pt!important;
+    font-weight:800!important;
+    letter-spacing:.12em!important;
+    color:#93B4FF!important;
+  }
+  .print-cover-main h1{
+    margin:0 0 9mm!important;
+    max-width:150mm!important;
+    font-size:31pt!important;
+    line-height:1.16!important;
+    letter-spacing:-.045em!important;
+    color:#fff!important;
+  }
+  .print-cover-main>p:last-child{
+    margin:0!important;
+    font-size:11pt!important;
+    line-height:1.75!important;
+    color:#CBD5E1!important;
+  }
+  .print-cover-bottom{
+    display:flex!important;
+    justify-content:space-between!important;
+    align-items:flex-end!important;
+    padding-top:5mm!important;
+    border-top:0.3mm solid rgba(255,255,255,.28)!important;
+  }
+  .print-cover-bottom strong{font-size:10pt!important;letter-spacing:.05em!important}
+  .print-cover-bottom span{font-size:8pt!important;color:#CBD5E1!important}
+
+  .print-first-header{
+    display:flex!important;
+    justify-content:space-between!important;
+    align-items:center!important;
+    width:100%!important;
+    padding:0 0 3mm!important;
+    margin:0 0 5mm!important;
+    border-bottom:0.3mm solid #D9E0E8!important;
+    font-size:7pt!important;
+    font-weight:700!important;
+    letter-spacing:.09em!important;
+    color:#64748B!important;
+  }
+
+  /* cover is page 1; this header starts page 2 with the normal portfolio */
+  .print-first-header + header + #about,
+  #about{page-break-before:auto!important;break-before:auto!important}
+}
