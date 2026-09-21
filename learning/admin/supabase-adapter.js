@@ -1,4 +1,4 @@
-// Learning Hub v0.7.6 — Supabase persistence adapter
+// Learning Hub v0.7.7 — Supabase persistence + asset upload adapter
 // Purpose: replace localStorage persistence with Supabase while preserving the confirmed v0.6.4 UI.
 // No screen/layout/field changes.
 
@@ -174,6 +174,41 @@
       }
 
       return { tracks:trackRows.length, contents:contentRows.length };
+    },
+
+    async uploadAsset(file, contentCode) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+      if (!file) throw new Error('업로드할 파일을 선택하세요.');
+
+      const code = String(contentCode || 'unassigned').replace(/[^0-9A-Za-z_-]/g, '-');
+      const safeName = String(file.name || 'file')
+        .normalize('NFKC')
+        .replace(/[\\/?#%:]+/g, '-')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '') || 'file';
+      const path = `learning/${code}/${Date.now()}-${safeName}`;
+
+      const { error } = await client.storage.from('site-assets')
+        .upload(path, file, {
+          cacheControl: '3600',
+          upsert: false,
+          contentType: file.type || undefined
+        });
+      if (error) throw error;
+
+      const { data } = client.storage.from('site-assets').getPublicUrl(path);
+      if (!data || !data.publicUrl) throw new Error('업로드된 파일의 공개 URL을 만들 수 없습니다.');
+
+      return {
+        bucket: 'site-assets',
+        path,
+        publicUrl: data.publicUrl,
+        name: file.name || safeName,
+        type: file.type || '',
+        size: file.size || 0
+      };
     },
 
     async saveTrack(t) {

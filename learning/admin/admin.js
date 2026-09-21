@@ -73,6 +73,27 @@ function markDirty(){dirty=true;if($('dirtyWarning'))$('dirtyWarning').hidden=fa
 function nextTrackNum(){let nums=db.tracks.map(t=>parseInt(t.num,10)).filter(Number.isFinite);return String((nums.length?Math.max(...nums):0)+1).padStart(2,'0')}
 async function addTrack(){if(dirty)return alert('먼저 현재 변경사항을 저장하세요.');const name=prompt('새 Track 이름을 입력하세요.');if(!name)return;const cleanName=name.trim();if(!cleanName)return;const num=nextTrackNum();const t={num,name:cleanName,desc:'',count:0};try{if(!window.learningHubDb)throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');await window.learningHubDb.saveTrack(t);db.tracks.push(t);drawNav();toast(`Supabase에 Track ${num}을 추가했습니다.`)}catch(e){alert('Track을 추가하지 않았습니다.\n\n'+(e.message||e))}}
 async function addContent(){if(dirty)return alert('먼저 현재 변경사항을 저장하세요.');if(!db.tracks.length)return alert('먼저 Track을 추가하세요.');const list=db.tracks.map(t=>`${t.num}: ${t.name}`).join('\n');const tn=prompt('추가할 Track 번호를 입력하세요.\n\n'+list);const t=db.tracks.find(x=>x.num===tn);if(!t)return alert('Track 번호를 확인하세요.');const title=prompt('새 콘텐츠 제목을 입력하세요.');if(!title)return;const siblings=db.contents.filter(x=>x.track===tn);const n=Math.max(0,...siblings.map(x=>parseInt(x.id.split('-')[1],10)||0))+1;const id=`${tn}-${String(n).padStart(2,'0')}`;const c={id,track:tn,trackName:t.name,title:title.trim(),summary:'',level:'기본',time:'준비 중',status:'draft',learning:{learn:'',example:'',check:''},assets:{prompt:{title:'',body:''},template:{title:'',url:''},app:{title:'',url:''}},links:[],flow:{prev:'',next:''},updatedAt:null};try{if(!window.learningHubDb)throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');await window.learningHubDb.saveContent(c);c.updatedAt=new Date().toISOString();db.contents.push(c);t.count=(t.count||0)+1;selected=c;dirty=false;drawNav();load(id);toast(`Supabase에 ${id} 콘텐츠를 추가했습니다.`)}catch(e){alert('콘텐츠를 추가하지 않았습니다.\n\n'+(e.message||e))}}
+async function uploadAssetFile(file){
+ if(!file)return;
+ if(!selected)return alert('먼저 콘텐츠를 선택하세요.');
+ try{
+   if(!window.learningHubDb)throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');
+   if($('assetUploadBtn'))$('assetUploadBtn').disabled=true;
+   if($('assetUploadStatus'))$('assetUploadStatus').textContent='업로드 중...';
+   const info=await window.learningHubDb.uploadAsset(file,selected.id);
+   if(!$('templateTitle').value.trim())$('templateTitle').value=info.name;
+   $('templateUrl').value=info.publicUrl;
+   markDirty();
+   if($('assetUploadStatus'))$('assetUploadStatus').textContent='업로드 완료 · 변경사항을 저장하세요.';
+   toast('site-assets/learning에 파일을 업로드했습니다.');
+ }catch(e){
+   if($('assetUploadStatus'))$('assetUploadStatus').textContent='업로드 실패';
+   alert('파일을 업로드하지 않았습니다.\n\n'+(e.message||e));
+ }finally{
+   if($('assetUploadBtn'))$('assetUploadBtn').disabled=false;
+   if($('assetFile'))$('assetFile').value='';
+ }
+}
 async function exportBackup(){
  try{
    if(!window.learningHubDb)throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');
@@ -117,6 +138,8 @@ function bind(){
  const tabs=document.querySelector('.tabs');
  if(tabs)tabs.onclick=e=>{if(!e.target.dataset.tab)return;document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.dataset.panel===e.target.dataset.tab))};
  if($('addLink'))$('addLink').onclick=()=>{addLinkRow();markDirty()};
+ if($('assetUploadBtn'))$('assetUploadBtn').onclick=e=>{e.preventDefault();if($('assetFile'))$('assetFile').click()};
+ if($('assetFile'))$('assetFile').onchange=e=>{if(e.target.files[0])uploadAssetFile(e.target.files[0])};
  if($('saveBtn'))$('saveBtn').onclick=e=>{e.preventDefault();save()};
  if($('previewBtn'))$('previewBtn').onclick=e=>{e.preventDefault();if(selected)window.open(`../lesson.html?id=${selected.id}`,'_blank')};
  if($('backupBtn'))$('backupBtn').onclick=exportBackup;
