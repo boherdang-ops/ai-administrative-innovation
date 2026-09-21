@@ -35,7 +35,8 @@ async function boot(){
    document.getElementById('nav').innerHTML='<div style="padding:18px;color:#b42318;font-size:12px">초기 Track/Content 데이터가 비어 있습니다.</div>';
    setState('데이터 없음',false); return;
  }
- selected=db.contents[0]||null;bind();drawNav();if(selected)load(selected.id);else empty();setState(remoteLoaded?'Supabase 연결':'로컬 Seed 사용',remoteLoaded)}
+ const requestedId=new URLSearchParams(location.search).get('content');
+ selected=(requestedId&&db.contents.find(x=>x.id===requestedId))||db.contents[0]||null;bind();drawNav();if(selected)load(selected.id);else empty();setState(remoteLoaded?'Supabase 연결':'로컬 Seed 사용',remoteLoaded)}
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function setState(t,ok=true){const a=$('stateText'),b=$('stateDot');if(a)a.textContent=t;if(b)b.style.background=ok?'#22c55e':'#f59e0b'}
 function recount(){$('contentCount').textContent=`${db.tracks.length} TRACKS · ${db.contents.length} CONTENTS`}
@@ -59,7 +60,9 @@ function operationalError(action,e){console.error('[Learning Hub]',action,e);set
 async function save(){
  if(saveBusy){toast('저장 작업을 처리 중입니다.');return}
  const c=collect(),errs=validate(c);if(errs.length){alert('저장하지 않았습니다.\n\n'+errs.join('\n'));return}
-  const btn=$('saveBtn'),oldText=btn?btn.textContent:'';
+ const isPublish=c.status==='public';
+ if(isPublish){const publishErrs=publishValidation(c);if(publishErrs.length){alert('게시하지 않았습니다.\n\n'+publishErrs.join('\n'));return}}
+ const btn=$('saveBtn'),oldText=btn?btn.textContent:'';
  try{
    saveBusy=true;
    if(btn){btn.disabled=true;btn.textContent=isPublish?'게시 중...':'저장 중...'}
@@ -96,7 +99,9 @@ function formatBytes(n){
 async function persistAssetChange(message){
  const c=collect(),errs=validate(c);
  if(errs.length)throw new Error(errs.join('\n'));
-  if(isPublish)await window.learningHubDb.publishContent(c);
+ const isPublish=c.status==='public';
+ if(isPublish){const publishErrs=publishValidation(c);if(publishErrs.length)throw new Error(publishErrs.join('\n'));}
+ if(isPublish)await window.learningHubDb.publishContent(c);
  else await window.learningHubDb.saveContent(c);
  c.updatedAt=new Date().toISOString();
  const idx=db.contents.findIndex(x=>x.id===c.id);
