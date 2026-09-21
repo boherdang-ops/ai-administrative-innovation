@@ -1,4 +1,4 @@
-// Learning Hub v0.8.3 — Supabase persistence + asset upload adapter
+// Learning Hub v1.5.0 — Supabase persistence + Flexible Content Blocks adapter
 // Purpose: replace localStorage persistence with Supabase while preserving the confirmed v0.6.4 UI.
 // No screen/layout/field changes.
 
@@ -379,14 +379,18 @@
           const assets = c.assets || {};
           const links = Array.isArray(c.external_links) ? c.external_links : [];
           const hasLearning = [learning.learn, learning.example, learning.check].some(x=>String(x||'').trim());
-          const hasAsset = String(assets?.prompt?.body || '').trim() || String(assets?.template?.url || '').trim() || String(assets?.app?.url || '').trim();
+          const blockList = Array.isArray(assets?.blocks) ? assets.blocks : [];
+          const hasBlock = blockList.some(b=>String(b?.body || '').trim() || String(b?.url || '').trim() || String(b?.title || '').trim());
+          const hasAsset = String(assets?.prompt?.body || '').trim() || String(assets?.template?.url || '').trim() || String(assets?.app?.url || '').trim() || hasBlock;
           const hasLink = links.some(x=>String(x?.url || '').trim());
           if (!hasLearning && !hasAsset && !hasLink) publicEmptyLearning.push(c.content_code);
         }
 
+        const blocks = Array.isArray(c.assets?.blocks) ? c.assets.blocks : [];
         const urls = [
           ['template', c.assets?.template?.url],
           ['app', c.assets?.app?.url],
+          ...blocks.map((x,i)=>[`block${i+1}:${x?.type || 'BLOCK'}`,x?.url]),
           ...((Array.isArray(c.external_links) ? c.external_links : []).map((x,i)=>[`link${i+1}`,x?.url]))
         ];
         urls.forEach(([kind,url])=>{ if (String(url||'').trim() && !isHttpUrl(url)) invalidUrls.push(`${c.content_code}:${kind}`); });

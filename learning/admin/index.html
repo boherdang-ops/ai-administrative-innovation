@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Learning Hub CMS · Structure Prototype</title>
-<link rel="stylesheet" href="admin.css?v=090">
+<link rel="stylesheet" href="admin.css?v=150">
 </head>
 <body>
 <header class="admin-top">
@@ -72,6 +72,14 @@
         <div id="assetList" style="margin-top:12px"></div>
         </div>
         <div class="asset-block"><span>APP</span><label>앱 이름<input id="appTitle"></label><label>앱 URL<input id="appUrl" placeholder="필요한 경우에만 연결"></label></div>
+        <div class="asset-block flexible-blocks">
+          <div class="flex-block-head">
+            <div><span>FLEXIBLE CONTENT BLOCKS</span><h3>확장 자료</h3><p class="help">내용이 있는 블록만 학습자 화면에 표시됩니다. LEARN·UNDERSTAND·PRACTICE·REVIEW 어느 영역에든 필요한 자료를 자유롭게 추가할 수 있습니다.</p></div>
+            <button type="button" id="addBlockBtn" class="ghost">+ 자료 추가</button>
+          </div>
+          <div id="blockRows"></div>
+          <p class="types">지원 유형 · TEXT · IMAGE · VIDEO · LINK · FILE · APP · NOTICE · CHECKLIST · TABLE · PROMPT</p>
+        </div>
       </section>
 
       <section class="panel" data-panel="links">
@@ -92,6 +100,6 @@
 <div id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
-<script src="supabase-adapter.js?v=090"></script>
-<script src="cms-seed.js?v=062"></script><script src="admin.js?v=090"></script>
+<script src="supabase-adapter.js?v=150"></script>
+<script src="cms-seed.js?v=062"></script><script src="admin.js?v=150"></script>
 </body></html>
