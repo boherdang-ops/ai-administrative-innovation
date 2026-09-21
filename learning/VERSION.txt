@@ -1,0 +1,3 @@
+Learning Hub v0.9.0 Production Baseline
+Baseline date: 2026-09-21
+UI baseline: CMS v0.6.4 (unchanged)
