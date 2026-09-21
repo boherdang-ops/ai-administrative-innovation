@@ -1,4 +1,4 @@
-// Learning Hub v0.7.9 — Supabase persistence + asset upload adapter
+// Learning Hub v0.8.3 — Supabase persistence + asset upload adapter
 // Purpose: replace localStorage persistence with Supabase while preserving the confirmed v0.6.4 UI.
 // No screen/layout/field changes.
 
@@ -272,6 +272,69 @@
         throw new Error('Learning Hub 관리 경로의 파일만 삭제할 수 있습니다.');
       }
       const { error } = await client.storage.from('site-assets').remove([key]);
+      if (error) throw error;
+      return true;
+    },
+
+
+
+    async deleteContent(contentCode) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+      const code = String(contentCode || '').trim();
+      if (!code) throw new Error('삭제할 콘텐츠 ID가 없습니다.');
+
+      const { data: allRows, error: allError } = await client.from('learning_contents')
+        .select('content_code,flow');
+      if (allError) throw allError;
+
+      let referencesUpdated = 0;
+      for (const row of (allRows || [])) {
+        if (row.content_code === code) continue;
+        const flow = Object.assign({prev:'', next:''}, row.flow || {});
+        let changed = false;
+        if (flow.prev === code) { flow.prev = ''; changed = true; }
+        if (flow.next === code) { flow.next = ''; changed = true; }
+        if (changed) {
+          const { error } = await client.from('learning_contents')
+            .update({flow}).eq('content_code', row.content_code);
+          if (error) throw error;
+          referencesUpdated += 1;
+        }
+      }
+
+      let assetsDeleted = 0;
+      try {
+        const assets = await this.listAssets(code);
+        const paths = assets.map(x=>x.path).filter(Boolean);
+        if (paths.length) {
+          const { error } = await client.storage.from('site-assets').remove(paths);
+          if (error) throw error;
+          assetsDeleted = paths.length;
+        }
+      } catch (assetError) {
+        throw new Error('콘텐츠 파일 정리 중 오류: ' + (assetError.message || assetError));
+      }
+
+      const { error: deleteError } = await client.from('learning_contents')
+        .delete().eq('content_code', code);
+      if (deleteError) throw deleteError;
+
+      return { referencesUpdated, assetsDeleted };
+    },
+
+    async deleteTrack(trackCode) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+      const code = String(trackCode || '').trim();
+      if (!code) throw new Error('삭제할 Track 번호가 없습니다.');
+
+      const { count, error: countError } = await client.from('learning_contents')
+        .select('content_code', { count:'exact', head:true }).eq('track_code', code);
+      if (countError) throw countError;
+      if ((count || 0) > 0) throw new Error(`Track ${code}에 콘텐츠 ${count}개가 있어 삭제할 수 없습니다. 콘텐츠를 먼저 정리하세요.`);
+
+      const { error } = await client.from('learning_tracks').delete().eq('track_code', code);
       if (error) throw error;
       return true;
     },
