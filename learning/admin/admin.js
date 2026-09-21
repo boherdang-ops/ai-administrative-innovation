@@ -6,7 +6,7 @@ function getSeed(){
   if(!data || !Array.isArray(data.tracks) || !Array.isArray(data.contents)) throw new Error('초기 CMS 데이터 형식이 올바르지 않습니다.');
   return data;
 }
-let db=null,selected=null,dirty=false;
+let db=null,selected=null,dirty=false,saveBusy=false;
 const $=id=>document.getElementById(id);
 async function boot(){
  try{
@@ -51,9 +51,15 @@ function addLinkRow(x={type:'VIDEO',title:'',url:''}){const d=document.createEle
 function collect(){const c=deep(selected);c.title=$('title').value.trim();c.summary=$('summary').value.trim();c.level=$('level').value;c.time=$('time').value.trim();c.status=$('status').value;c.learning={learn:$('learn').value,example:$('example').value,check:$('check').value};c.assets={prompt:{title:$('promptTitle').value,body:$('prompt').value},template:{title:$('templateTitle').value,url:$('templateUrl').value.trim()},app:{title:$('appTitle').value,url:$('appUrl').value.trim()}};c.links=[...document.querySelectorAll('.link-row')].map(r=>({type:r.querySelector('select').value,title:r.querySelector('.lt').value.trim(),url:r.querySelector('.lu').value.trim()}));c.flow={prev:$('prev').value,next:$('next').value};return c}
 function validUrl(u){if(!u)return true;try{return ['http:','https:'].includes(new URL(u).protocol)}catch(e){return false}}
 function validate(c){let e=[];if(!c.title)e.push('제목은 비워둘 수 없습니다.');[c.assets.template.url,c.assets.app.url,...c.links.map(x=>x.url)].filter(Boolean).forEach(u=>{if(!validUrl(u))e.push('URL 형식을 확인하세요: '+u)});if(c.flow.prev===c.id||c.flow.next===c.id)e.push('현재 콘텐츠를 이전/다음으로 지정할 수 없습니다.');return e}
-async function save(){const c=collect(),errs=validate(c);if(errs.length){alert('저장하지 않았습니다.\n\n'+errs.join('\n'));return}
+async function save(){
+ if(saveBusy){toast('저장 작업을 처리 중입니다.');return}
+ const c=collect(),errs=validate(c);if(errs.length){alert('저장하지 않았습니다.\n\n'+errs.join('\n'));return}
  const isPublish=c.status==='public';
+ const btn=$('saveBtn'),oldText=btn?btn.textContent:'';
  try{
+   saveBusy=true;
+   if(btn){btn.disabled=true;btn.textContent=isPublish?'게시 중...':'저장 중...'}
+   setState(isPublish?'게시 중':'저장 중',false);
    if(!window.learningHubDb) throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');
    if(isPublish){
      await window.learningHubDb.publishContent(c);
@@ -66,6 +72,10 @@ async function save(){const c=collect(),errs=validate(c);if(errs.length){alert('
    toast(isPublish?'Supabase에 게시했습니다.':'Supabase에 초안을 저장했습니다.');load(c.id);
  }catch(e){
    alert((isPublish?'게시하지 않았습니다.':'초안을 저장하지 않았습니다.')+'\n\n'+(e.message||e));
+ }finally{
+   saveBusy=false;
+   if(btn){btn.disabled=false;btn.textContent=oldText||'변경사항 임시 저장'}
+   setState(dirty?'미저장 변경':'준비됨',!dirty);
  }
 }
 function persist(){/* v0.7.1: operational data is no longer persisted to localStorage */}
@@ -224,16 +234,19 @@ async function uploadAssetFile(file){
    if($('assetFile'))$('assetFile').value='';
  }
 }
+function downloadBackupFile(backup,prefix='learning-hub-backup'){
+ const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),a=document.createElement('a');
+ const stamp=new Date().toISOString().replace(/[:.]/g,'-');
+ a.href=URL.createObjectURL(blob);
+ a.download=`${prefix}-${stamp}.json`;
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
 async function exportBackup(){
  try{
    if(!window.learningHubDb)throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');
    const backup=await window.learningHubDb.createBackup();
-   const blob=new Blob([JSON.stringify(backup,null,2)],{type:'application/json'}),a=document.createElement('a');
-   const stamp=new Date().toISOString().replace(/[:.]/g,'-');
-   a.href=URL.createObjectURL(blob);
-   a.download=`learning-hub-backup-${stamp}.json`;
-   a.click();
-   setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+   downloadBackupFile(backup,'learning-hub-backup');
    toast('Supabase 백업 파일을 저장했습니다.');
  }catch(e){
    alert('백업하지 않았습니다.\n\n'+(e.message||e));
@@ -251,6 +264,8 @@ async function importBackup(file){
    const tc=backup.tables.learning_tracks.length,cc=backup.tables.learning_contents.length;
    if(!confirm(`백업 시점의 Learning Hub 데이터로 복구하시겠습니까?\n\nTrack ${tc}개 · Content ${cc}개\n\n현재 백업에 없는 Track/Content는 삭제됩니다. 기존 revision 이력은 보존되고 복구 이력이 추가됩니다.`))return;
    if(!window.learningHubDb)throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');
+   const safetyBackup=await window.learningHubDb.createBackup();
+   downloadBackupFile(safetyBackup,'learning-hub-before-restore');
    const result=await window.learningHubDb.restoreBackup(backup);
    db=await window.learningHubDb.loadAll();
    selected=db.contents[0]||null;dirty=false;drawNav();selected?load(selected.id):empty();
@@ -272,7 +287,7 @@ function bind(){
  if($('assetRefreshBtn'))$('assetRefreshBtn').onclick=e=>{e.preventDefault();refreshAssetList(true)};
  if($('assetFile'))$('assetFile').onchange=e=>{if(e.target.files[0])uploadAssetFile(e.target.files[0])};
  if($('saveBtn'))$('saveBtn').onclick=e=>{e.preventDefault();save()};
- if($('previewBtn'))$('previewBtn').onclick=e=>{e.preventDefault();if(selected)window.open(`../lesson.html?id=${selected.id}`,'_blank')};
+ if($('previewBtn'))$('previewBtn').onclick=e=>{e.preventDefault();if(dirty)return alert('미리보기 전에 현재 변경사항을 저장하세요.');if(selected)window.open(`../lesson.html?id=${selected.id}`,'_blank')};
  if($('backupBtn'))$('backupBtn').onclick=exportBackup;
  if($('restoreBtn'))$('restoreBtn').onclick=e=>{e.preventDefault();if($('restoreFile'))$('restoreFile').click()};
  if($('restoreFile'))$('restoreFile').onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0]);e.target.value=''};
