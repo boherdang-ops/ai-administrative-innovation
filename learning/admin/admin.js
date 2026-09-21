@@ -88,7 +88,26 @@ async function exportBackup(){
    alert('백업하지 않았습니다.\n\n'+(e.message||e));
  }
 }
-function importBackup(file){const r=new FileReader();r.onload=()=>{try{const x=JSON.parse(r.result);if(x.schemaVersion!==1||!Array.isArray(x.contents)||!Array.isArray(x.tracks))throw Error();if(!confirm('현재 CMS 데이터를 백업 파일로 교체하시겠습니까?'))return;db=x;persist();selected=db.contents[0]||null;dirty=false;drawNav();selected?load(selected.id):empty();toast('백업을 복원했습니다.')}catch(e){alert('호환되는 Learning Hub 백업 파일이 아닙니다.')}};r.readAsText(file)}
+async function importBackup(file){
+ try{
+   if(dirty)return alert('먼저 현재 변경사항을 저장하세요.');
+   const text=await file.text();
+   let backup;
+   try{backup=JSON.parse(text)}catch(e){throw new Error('JSON 파일을 읽을 수 없습니다.')}
+   if(!backup||backup.backupVersion!==1||!backup.tables||!Array.isArray(backup.tables.learning_tracks)||!Array.isArray(backup.tables.learning_contents)){
+     throw new Error('호환되는 Learning Hub 백업 파일이 아닙니다.');
+   }
+   const tc=backup.tables.learning_tracks.length,cc=backup.tables.learning_contents.length;
+   if(!confirm(`백업 시점의 Learning Hub 데이터로 복구하시겠습니까?\n\nTrack ${tc}개 · Content ${cc}개\n\n현재 백업에 없는 Track/Content는 삭제됩니다. 기존 revision 이력은 보존되고 복구 이력이 추가됩니다.`))return;
+   if(!window.learningHubDb)throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');
+   const result=await window.learningHubDb.restoreBackup(backup);
+   db=await window.learningHubDb.loadAll();
+   selected=db.contents[0]||null;dirty=false;drawNav();selected?load(selected.id):empty();
+   toast(`Supabase 복구 완료 · ${result.tracks} Tracks · ${result.contents} Contents`);
+ }catch(e){
+   alert('복구하지 않았습니다.\n\n'+(e.message||e));
+ }
+}
 function toast(s){const t=$('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 function bind(){
  $('nav').onclick=e=>{if(e.target.dataset.id)load(e.target.dataset.id)};
@@ -101,6 +120,8 @@ function bind(){
  if($('saveBtn'))$('saveBtn').onclick=e=>{e.preventDefault();save()};
  if($('previewBtn'))$('previewBtn').onclick=e=>{e.preventDefault();if(selected)window.open(`../lesson.html?id=${selected.id}`,'_blank')};
  if($('backupBtn'))$('backupBtn').onclick=exportBackup;
+ if($('restoreBtn'))$('restoreBtn').onclick=e=>{e.preventDefault();if($('restoreFile'))$('restoreFile').click()};
+ if($('restoreFile'))$('restoreFile').onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0]);e.target.value=''};
  if($('exportBtn'))$('exportBtn').onclick=exportBackup;
  if($('importFile'))$('importFile').onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0]);e.target.value=''};
  document.querySelectorAll('#form input:not(:disabled),#form textarea,#form select').forEach(e=>e.addEventListener('input',markDirty));

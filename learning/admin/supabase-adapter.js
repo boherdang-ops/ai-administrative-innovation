@@ -1,4 +1,4 @@
-// Learning Hub v0.7.5 — Supabase persistence adapter
+// Learning Hub v0.7.6 — Supabase persistence adapter
 // Purpose: replace localStorage persistence with Supabase while preserving the confirmed v0.6.4 UI.
 // No screen/layout/field changes.
 
@@ -82,6 +82,98 @@
           learning_content_revisions: revisionsRes.data || []
         }
       };
+    },
+
+
+
+    async restoreBackup(backup) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+      if (!backup || backup.backupVersion !== 1 || !backup.tables) {
+        throw new Error('호환되는 Learning Hub 백업 파일이 아닙니다.');
+      }
+
+      const tracks = backup.tables.learning_tracks;
+      const contents = backup.tables.learning_contents;
+      if (!Array.isArray(tracks) || !Array.isArray(contents)) {
+        throw new Error('백업 파일의 Track/Content 데이터가 올바르지 않습니다.');
+      }
+      if (!tracks.length) throw new Error('백업 파일에 Track 데이터가 없습니다.');
+
+      const trackRows = tracks.map(t => ({
+        track_code:t.track_code,
+        name:t.name,
+        description:t.description || '',
+        sort_order:t.sort_order ?? (parseInt(t.track_code,10) || 0),
+        is_active:t.is_active !== false
+      }));
+      const contentRows = contents.map(c => ({
+        content_code:c.content_code,
+        track_code:c.track_code,
+        title:c.title,
+        summary:c.summary || '',
+        level:c.level || '기본',
+        expected_time:c.expected_time || '',
+        status:c.status || 'draft',
+        learning:c.learning || {},
+        assets:c.assets || {},
+        external_links:c.external_links || [],
+        flow:c.flow || {},
+        sort_order:c.sort_order ?? 0,
+        published_at:c.published_at || null
+      }));
+
+      const trackCodes = new Set(trackRows.map(x=>x.track_code));
+      for (const c of contentRows) {
+        if (!trackCodes.has(c.track_code)) {
+          throw new Error(`백업 파일에서 콘텐츠 ${c.content_code}의 Track ${c.track_code}을 찾을 수 없습니다.`);
+        }
+      }
+
+      const [currentTracksRes, currentContentsRes] = await Promise.all([
+        client.from('learning_tracks').select('track_code'),
+        client.from('learning_contents').select('content_code')
+      ]);
+      if (currentTracksRes.error) throw currentTracksRes.error;
+      if (currentContentsRes.error) throw currentContentsRes.error;
+
+      const keepContentCodes = new Set(contentRows.map(x=>x.content_code));
+      const extraContentCodes = (currentContentsRes.data || [])
+        .map(x=>x.content_code).filter(code=>!keepContentCodes.has(code));
+      if (extraContentCodes.length) {
+        const { error } = await client.from('learning_contents').delete().in('content_code', extraContentCodes);
+        if (error) throw error;
+      }
+
+      const keepTrackCodes = new Set(trackRows.map(x=>x.track_code));
+      const extraTrackCodes = (currentTracksRes.data || [])
+        .map(x=>x.track_code).filter(code=>!keepTrackCodes.has(code));
+      if (extraTrackCodes.length) {
+        const { error } = await client.from('learning_tracks').delete().in('track_code', extraTrackCodes);
+        if (error) throw error;
+      }
+
+      const { error: trackError } = await client.from('learning_tracks')
+        .upsert(trackRows, { onConflict:'track_code' });
+      if (trackError) throw trackError;
+
+      if (contentRows.length) {
+        const { error: contentError } = await client.from('learning_contents')
+          .upsert(contentRows, { onConflict:'content_code' });
+        if (contentError) throw contentError;
+
+        const restoreRows = contentRows.map(c => ({
+          content_code:c.content_code,
+          action:'restore',
+          snapshot:c,
+          created_by:session.user.id
+        }));
+        const { error: revisionError } = await client.from('learning_content_revisions')
+          .insert(restoreRows);
+        if (revisionError) throw revisionError;
+      }
+
+      return { tracks:trackRows.length, contents:contentRows.length };
     },
 
     async saveTrack(t) {
