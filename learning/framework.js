@@ -73,7 +73,7 @@ async function render(){
   const flowNext=x.published&&x.flow?.next?D.contents.find(c=>c.id===x.flow.next):null;
   const next=flowNext||same[idx+1];
   const nl=document.getElementById('nextLink'); if(next){nl.href=`lesson.html?id=${encodeURIComponent(next.id)}`;nl.textContent=`${next.id} ${next.title} →`}else{nl.href=`track.html?t=${encodeURIComponent(x.track)}`;nl.textContent='Track 전체 보기 →'}
-  const bar=document.getElementById('bar'); const update=()=>{const h=document.documentElement,max=h.scrollHeight-h.clientHeight;bar.style.width=(max?Math.min(100,h.scrollTop/max*100):0)+'%'};addEventListener('scroll',update,{passive:true});update();
+
  }
 }
 render();
