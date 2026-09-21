@@ -339,6 +339,150 @@
       return true;
     },
 
+
+    async healthCheck() {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+
+      const [tracksRes, contentsRes, revisionsRes] = await Promise.all([
+        client.from('learning_tracks').select('track_code,name,is_active').order('track_code'),
+        client.from('learning_contents').select('content_code,track_code,title,summary,status,learning,assets,external_links,flow').order('content_code'),
+        client.from('learning_content_revisions').select('id', { count:'exact', head:true })
+      ]);
+      if (tracksRes.error) throw tracksRes.error;
+      if (contentsRes.error) throw contentsRes.error;
+      if (revisionsRes.error) throw revisionsRes.error;
+
+      const tracks = tracksRes.data || [];
+      const contents = contentsRes.data || [];
+      const trackCodes = new Set(tracks.map(t=>t.track_code));
+      const contentCodes = new Set(contents.map(c=>c.content_code));
+      const orphanContents = contents.filter(c=>!trackCodes.has(c.track_code)).map(c=>c.content_code);
+      const invalidFlow = [];
+      const publicMissingSummary = [];
+      const publicEmptyLearning = [];
+      const invalidUrls = [];
+      const isHttpUrl = value => {
+        const v = String(value || '').trim();
+        if (!v) return true;
+        try { const u = new URL(v); return u.protocol === 'http:' || u.protocol === 'https:'; } catch (e) { return false; }
+      };
+
+      for (const c of contents) {
+        const flow = Object.assign({prev:'',next:''}, c.flow || {});
+        if (flow.prev && (!contentCodes.has(flow.prev) || flow.prev === c.content_code)) invalidFlow.push(`${c.content_code}:prev→${flow.prev}`);
+        if (flow.next && (!contentCodes.has(flow.next) || flow.next === c.content_code)) invalidFlow.push(`${c.content_code}:next→${flow.next}`);
+
+        if (c.status === 'public') {
+          if (!String(c.summary || '').trim()) publicMissingSummary.push(c.content_code);
+          const learning = c.learning || {};
+          const assets = c.assets || {};
+          const links = Array.isArray(c.external_links) ? c.external_links : [];
+          const hasLearning = [learning.learn, learning.example, learning.check].some(x=>String(x||'').trim());
+          const hasAsset = String(assets?.prompt?.body || '').trim() || String(assets?.template?.url || '').trim() || String(assets?.app?.url || '').trim();
+          const hasLink = links.some(x=>String(x?.url || '').trim());
+          if (!hasLearning && !hasAsset && !hasLink) publicEmptyLearning.push(c.content_code);
+        }
+
+        const urls = [
+          ['template', c.assets?.template?.url],
+          ['app', c.assets?.app?.url],
+          ...((Array.isArray(c.external_links) ? c.external_links : []).map((x,i)=>[`link${i+1}`,x?.url]))
+        ];
+        urls.forEach(([kind,url])=>{ if (String(url||'').trim() && !isHttpUrl(url)) invalidUrls.push(`${c.content_code}:${kind}`); });
+      }
+
+      return {
+        counts: {
+          tracks: tracks.length,
+          contents: contents.length,
+          public: contents.filter(c=>c.status==='public').length,
+          revisions: revisionsRes.count || 0
+        },
+        orphanContents,
+        invalidFlow,
+        publicMissingSummary,
+        publicEmptyLearning,
+        invalidUrls,
+        contents: contents.map(c=>({id:c.content_code,title:c.title,status:c.status}))
+      };
+    },
+
+    async getRevisions(contentCode, limit=30) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+      const code = String(contentCode || '').trim();
+      if (!code) return [];
+      const { data, error } = await client.from('learning_content_revisions')
+        .select('id,content_code,action,snapshot,created_at')
+        .eq('content_code', code)
+        .order('created_at', { ascending:false })
+        .limit(Math.max(1, Math.min(Number(limit)||30, 100)));
+      if (error) throw error;
+      return data || [];
+    },
+
+    async restoreRevision(revisionId, expectedContentCode) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+      const { data: rev, error } = await client.from('learning_content_revisions')
+        .select('id,content_code,action,snapshot,created_at')
+        .eq('id', revisionId)
+        .single();
+      if (error) throw error;
+      if (!rev || !rev.snapshot) throw new Error('복구할 revision 스냅샷이 없습니다.');
+      if (expectedContentCode && rev.content_code !== expectedContentCode) throw new Error('선택한 콘텐츠와 revision이 일치하지 않습니다.');
+
+      const s = rev.snapshot || {};
+      const code = String(s.id || s.content_code || rev.content_code || '').trim();
+      const trackCode = String(s.track || s.track_code || '').trim();
+      if (!code || !trackCode) throw new Error('revision에 콘텐츠 ID 또는 Track 정보가 없습니다.');
+
+      const status = s.status || 'draft';
+      const publishedAt = status === 'public' ? (s.publishedAt || s.published_at || new Date().toISOString()) : null;
+      const row = {
+        content_code: code,
+        track_code: trackCode,
+        title: s.title || code,
+        summary: s.summary || '',
+        level: s.level || '기본',
+        expected_time: s.time || s.expected_time || '',
+        status,
+        learning: s.learning || {},
+        assets: s.assets || {},
+        external_links: s.links || s.external_links || [],
+        flow: s.flow || {},
+        published_at: publishedAt
+      };
+
+      const { error: upsertError } = await client.from('learning_contents')
+        .upsert(row, { onConflict:'content_code' });
+      if (upsertError) throw upsertError;
+
+      const snapshot = {
+        id: code,
+        track: trackCode,
+        title: row.title,
+        summary: row.summary,
+        level: row.level,
+        time: row.expected_time,
+        status: row.status,
+        learning: row.learning,
+        assets: row.assets,
+        links: row.external_links,
+        flow: row.flow,
+        publishedAt: row.published_at
+      };
+      const { error: insertError } = await client.from('learning_content_revisions').insert({
+        content_code: code,
+        action: 'restore',
+        snapshot,
+        created_by: session.user.id
+      });
+      if (insertError) throw insertError;
+      return { contentCode:code, restoredFrom:rev.id };
+    },
+
     async saveTrack(t) {
       const session = await this.getSession();
       if (!session) throw new Error('관리자 로그인이 필요합니다.');

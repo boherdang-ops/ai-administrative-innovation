@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learning Hub CMS · 운영 점검</title>
+<link rel="stylesheet" href="admin.css?v=085">
+<style>
+body{background:#f4f6f8}.maint-wrap{max-width:1180px;margin:0 auto;padding:32px 24px 70px}.maint-head{display:flex;justify-content:space-between;align-items:end;gap:20px}.maint-head h1{margin:4px 0 0;font-size:28px}.maint-head p{margin:0;color:#64748b;font-size:11px}.maint-actions{display:flex;gap:8px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:24px}.card{background:#fff;border:1px solid #dfe5ec;border-radius:8px;padding:18px}.card span{display:block;font-size:10px;color:#64748b;font-weight:800}.card b{display:block;margin-top:7px;font-size:24px}.section{background:#fff;border:1px solid #dfe5ec;border-radius:8px;padding:22px;margin-top:16px}.section h2{font-size:18px;margin:0 0 12px}.check{display:flex;justify-content:space-between;gap:20px;padding:10px 0;border-top:1px solid #eef2f6;font-size:12px}.check:first-of-type{border-top:0}.oktxt{color:#15803d;font-weight:800}.warntxt{color:#b45309;font-weight:800}.badtxt{color:#b91c1c;font-weight:800}.selector{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}.selector label{margin:0}.rev-table{width:100%;border-collapse:collapse;font-size:11px;margin-top:14px}.rev-table th,.rev-table td{padding:10px 8px;border-top:1px solid #e5e9ee;text-align:left;vertical-align:top}.rev-table th{color:#64748b;font-size:10px}.rev-table button{border:1px solid #cbd5e1;background:#fff;border-radius:5px;padding:6px 9px;font-size:10px;font-weight:800}.note{font-size:11px;color:#64748b;line-height:1.6}.empty{color:#94a3b8;font-size:12px;padding:16px 0}.statusline{margin-top:12px;font-size:11px;color:#475569}@media(max-width:850px){.cards{grid-template-columns:1fr 1fr}.maint-head{display:block}.maint-actions{margin-top:12px}.selector{grid-template-columns:1fr}.rev-table{font-size:10px}}
+</style>
+</head>
+<body>
+<header class="admin-top">
+  <div><b>LEARNING HUB CMS</b><span>운영 점검 · v0.8.5</span></div>
+  <div class="top-links"><a href="index.html">CMS로 돌아가기</a><a href="../index.html">공개 사이트 보기 →</a></div>
+</header>
+<div class="notice"><b>운영 점검:</b> 데이터를 변경하지 않는 진단이 기본입니다. 개별 revision 복구를 실행할 때만 변경되며, 복구 직전 전체 백업 JSON을 자동 저장합니다.</div>
+<main class="maint-wrap">
+  <div class="maint-head">
+    <div><p>LEARNING HUB · MAINTENANCE</p><h1>운영 점검 및 콘텐츠 이력 복구</h1></div>
+    <div class="maint-actions"><button id="refreshBtn" class="ghost">점검 새로고침</button><button id="backupBtn" class="ghost">현재 상태 백업</button></div>
+  </div>
+  <div class="cards">
+    <div class="card"><span>TRACKS</span><b id="trackCount">-</b></div>
+    <div class="card"><span>CONTENTS</span><b id="contentCount">-</b></div>
+    <div class="card"><span>PUBLIC</span><b id="publicCount">-</b></div>
+    <div class="card"><span>REVISIONS</span><b id="revisionCount">-</b></div>
+  </div>
+  <section class="section">
+    <h2>무결성 점검</h2>
+    <div id="checks"><div class="empty">점검 중입니다.</div></div>
+    <div id="checkedAt" class="statusline"></div>
+  </section>
+  <section class="section">
+    <h2>콘텐츠 revision 이력</h2>
+    <p class="note">저장·게시·복구 스냅샷을 확인하고 특정 시점으로 되돌릴 수 있습니다. 개별 복구 전에는 전체 Learning Hub 백업이 자동 다운로드됩니다.</p>
+    <div class="selector"><label>콘텐츠 선택<select id="contentSelect"></select></label><button id="loadRevBtn" class="ghost">이력 불러오기</button></div>
+    <div id="revisionList"><div class="empty">콘텐츠를 선택하세요.</div></div>
+  </section>
+</main>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-adapter.js?v=085"></script>
+<script src="maintenance.js?v=085"></script>
+</body>
+</html>

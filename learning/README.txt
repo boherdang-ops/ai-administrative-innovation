@@ -1,7 +1,9 @@
-Learning Hub v0.8.4 — 운영 안전장치 UI 반영 보강
+Learning Hub v0.8.5 — 운영 점검 + 콘텐츠 revision 이력 복구
 
-- v0.8.3 기능 유지
-- 상단 동적 Supabase 연결 상태를 확실히 표시
-- 기본정보 하단 게시 전 점검/안전 관리(콘텐츠 삭제, Track 삭제) 표시
-- CSS/JS 캐시 버전을 v084로 갱신
-- 기존 CMS 레이아웃/데이터 구조 변경 없음
+변경 범위
+- admin/index.html: 상단에 '운영 점검' 링크만 추가
+- admin/admin.css: 링크 스타일만 추가
+- admin/supabase-adapter.js: healthCheck/getRevisions/restoreRevision 추가
+- admin/maintenance.html, maintenance.js 신규
+
+기존 CMS 편집 화면/탭/필드/저장/게시/백업/복구/파일관리 구조는 변경하지 않음.
