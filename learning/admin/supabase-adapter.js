@@ -1,4 +1,4 @@
-// Learning Hub v0.7.7 — Supabase persistence + asset upload adapter
+// Learning Hub v0.7.8 — Supabase persistence + asset upload adapter
 // Purpose: replace localStorage persistence with Supabase while preserving the confirmed v0.6.4 UI.
 // No screen/layout/field changes.
 
@@ -182,12 +182,19 @@
       if (!file) throw new Error('업로드할 파일을 선택하세요.');
 
       const code = String(contentCode || 'unassigned').replace(/[^0-9A-Za-z_-]/g, '-');
-      const safeName = String(file.name || 'file')
-        .normalize('NFKC')
-        .replace(/[\\/?#%:]+/g, '-')
-        .replace(/\s+/g, '-')
+      // Storage object key는 ASCII 안전 문자만 사용합니다.
+      // 원래 파일명은 표시용 metadata로만 보존합니다.
+      const originalName = String(file.name || 'file');
+      const lastDot = originalName.lastIndexOf('.');
+      const rawBase = lastDot > 0 ? originalName.slice(0, lastDot) : originalName;
+      const rawExt = lastDot > 0 ? originalName.slice(lastDot + 1) : '';
+      const safeBase = rawBase
+        .normalize('NFKD')
+        .replace(/[^0-9A-Za-z_-]+/g, '-')
         .replace(/-+/g, '-')
         .replace(/^-|-$/g, '') || 'file';
+      const safeExt = rawExt.replace(/[^0-9A-Za-z]+/g, '').toLowerCase().slice(0, 12);
+      const safeName = safeExt ? `${safeBase}.${safeExt}` : safeBase;
       const path = `learning/${code}/${Date.now()}-${safeName}`;
 
       const { error } = await client.storage.from('site-assets')
@@ -205,7 +212,7 @@
         bucket: 'site-assets',
         path,
         publicUrl: data.publicUrl,
-        name: file.name || safeName,
+        name: originalName,
         type: file.type || '',
         size: file.size || 0
       };
