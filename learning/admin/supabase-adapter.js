@@ -1,4 +1,4 @@
-// Learning Hub v0.7.8 — Supabase persistence + asset upload adapter
+// Learning Hub v0.7.9 — Supabase persistence + asset upload adapter
 // Purpose: replace localStorage persistence with Supabase while preserving the confirmed v0.6.4 UI.
 // No screen/layout/field changes.
 
@@ -176,6 +176,52 @@
       return { tracks:trackRows.length, contents:contentRows.length };
     },
 
+    assetPathFromPublicUrl(url) {
+      if (!url) return null;
+      try {
+        const marker = '/storage/v1/object/public/site-assets/';
+        const text = String(url);
+        const pos = text.indexOf(marker);
+        if (pos < 0) return null;
+        const path = decodeURIComponent(text.slice(pos + marker.length).split('?')[0]);
+        return path.startsWith('learning/') ? path : null;
+      } catch (e) {
+        return null;
+      }
+    },
+
+    async listAssets(contentCode) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+
+      const code = String(contentCode || 'unassigned').replace(/[^0-9A-Za-z_-]/g, '-');
+      const folder = `learning/${code}`;
+      const { data, error } = await client.storage.from('site-assets')
+        .list(folder, {
+          limit: 100,
+          offset: 0,
+          sortBy: { column: 'created_at', order: 'desc' }
+        });
+      if (error) throw error;
+
+      return (data || [])
+        .filter(item => item && item.name && item.name !== '.emptyFolderPlaceholder')
+        .map(item => {
+          const path = `${folder}/${item.name}`;
+          const { data: publicData } = client.storage.from('site-assets').getPublicUrl(path);
+          return {
+            bucket: 'site-assets',
+            path,
+            name: item.name,
+            publicUrl: publicData?.publicUrl || '',
+            size: item.metadata?.size || 0,
+            mimeType: item.metadata?.mimetype || item.metadata?.contentType || '',
+            createdAt: item.created_at || null,
+            updatedAt: item.updated_at || null
+          };
+        });
+    },
+
     async uploadAsset(file, contentCode) {
       const session = await this.getSession();
       if (!session) throw new Error('관리자 로그인이 필요합니다.');
@@ -183,7 +229,7 @@
 
       const code = String(contentCode || 'unassigned').replace(/[^0-9A-Za-z_-]/g, '-');
       // Storage object key는 ASCII 안전 문자만 사용합니다.
-      // 원래 파일명은 표시용 metadata로만 보존합니다.
+      // 원래 파일명은 CMS 자료명으로 보존합니다.
       const originalName = String(file.name || 'file');
       const lastDot = originalName.lastIndexOf('.');
       const rawBase = lastDot > 0 ? originalName.slice(0, lastDot) : originalName;
@@ -216,6 +262,18 @@
         type: file.type || '',
         size: file.size || 0
       };
+    },
+
+    async deleteAsset(path) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+      const key = String(path || '');
+      if (!key.startsWith('learning/')) {
+        throw new Error('Learning Hub 관리 경로의 파일만 삭제할 수 있습니다.');
+      }
+      const { error } = await client.storage.from('site-assets').remove([key]);
+      if (error) throw error;
+      return true;
     },
 
     async saveTrack(t) {

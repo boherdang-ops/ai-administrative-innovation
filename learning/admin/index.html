@@ -57,7 +57,15 @@
       <section class="panel" data-panel="assets">
         <h2>학습자산</h2><p class="help">Prompt First. 실제 학습효과가 있을 때만 Template이나 App을 추가합니다.</p>
         <div class="asset-block"><span>PROMPT</span><label>프롬프트 제목<input id="promptTitle"></label><label>프롬프트 내용<textarea id="prompt" rows="9"></textarea></label></div>
-        <div class="asset-block"><span>TEMPLATE / FILE</span><label>자료명<input id="templateTitle"></label><label>파일 또는 URL<input id="templateUrl" placeholder="https://..."></label><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button type="button" id="assetUploadBtn" class="ghost">파일/이미지 업로드</button><small id="assetUploadStatus" class="help" style="margin:0">site-assets/learning 경로에 저장</small><input id="assetFile" type="file" hidden></div></div>
+        <div class="asset-block"><span>TEMPLATE / FILE</span><label>자료명<input id="templateTitle"></label><label>파일 또는 URL<input id="templateUrl" placeholder="https://..."></label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button type="button" id="assetUploadBtn" class="ghost">파일/이미지 업로드·교체</button>
+          <button type="button" id="assetRefreshBtn" class="ghost">파일 목록 새로고침</button>
+          <small id="assetUploadStatus" class="help" style="margin:0">site-assets/learning 경로에 저장</small>
+          <input id="assetFile" type="file" hidden>
+        </div>
+        <div id="assetList" style="margin-top:12px"></div>
+        </div>
         <div class="asset-block"><span>APP</span><label>앱 이름<input id="appTitle"></label><label>앱 URL<input id="appUrl" placeholder="필요한 경우에만 연결"></label></div>
       </section>
 
@@ -79,6 +87,6 @@
 <div id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
-<script src="supabase-adapter.js?v=078"></script>
-<script src="cms-seed.js?v=062"></script><script src="admin.js?v=077"></script>
+<script src="supabase-adapter.js?v=079"></script>
+<script src="cms-seed.js?v=062"></script><script src="admin.js?v=079"></script>
 </body></html>
