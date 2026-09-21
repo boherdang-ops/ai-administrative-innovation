@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Learning Hub CMS · Structure Prototype</title>
+<link rel="stylesheet" href="admin.css?v=064">
+</head>
+<body>
+<header class="admin-top">
+  <div><b>LEARNING HUB CMS</b><span>Stable CMS v0.6.4</span></div>
+  <a href="../index.html">공개 사이트 보기 →</a>
+</header>
+<div class="notice"><b>현재 단계:</b> CMS 구조 검증용입니다. 브라우저에서 수정 내용을 미리 볼 수 있지만 서버에는 저장되지 않습니다.</div>
+<main class="admin-layout">
+  <aside class="sidebar">
+    <div class="side-head"><span id="contentCount">LEARNING STRUCTURE</span><input id="search" placeholder="콘텐츠 찾기">
+<div class="structure-actions"><button id="addContentBtn">+ 콘텐츠</button><button id="addTrackBtn">+ Track</button></div></div>
+    <div id="nav"></div>
+  </aside>
+  <section class="editor">
+    <div class="editor-head">
+      <div><p id="crumb">TRACK</p><h1 id="titleHead">콘텐츠 선택</h1></div>
+      <div class="actions"><button id="previewBtn" class="ghost">미리보기</button><button id="saveBtn" class="primary">변경사항 임시 저장</button></div>
+    </div>
+
+    <div class="tabs">
+      <button class="active" data-tab="basic">기본정보</button>
+      <button data-tab="learning">학습내용</button>
+      <button data-tab="assets">학습자산</button>
+      <button data-tab="links">외부자료</button>
+      <button data-tab="flow">연결</button>
+    </div>
+
+    <form id="form">
+      <section class="panel active" data-panel="basic">
+        <h2>기본정보</h2><p class="help">목록과 학습페이지 상단에 표시되는 최소 정보입니다.</p>
+        <div class="grid2">
+          <label>Track<input id="track" disabled></label>
+          <label>콘텐츠 ID<input id="cid" disabled></label>
+        </div>
+        <label>제목<input id="title"></label>
+        <label>한 줄 설명<textarea id="summary" rows="3"></textarea></label>
+        <div class="grid3">
+          <label>난이도<select id="level"><option>입문</option><option>기본</option><option>중급</option><option>심화</option></select></label>
+          <label>예상시간<input id="time" placeholder="예: 15분"></label>
+          <label>공개상태<select id="status"><option value="draft">초안</option><option value="public">공개</option><option value="hidden">비공개</option></select></label>
+        </div>
+      </section>
+
+      <section class="panel" data-panel="learning">
+        <h2>학습내용</h2><p class="help">긴 강의 원고를 강제하지 않습니다. 필요한 항목만 작성합니다.</p>
+        <label>핵심 설명<textarea id="learn" rows="7" placeholder="짧은 이론, 개념 설명, Tutor Note 등"></textarea></label>
+        <label>사례·예제<textarea id="example" rows="6" placeholder="Before/After, 사례, 예시 등"></textarea></label>
+        <label>Tutor Check<textarea id="check" rows="5" placeholder="학습자가 마지막에 확인할 기준"></textarea></label>
+      </section>
+
+      <section class="panel" data-panel="assets">
+        <h2>학습자산</h2><p class="help">Prompt First. 실제 학습효과가 있을 때만 Template이나 App을 추가합니다.</p>
+        <div class="asset-block"><span>PROMPT</span><label>프롬프트 제목<input id="promptTitle"></label><label>프롬프트 내용<textarea id="prompt" rows="9"></textarea></label></div>
+        <div class="asset-block"><span>TEMPLATE / FILE</span><label>자료명<input id="templateTitle"></label><label>파일 또는 URL<input id="templateUrl" placeholder="https://..."></label></div>
+        <div class="asset-block"><span>APP</span><label>앱 이름<input id="appTitle"></label><label>앱 URL<input id="appUrl" placeholder="필요한 경우에만 연결"></label></div>
+      </section>
+
+      <section class="panel" data-panel="links">
+        <h2>외부자료</h2><p class="help">Learning Hub 안에 모든 콘텐츠를 만들 필요가 없습니다. 좋은 외부자료를 적절한 위치에 연결합니다.</p>
+        <div id="linkRows"></div>
+        <button type="button" id="addLink" class="ghost">+ 외부자료 추가</button>
+        <p class="types">지원 유형 · VIDEO · ARTICLE · BLOG · FILE · APP · LINK</p>
+      </section>
+
+      <section class="panel" data-panel="flow">
+        <h2>학습 연결</h2><p class="help">학습자가 길을 잃지 않도록 이전·다음 콘텐츠만 관리합니다.</p>
+        <div class="grid2"><label>이전 학습<select id="prev"></select></label><label>다음 학습<select id="next"></select></label></div>
+        <div class="flow-note"><b>운영 원칙</b><p>HOME → Track → Learning Page → NEXT. 기능을 늘리기보다 이 기본 동선을 유지합니다.</p></div>
+      </section>
+    </form>
+  </section>
+</main>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-adapter.js?v=071"></script>
+<script src="cms-seed.js?v=062"></script><script src="admin.js?v=063"></script>
+</body></html>
