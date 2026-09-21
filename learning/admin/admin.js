@@ -144,7 +144,6 @@ async function refreshAssetList(showToast=false){
  }
 }
 async function useStoredAsset(item){
- if(dirty)return alert('파일을 연결하기 전에 현재 변경사항을 먼저 저장하세요.');
  if(!item||!item.publicUrl)return;
  const oldUrl=$('templateUrl').value;
  try{
@@ -158,7 +157,6 @@ async function useStoredAsset(item){
  }
 }
 async function deleteStoredAsset(item){
- if(dirty)return alert('파일을 삭제하기 전에 현재 변경사항을 먼저 저장하세요.');
  if(!item||!item.path)return;
  const currentPath=window.learningHubDb.assetPathFromPublicUrl($('templateUrl').value.trim());
  const linked=currentPath===item.path;
@@ -187,7 +185,6 @@ async function deleteStoredAsset(item){
 async function uploadAssetFile(file){
  if(!file)return;
  if(!selected)return alert('먼저 콘텐츠를 선택하세요.');
- if(dirty)return alert('파일을 업로드하거나 교체하기 전에 현재 변경사항을 먼저 저장하세요.');
  if(!window.learningHubDb)return alert('Supabase 연결 모듈을 찾을 수 없습니다.');
  const oldTitle=$('templateTitle').value;
  const oldUrl=$('templateUrl').value.trim();
@@ -281,7 +278,7 @@ function bind(){
  if($('restoreFile'))$('restoreFile').onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0]);e.target.value=''};
  if($('exportBtn'))$('exportBtn').onclick=exportBackup;
  if($('importFile'))$('importFile').onchange=e=>{if(e.target.files[0])importBackup(e.target.files[0]);e.target.value=''};
- document.querySelectorAll('#form input:not(:disabled),#form textarea,#form select').forEach(e=>e.addEventListener('input',markDirty));
+ document.querySelectorAll('#form input:not(:disabled):not([type="file"]),#form textarea,#form select').forEach(e=>e.addEventListener('input',markDirty));
  window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}})
 }
 boot()})();
