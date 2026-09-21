@@ -52,15 +52,20 @@ function collect(){const c=deep(selected);c.title=$('title').value.trim();c.summ
 function validUrl(u){if(!u)return true;try{return ['http:','https:'].includes(new URL(u).protocol)}catch(e){return false}}
 function validate(c){let e=[];if(!c.title)e.push('제목은 비워둘 수 없습니다.');[c.assets.template.url,c.assets.app.url,...c.links.map(x=>x.url)].filter(Boolean).forEach(u=>{if(!validUrl(u))e.push('URL 형식을 확인하세요: '+u)});if(c.flow.prev===c.id||c.flow.next===c.id)e.push('현재 콘텐츠를 이전/다음으로 지정할 수 없습니다.');return e}
 async function save(){const c=collect(),errs=validate(c);if(errs.length){alert('저장하지 않았습니다.\n\n'+errs.join('\n'));return}
+ const isPublish=c.status==='public';
  try{
    if(!window.learningHubDb) throw new Error('Supabase 연결 모듈을 찾을 수 없습니다.');
-   await window.learningHubDb.saveContent(c);
+   if(isPublish){
+     await window.learningHubDb.publishContent(c);
+   }else{
+     await window.learningHubDb.saveContent(c);
+   }
    c.updatedAt=new Date().toISOString();
    db.contents[db.contents.findIndex(x=>x.id===c.id)]=c;db.updatedAt=c.updatedAt;
    selected=c;dirty=false;if($('dirtyWarning'))$('dirtyWarning').hidden=true;
-   toast('Supabase에 초안을 저장했습니다.');load(c.id);
+   toast(isPublish?'Supabase에 게시했습니다.':'Supabase에 초안을 저장했습니다.');load(c.id);
  }catch(e){
-   alert('초안을 저장하지 않았습니다.\n\n'+(e.message||e));
+   alert((isPublish?'게시하지 않았습니다.':'초안을 저장하지 않았습니다.')+'\n\n'+(e.message||e));
  }
 }
 function persist(){/* v0.7.1: operational data is no longer persisted to localStorage */}

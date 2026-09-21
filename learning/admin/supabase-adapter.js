@@ -1,4 +1,4 @@
-// Learning Hub v0.7.3 — Supabase persistence adapter
+// Learning Hub v0.7.4 — Supabase persistence adapter
 // Purpose: replace localStorage persistence with Supabase while preserving the confirmed v0.6.4 UI.
 // No screen/layout/field changes.
 
@@ -99,6 +99,41 @@
           content_code:c.id,
           action:'save',
           snapshot:c,
+          created_by:session.user.id
+        });
+      if (revError) throw revError;
+    },
+
+    async publishContent(c) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+
+      const publishedAt = new Date().toISOString();
+      const row = {
+        content_code:c.id,
+        track_code:c.track,
+        title:c.title,
+        summary:c.summary || '',
+        level:c.level || '기본',
+        expected_time:c.time || '',
+        status:'public',
+        learning:c.learning || {},
+        assets:c.assets || {},
+        external_links:c.links || [],
+        flow:c.flow || {},
+        published_at:publishedAt
+      };
+
+      const { error } = await client.from('learning_contents')
+        .upsert(row, { onConflict:'content_code' });
+      if (error) throw error;
+
+      const snapshot = Object.assign({}, c, {status:'public', publishedAt});
+      const { error: revError } = await client.from('learning_content_revisions')
+        .insert({
+          content_code:c.id,
+          action:'publish',
+          snapshot,
           created_by:session.user.id
         });
       if (revError) throw revError;
