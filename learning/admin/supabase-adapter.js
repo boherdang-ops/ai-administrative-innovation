@@ -1,4 +1,4 @@
-// Learning Hub v0.7.1 — Supabase draft persistence adapter
+// Learning Hub v0.7.3 — Supabase persistence adapter
 // Purpose: replace localStorage persistence with Supabase while preserving the confirmed v0.6.4 UI.
 // No screen/layout/field changes.
 
@@ -53,6 +53,23 @@
           updatedAt:c.updated_at
         }))
       };
+    },
+
+    async saveTrack(t) {
+      const session = await this.getSession();
+      if (!session) throw new Error('관리자 로그인이 필요합니다.');
+
+      const row = {
+        track_code:t.num,
+        name:t.name,
+        description:t.desc || '',
+        sort_order:parseInt(t.num,10) || 0,
+        is_active:true
+      };
+
+      const { error } = await client.from('learning_tracks')
+        .upsert(row, { onConflict:'track_code' });
+      if (error) throw error;
     },
 
     async saveContent(c) {
