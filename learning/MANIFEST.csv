@@ -1,0 +1,25 @@
+﻿content_code,content_title,template_title,format,filename,public_url
+01-01,"생성형 AI, 무엇이 다른가",AI 업무 적용 진단표,XLSX,01-01_ai-work-diagnostic.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/01-01_ai-work-diagnostic.xlsx
+01-02,ChatGPT·Claude·Gemini 활용 구분,AI 도구 비교표,XLSX,01-02_ai-tool-comparison.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/01-02_ai-tool-comparison.xlsx
+01-03,AI에게 일을 제대로 시키는 법,STC 표준 프롬프트 카드,DOCX,01-03_stc-prompt-card.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/01-03_stc-prompt-card.docx
+01-04,공무원 표준 프롬프트 작성법,공무원 표준 프롬프트 6칸 템플릿,DOCX,01-04_public-prompt-6box.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/01-04_public-prompt-6box.docx
+01-05,AI 결과 검증하는 법,AI 결과 검증 체크리스트,XLSX,01-05_ai-result-verification.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/01-05_ai-result-verification.xlsx
+01-06,공공업무 AI 안전 활용,공공업무 AI 안전점검표,XLSX,01-06_public-ai-safety-check.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/01-06_public-ai-safety-check.xlsx
+02-01,보고서 작성,1쪽 간부보고서 템플릿,DOCX,02-01_one-page-brief.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/02-01_one-page-brief.docx
+02-02,사업계획서 작성,사업계획서 로직체인 템플릿,DOCX,02-02_project-logic-chain.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/02-02_project-logic-chain.docx
+02-03,보도자료 작성,보도자료 팩트체크 템플릿,DOCX,02-03_press-release-factcheck.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/02-03_press-release-factcheck.docx
+02-04,긴 문서 요약·간부보고,3단계 간부요약 템플릿,DOCX,02-04_three-level-executive-summary.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/02-04_three-level-executive-summary.docx
+03-01,행정문제 제대로 정의하기,정책문제 정의 Canvas,DOCX,03-01_policy-problem-canvas.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/03-01_policy-problem-canvas.docx
+03-02,원인 구조 분석,원인구조 분석표,XLSX,03-02_cause-analysis.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/03-02_cause-analysis.xlsx
+03-03,정책사례 조사·벤치마킹,정책사례 벤치마킹 비교표,XLSX,03-03_policy-benchmarking.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/03-03_policy-benchmarking.xlsx
+03-04,정책 아이디어 발굴,정책 아이디어 발산 매트릭스,XLSX,03-04_policy-idea-matrix.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/03-04_policy-idea-matrix.xlsx
+03-05,정책대안 비교·선택,정책대안 5요소 평가표,XLSX,03-05_policy-alternative-score.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/03-05_policy-alternative-score.xlsx
+03-06,정책사업 설계,정책사업 Logic Model Canvas,DOCX,03-06_logic-model-canvas.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/03-06_logic-model-canvas.docx
+03-07,정책기획서 완성,정책기획서 완성 템플릿,DOCX,03-07_policy-proposal.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/03-07_policy-proposal.docx
+04-01,AI로 Excel·CSV 분석하기,행정데이터 분석 체크시트,XLSX,04-01_admin-data-analysis-check.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/04-01_admin-data-analysis-check.xlsx
+04-02,데이터에서 행정적 시사점 찾기,데이터→시사점 4단계 템플릿,XLSX,04-02_data-to-insight.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/04-02_data-to-insight.xlsx
+04-03,표·그래프·보고서 만들기,1쪽 데이터 보고서 템플릿,XLSX,04-03_one-page-data-report.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/04-03_one-page-data-report.xlsx
+05-01,AI로 PPT 기획하기,공공보고 PPT 스토리보드,DOCX,05-01_ppt-storyboard.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/05-01_ppt-storyboard.docx
+05-02,행정 홍보 이미지·콘텐츠 만들기,행정 홍보 콘텐츠 기획서,DOCX,05-02_public-content-brief.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/05-02_public-content-brief.docx
+06-01,우리 업무에서 AI 적용점 찾기,AI 업무 적용점 매트릭스,XLSX,06-01_ai-opportunity-matrix.xlsx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/06-01_ai-opportunity-matrix.xlsx
+06-02,AI 기반 업무 프로세스 재설계,AI 업무 프로세스 재설계 Canvas,DOCX,06-02_ai-process-redesign.docx,https://boherdang-ops.github.io/ai-administrative-innovation/learning/resources/templates/06-02_ai-process-redesign.docx
