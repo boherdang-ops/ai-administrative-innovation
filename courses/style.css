@@ -62,3 +62,6 @@ thead{display:table-header-group}tr{break-inside:avoid}h2,h3,h4{break-after:avoi
 .curriculum-table td:first-child,.curriculum-table td:last-child,.schedule-table td:first-child{text-align:center}
 .prose p.bullet-paragraph{position:relative;padding-left:1.2em;text-indent:0}
 .bullet-paragraph .bullet-marker{position:absolute;left:0;top:0;width:1.2em;text-align:left}
+
+.schedule-table td:last-child,.overview-table td:first-child{text-align:center}
+@media print{.curriculum-table{table-layout:auto}.curriculum-table td:nth-child(1){width:1%;white-space:nowrap}.curriculum-table td:nth-child(2){width:23%}.curriculum-table td:nth-child(3){width:auto}.curriculum-table td:nth-child(4){width:1%;white-space:nowrap}}
