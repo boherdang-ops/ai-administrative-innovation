@@ -27,3 +27,18 @@ tr:first-child{font-weight:700;border-bottom:1.2pt solid #344054;background:#eef
 thead{display:table-header-group}tr{break-inside:avoid}h2,h3,h4{break-after:avoid}
 .print-footer{display:block;border-top:1pt solid #667085;margin-top:20pt;padding-top:8pt;color:#333;font-size:8.5pt;break-inside:avoid}
 }
+
+@media print{
+.detail-head{background:#0b172a;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.detail-head h1{color:#fff}
+.detail-head .eyebrow{color:#9cbaff}
+.detail-head p:last-child{color:#cbd5e1}
+.facts{grid-template-columns:1fr 1fr;border:1pt solid #667085;gap:0}
+.facts .fact{border:0}
+.facts .fact:nth-child(odd){border-right:.7pt solid #667085}
+.facts .fact:nth-child(n+3){border-top:.7pt solid #667085}
+.schedule-table{table-layout:fixed}
+.schedule-table td:nth-child(1){width:18%}
+.schedule-table td:nth-child(2){width:64%}
+.schedule-table td:nth-child(3){width:18%}
+}
