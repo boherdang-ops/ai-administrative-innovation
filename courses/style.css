@@ -42,3 +42,19 @@ thead{display:table-header-group}tr{break-inside:avoid}h2,h3,h4{break-after:avoi
 .schedule-table td:nth-child(2){width:64%}
 .schedule-table td:nth-child(3){width:18%}
 }
+
+/* Table alignment applies from the curriculum section onward. */
+.content-section.table-middle td,.content-section.table-middle th{vertical-align:middle}
+.curriculum-table tr:first-child td,.schedule-table tr:first-child td{text-align:center}
+@media print{
+.detail-head{padding-left:12pt;padding-right:12pt}
+.schedule-table td:nth-child(1){width:12%}
+.schedule-table td:nth-child(2){width:74%}
+.schedule-table td:nth-child(3){width:14%}
+.curriculum-table{table-layout:fixed}
+.curriculum-table td:nth-child(1){width:9%}
+.curriculum-table td:nth-child(2){width:23%}
+.curriculum-table td:nth-child(3){width:50%}
+.curriculum-table td:nth-child(4){width:18%}
+.curriculum-table tr:first-child td:first-child,.curriculum-table tr:first-child td:last-child,.schedule-table tr:first-child td{white-space:nowrap}
+}
