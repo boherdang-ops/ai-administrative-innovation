@@ -65,3 +65,5 @@ thead{display:table-header-group}tr{break-inside:avoid}h2,h3,h4{break-after:avoi
 
 .schedule-table td:last-child,.overview-table td:first-child{text-align:center}
 @media print{.curriculum-table{table-layout:auto}.curriculum-table td:nth-child(1){width:1%;white-space:nowrap}.curriculum-table td:nth-child(2){width:23%}.curriculum-table td:nth-child(3){width:auto}.curriculum-table td:nth-child(4){width:1%;white-space:nowrap}}
+
+.session-table{table-layout:auto}.session-table td{vertical-align:middle!important}.session-table tr:first-child td{text-align:center}.session-table .session-cell,.session-table .session-col-0,.session-table .session-col-1,.session-table .session-col-3{width:1%;white-space:nowrap;text-align:center}.session-table .session-col-2{width:auto}
