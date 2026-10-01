@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 블로그 초안 생성기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f3f4f6;
+        }
+        /* Custom scrollbar for textareas */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        textarea::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        .loader {
+            border-top-color: #4f46e5;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="mb-8 text-center md:text-left">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2"><i class="fa-solid fa-pen-nib text-indigo-600 mr-2"></i>AI 블로그 초안 생성기</h1>
+            <p class="text-gray-600">핵심 정보만 입력하면 AI가 전문적인 블로그 포스팅 초안을 작성해 드립니다.</p>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8">
+            
+            <!-- Left Column: Input Form -->
+            <div class="w-full lg:w-5/12 bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col gap-5">
+                <div class="flex justify-between items-center border-b pb-3">
+                    <h2 class="text-xl font-semibold text-gray-800"><i class="fa-solid fa-keyboard mr-2 text-gray-500"></i>작성 가이드 입력</h2>
+                    <button id="newPostBtn" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium transition-colors flex items-center gap-1">
+                        <i class="fa-solid fa-eraser"></i> 새글 쓰기
+                    </button>
+                </div>
+                
+                <div>
+                    <label for="coreMessage" class="block text-sm font-medium text-gray-700 mb-1">핵심 메시지 <span class="text-red-500">*</span></label>
+                    <textarea id="coreMessage" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="예: 외부 용역에 맡기던 일을 담당자가 직접 만드는 시대가 이미 와 있다."></textarea>
+                </div>
+
+                <div>
+                    <label for="referenceSource" class="block text-sm font-medium text-gray-700 mb-1">참고 소스/자료</label>
+                    <input type="text" id="referenceSource" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="예: ZDNet Korea 기사 (2026-09-04), 사내 통계 자료 등">
+                </div>
+
+                <div>
+                    <label for="outline" class="block text-sm font-medium text-gray-700 mb-1">개요/주요 내용 <span class="text-red-500">*</span></label>
+                    <textarea id="outline" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="예: 행안부 AI 챔피언 제도로 담당자들이 직접 도구 제작. 반복 공문 처리 단축(성남시), RAG 시스템 도입(서울시) 등. 현업 담당자의 직접 설계가 핵심."></textarea>
+                </div>
+
+                <div>
+                    <label for="timing" class="block text-sm font-medium text-gray-700 mb-1">시의성 및 연결점</label>
+                    <textarea id="timing" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" placeholder="예: 관련 기사가 최근에 나왔고, 우리 회사의 혁신리더 과정을 이 방향으로 재설계한 이유와 연결하고 싶음."></textarea>
+                </div>
+
+                <div class="mt-auto pt-4">
+                    <button id="generateBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> 블로그 초안 생성하기
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Output & Editor -->
+            <div class="w-full lg:w-7/12 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col h-[800px] lg:h-auto overflow-hidden relative">
+                
+                <!-- Toolbar -->
+                <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10">
+                    <h2 class="text-xl font-semibold text-gray-800"><i class="fa-solid fa-file-lines mr-2 text-gray-500"></i>결과물 및 편집</h2>
+                    <div class="flex gap-2">
+                        <button id="undoBtn" class="text-sm bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium py-1.5 px-3 rounded-lg shadow-sm transition-colors flex items-center gap-1 hidden">
+                            <i class="fa-solid fa-rotate-left"></i> 이전
+                        </button>
+                        <button id="redoBtn" class="text-sm bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium py-1.5 px-3 rounded-lg shadow-sm transition-colors flex items-center gap-1 hidden">
+                            다음 <i class="fa-solid fa-rotate-right"></i>
+                        </button>
+                        <button id="copyBtn" class="text-sm bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 font-medium py-1.5 px-3 rounded-lg shadow-sm transition-colors flex items-center gap-2 hidden">
+                            <i class="fa-regular fa-copy"></i> 복사하기
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Editor Area -->
+                <div class="flex-grow relative bg-white">
+                    <!-- Loading Overlay -->
+                    <div id="loadingOverlay" class="absolute inset-0 bg-white/80 backdrop-blur-sm flex flex-col items-center justify-center hidden z-20">
+                        <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+                        <p class="text-indigo-600 font-medium animate-pulse">AI가 열심히 글을 작성하고 있습니다...</p>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-400 p-8 text-center">
+                        <i class="fa-solid fa-robot text-5xl mb-4 opacity-50"></i>
+                        <p>좌측 폼에 내용을 입력하고 '생성하기'를 누르면<br>이곳에 블로그 초안이 작성됩니다.</p>
+                    </div>
+
+                    <!-- Textarea for editing -->
+                    <textarea id="editorContent" class="w-full h-full p-6 text-gray-800 leading-relaxed resize-none focus:outline-none hidden text-lg" placeholder="생성된 텍스트가 여기에 표시됩니다. 자유롭게 수정하세요."></textarea>
+                </div>
+                
+                <!-- Toast Notification -->
+                <div id="toast" class="absolute bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transform transition-all duration-300 translate-y-20 opacity-0 z-30">
+                    클립보드에 복사되었습니다!
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="customModal" class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4">
+            <h3 class="text-lg font-bold text-gray-900 mb-2" id="modalTitle">알림</h3>
+            <p class="text-gray-600 mb-6" id="modalMessage">메시지 내용</p>
+            <div class="flex justify-end gap-2">
+                <button id="modalCancelBtn" class="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors hidden">취소</button>
+                <button id="modalConfirmBtn" class="px-4 py-2 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const editorContent = document.getElementById('editorContent');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const emptyState = document.getElementById('emptyState');
+        const toast = document.getElementById('toast');
+
+        // New features elements
+        const newPostBtn = document.getElementById('newPostBtn');
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        
+        // Modal elements
+        const customModal = document.getElementById('customModal');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        let modalConfirmCallback = null;
+
+        // Input elements
+        const coreMessageInput = document.getElementById('coreMessage');
+        const referenceSourceInput = document.getElementById('referenceSource');
+        const outlineInput = document.getElementById('outline');
+        const timingInput = document.getElementById('timing');
+
+        // History state for undo/redo
+        let historyStack = [];
+        let redoStack = [];
+
+        // Custom Modal Logic (replaces alert and confirm)
+        function showModal(message, isConfirm = false, onConfirm = null) {
+            modalMessage.textContent = message;
+            if (isConfirm) {
+                modalCancelBtn.classList.remove('hidden');
+            } else {
+                modalCancelBtn.classList.add('hidden');
+            }
+            modalConfirmCallback = onConfirm;
+            customModal.classList.remove('hidden');
+        }
+
+        modalCancelBtn.addEventListener('click', () => customModal.classList.add('hidden'));
+        modalConfirmBtn.addEventListener('click', () => {
+            customModal.classList.add('hidden');
+            if (modalConfirmCallback) modalConfirmCallback();
+        });
+
+        // Initial Sample Data Population (based on user prompt)
+        window.addEventListener('DOMContentLoaded', () => {
+            coreMessageInput.value = "외부 용역에 맡기던 일을 담당자가 직접 만드는 시대가 이미 와 있다";
+            referenceSourceInput.value = "AI로 일하는 공무원들…행정현장에서 혁신 이끈다 (ZDNet Korea, 2026-09-04)";
+            outlineInput.value = "행안부 AI 챔피언(그린·블루·블랙 등급) 제도로 광양시·성남시·서울시·광진구 등 담당자들이 직접 만든 도구 사례입니다. 반복 공문 30분→3분(성남시), 정책데이터 통합 플랫폼(광양시), RAG 기반 시스템(서울시) 등. 핵심은 \"현업을 가장 잘 아는 담당자가 외부 용역에만 의존하지 않고\" 직접 설계했다는 점.";
+            timingInput.value = "기사가 사흘 전(9/4) 나왔고, 마침 혁신리더 과정을 AI챔피언 인증 대응형으로 전면 재설계한 직후라 타이밍이 맞습니다. 이 두 가지를 자연스럽게 연결하고 싶습니다.";
+        });
+
+        generateBtn.addEventListener('click', async () => {
+            const coreMessage = coreMessageInput.value.trim();
+            const outline = outlineInput.value.trim();
+
+            if (!coreMessage || !outline) {
+                showModal("핵심 메시지와 개요는 필수 입력 항목입니다.");
+                return;
+            }
+
+            // 새로 생성할 때마다 기존 내용을 히스토리에 저장
+            if (editorContent.value && !editorContent.classList.contains('hidden')) {
+                historyStack.push(editorContent.value);
+                redoStack = []; // 새로운 글이 생성되면 redo 스택 초기화
+                updateHistoryBtnState();
+            }
+
+            // UI 상태 변경 (로딩 중)
+            emptyState.classList.add('hidden');
+            editorContent.classList.add('hidden');
+            loadingOverlay.classList.remove('hidden');
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 생성 중...';
+
+            try {
+                const generatedText = await callGeminiAPI(
+                    coreMessage, 
+                    referenceSourceInput.value, 
+                    outline, 
+                    timingInput.value
+                );
+
+                // UI 상태 변경 (완료)
+                editorContent.value = generatedText;
+                loadingOverlay.classList.add('hidden');
+                editorContent.classList.remove('hidden');
+                copyBtn.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Generation failed:", error);
+                showModal("글 생성에 실패했습니다. 다시 시도해주세요. 에러: " + error.message);
+                
+                if(!editorContent.value) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    editorContent.classList.remove('hidden');
+                }
+                loadingOverlay.classList.add('hidden');
+            } finally {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> 다시 생성하기';
+            }
+        });
+
+        async function callGeminiAPI(message, source, outline, timing) {
+            const apiKey = ""; // Environment handles the API key
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const systemPrompt = `당신은 트렌드를 잘 읽고 설득력 있는 글을 쓰는 전문 비즈니스 블로거이자 AI 교육 전문가입니다. 
+제공된 '핵심 메시지', '참고 소스', '개요', '시의성' 정보를 완벽하게 융합하여 독자의 흥미를 끄는 블로그 포스팅 초안을 작성해주세요.
+
+[작성 지침]
+1. 제목: 글의 맨 첫 줄에 전체 내용에 어울리는 매력적인 제목을 작성하세요.
+2. 서론: 독자의 공감을 이끌어내며 최근 트렌드나 문제의식을 바탕으로 흥미롭게 시작하세요.
+3. 본론: 제공된 개요와 참고 소스의 구체적인 사례를 활용하여 설득력 있게 내용을 전개하세요.
+4. 결론 및 교육적 접근(자연스러운 홍보): 글의 후반부에는 '이러한 변화의 시대에 왜 제대로 된 AI 교육이 필수적인지' 교육적인 관점에서 인사이트를 제공하세요. '시의성'에 언급된 내용(예: 자사의 혁신리더 과정 재설계 등)을 이러한 시대적 요구에 부응하는 자연스러운 해결책과 방향성으로 제시하여, 노골적인 홍보가 아닌 가치 있는 정보로 느끼게 하세요.
+5. 톤앤매너: 전문적이면서도 신뢰감을 주는 경어체(~습니다, ~해요)를 사용하여 독자와 소통하는 느낌을 주세요.
+6. 포맷팅 (매우 중요): 본문에는 '**', '---', '##' 같은 마크다운(Markdown) 특수 기호를 절대 사용하지 마세요. 바로 복사해서 붙여넣을 수 있도록 일반 텍스트(Plain text)로만 작성하되, 가독성을 위해 빈 줄(엔터)을 적절히 활용하세요. 소제목도 기호 없이 텍스트로만 작성하세요.
+7. 해시태그: 글의 맨 마지막 줄에 내용과 어울리는 해시태그 3~5개를 띄어쓰기로 구분하여 추가하세요. (이 부분에만 '#' 기호 사용 허용)`;
+
+            const userPrompt = `다음 정보를 바탕으로 블로그 포스트를 작성해주세요.
+
+- 핵심 메시지: ${message}
+- 참고 소스: ${source ? source : '없음'}
+- 개요/주요 내용: ${outline}
+- 시의성 및 연결 방향: ${timing ? timing : '없음'}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`API 요청 실패: ${response.status}`);
+            }
+
+            const result = await response.json();
+            const candidate = result.candidates?.[0];
+
+            if (candidate && candidate.content?.parts?.[0]?.text) {
+                return candidate.content.parts[0].text;
+            } else {
+                throw new Error("예상치 못한 API 응답 구조입니다.");
+            }
+        }
+
+        copyBtn.addEventListener('click', () => {
+            if (!editorContent.value) return;
+
+            // Use legacy execCommand for iframe compatibility as requested in instructions
+            editorContent.select();
+            editorContent.setSelectionRange(0, 99999); // For mobile devices
+
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error('Copy failed', err);
+                showModal("복사에 실패했습니다. 직접 텍스트를 선택하여 복사해주세요.");
+            }
+            
+            // Deselect
+            window.getSelection().removeAllRanges();
+        });
+
+        // Update History Buttons Visibility
+        function updateHistoryBtnState() {
+            if (historyStack.length > 0) {
+                undoBtn.classList.remove('hidden');
+            } else {
+                undoBtn.classList.add('hidden');
+            }
+            
+            if (redoStack.length > 0) {
+                redoBtn.classList.remove('hidden');
+            } else {
+                redoBtn.classList.add('hidden');
+            }
+        }
+
+        // Undo Functionality
+        undoBtn.addEventListener('click', () => {
+            if (historyStack.length > 0) {
+                redoStack.push(editorContent.value); // 현재 상태를 다음(Redo)을 위해 저장
+                
+                const previousText = historyStack.pop();
+                editorContent.value = previousText;
+                updateHistoryBtnState();
+                showToast('이전 글로 이동했습니다.');
+            }
+        });
+
+        // Redo Functionality
+        redoBtn.addEventListener('click', () => {
+            if (redoStack.length > 0) {
+                historyStack.push(editorContent.value); // 현재 상태를 이전(Undo)을 위해 저장
+                
+                const nextText = redoStack.pop();
+                editorContent.value = nextText;
+                updateHistoryBtnState();
+                showToast('다음 글로 이동했습니다.');
+            }
+        });
+
+        // New Post Functionality
+        newPostBtn.addEventListener('click', () => {
+            showModal("입력된 내용과 생성된 글이 모두 초기화됩니다. 새로 작성하시겠습니까?", true, () => {
+                // Clear inputs
+                coreMessageInput.value = '';
+                referenceSourceInput.value = '';
+                outlineInput.value = '';
+                timingInput.value = '';
+                
+                // Reset right column
+                editorContent.value = '';
+                editorContent.classList.add('hidden');
+                copyBtn.classList.add('hidden');
+                undoBtn.classList.add('hidden');
+                redoBtn.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                
+                // Reset state
+                historyStack = [];
+                redoStack = [];
+                updateHistoryBtnState();
+                
+                generateBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> 블로그 초안 생성하기';
+            });
+        });
+
+        function showToast(msg = '클립보드에 복사되었습니다!') {
+            toast.textContent = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>

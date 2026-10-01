@@ -1,0 +1,23 @@
+#works .asset-categories{display:flex;flex-wrap:wrap;gap:16px 24px;margin:32px 0}
+#works .asset-categories span{display:flex;flex-direction:column;gap:5px}
+#works .asset-categories b{font-size:11px;color:var(--blue);letter-spacing:.04em}
+#works .asset-categories small{font-size:13px;color:var(--muted)}
+#works .works b,#works .asset-all-list b{overflow-wrap:anywhere;letter-spacing:.04em}
+#works .asset-use{font-size:13px;color:var(--muted)}
+#works .asset-badge{display:inline-block;font-size:10px;letter-spacing:.08em;font-weight:800;color:var(--blue);border:1px solid var(--line);padding:5px 8px;margin:0 12px 0 0}
+#works .asset-link{font-size:13px;color:var(--blue);display:inline-block;padding:10px 0}
+#works .asset-button{font:inherit;font-size:12px;font-weight:800;letter-spacing:.08em;background:transparent;border:1px solid var(--line);padding:14px 22px;margin:32px 0;cursor:pointer}
+#works #asset-filter{font:inherit;max-width:100%;padding:10px;margin:0 0 0 12px;border:1px solid var(--line);background:#fff}
+#works .asset-all-list article{padding:30px 24px 30px 0;border-top:1px solid var(--line)}
+#works .asset-all-list article:nth-child(even){padding-left:24px;border-left:1px solid var(--line)}
+#works .intellectual-assets{margin-top:60px;padding-top:35px;border-top:1px solid var(--line)}
+#works .intellectual-assets h3{font-size:28px;margin:0 0 16px;letter-spacing:-.03em}
+#works .intellectual-assets>p:not(.eyebrow){font-size:15px;color:var(--muted);line-height:1.7}
+#works .asset-register-list details{border-top:1px solid var(--line);padding:18px 0}
+#works .asset-register-list summary{cursor:pointer;font-size:15px;line-height:1.9;overflow-wrap:anywhere}
+#works .asset-register-list dl{display:grid;grid-template-columns:110px 1fr;gap:10px;font-size:13px;color:var(--muted);line-height:1.7}
+#works .asset-register-list dd{margin:0;overflow-wrap:anywhere}
+#works [hidden]{display:none!important}
+@media(max-width:640px){#works .asset-all-list article:nth-child(even){padding-left:0;border-left:0}#works #asset-filter{display:block;margin:10px 0}#works .asset-register-list dl{grid-template-columns:1fr;gap:6px}#works .asset-register-list dt{font-weight:700}}
+@media print{#works .asset-button,#works #all-assets{display:none!important}#works .asset-register-list details{break-inside:avoid}#works .asset-register-list details::details-content{display:block;content-visibility:visible}#works .works article{break-inside:avoid}#works .asset-register-list summary{font-size:9pt}#works .asset-register-list dl{font-size:8pt}#works .intellectual-assets h3{font-size:16pt}#works .asset-register-list details{padding:3mm 0}}
+@media print{#works .intellectual-assets>p,#works .intellectual-assets>h3{break-after:avoid}#works .asset-register-list details:first-child{break-before:avoid}}

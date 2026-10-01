@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공공기관 맞춤형 AI 프롬프트 생성기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom scrollbar for output area */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        /* Markdown Styles */
+        .markdown-body h1 { font-size: 1.5rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; color: #1e3a8a; }
+        .markdown-body h2 { font-size: 1.25rem; font-weight: bold; margin-top: 1rem; margin-bottom: 0.5rem; color: #1e40af; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.25rem; }
+        .markdown-body h3 { font-size: 1.1rem; font-weight: bold; margin-top: 0.75rem; margin-bottom: 0.25rem; color: #3b82f6; }
+        .markdown-body p { margin-bottom: 0.75rem; line-height: 1.6; color: #334155; }
+        .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.75rem; color: #334155; }
+        .markdown-body li { margin-bottom: 0.25rem; }
+        .markdown-body strong { color: #0f172a; }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <header class="bg-blue-900 text-white py-6 shadow-md">
+        <div class="max-w-6xl mx-auto px-4 flex items-center gap-4">
+            <div class="bg-white text-blue-900 p-2 rounded-lg flex items-center justify-center w-12 h-12">
+                <i class="fa-solid fa-wand-magic-sparkles text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight">공공기관 맞춤형 NotebookLM 가이드 생성기</h1>
+                <p class="text-blue-200 text-sm mt-1">구글 NotebookLM의 '자료에 대한 설명' 칸에 바로 붙여넣을 수 있는 최적의 지시문을 생성합니다.</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-6xl mx-auto px-4 py-8 w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Input Form -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 flex flex-col h-full">
+                <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-blue-600"></i> 소스 입력 및 설정
+                </h2>
+                
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">1. 제작할 자료 유형 선택</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="docType" value="슬라이드 자료 (PPT)" class="peer sr-only" checked>
+                            <div class="rounded-lg border-2 border-slate-200 px-4 py-3 text-center hover:bg-slate-50 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                <i class="fa-solid fa-desktop text-xl mb-1 text-slate-500 peer-checked:text-blue-600"></i>
+                                <div class="text-sm font-medium">슬라이드</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="docType" value="보고서 (기획안/요약본)" class="peer sr-only">
+                            <div class="rounded-lg border-2 border-slate-200 px-4 py-3 text-center hover:bg-slate-50 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                <i class="fa-solid fa-file-lines text-xl mb-1 text-slate-500 peer-checked:text-blue-600"></i>
+                                <div class="text-sm font-medium">보고서</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="docType" value="인포그래픽 (시각자료)" class="peer sr-only">
+                            <div class="rounded-lg border-2 border-slate-200 px-4 py-3 text-center hover:bg-slate-50 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                <i class="fa-solid fa-chart-pie text-xl mb-1 text-slate-500 peer-checked:text-blue-600"></i>
+                                <div class="text-sm font-medium">인포그래픽</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="docType" value="설명 동영상 (가로 16:9)" class="peer sr-only">
+                            <div class="rounded-lg border-2 border-slate-200 px-4 py-3 text-center hover:bg-slate-50 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                <i class="fa-solid fa-video text-xl mb-1 text-slate-500 peer-checked:text-blue-600"></i>
+                                <div class="text-sm font-medium">설명 동영상</div>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="docType" value="짧은 동영상 (세로 9:16 쇼츠)" class="peer sr-only">
+                            <div class="rounded-lg border-2 border-slate-200 px-4 py-3 text-center hover:bg-slate-50 peer-checked:border-blue-600 peer-checked:bg-blue-50 transition-all">
+                                <i class="fa-solid fa-mobile-screen text-xl mb-1 text-slate-500 peer-checked:text-blue-600"></i>
+                                <div class="text-sm font-medium">짧은 영상(쇼츠)</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">2. 대상 독자 (선택사항)</label>
+                    <select id="targetAudience" class="w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
+                        <option value="일반 시민 및 지역 주민">일반 시민 및 지역 주민 (이해하기 쉽고 친근하게)</option>
+                        <option value="상급 기관 및 기관장 보고용">상급 기관 및 기관장 보고용 (격식있고 핵심 위주로)</option>
+                        <option value="내부 부서 공유 및 협업용">내부 부서 공유 및 협업용 (실무적이고 명확하게)</option>
+                        <option value="언론 배포용 (보도자료)">언론 배포용 (객관적이고 신뢰성 있게)</option>
+                        <option value="공무원 교육용">공무원 교육용 (이해하기 쉽고 명확한 전달 위주)</option>
+                    </select>
+                </div>
+
+                <div class="mb-6 flex-grow flex flex-col">
+                    <div class="flex justify-between items-end mb-2">
+                        <label class="block text-sm font-semibold text-slate-700">
+                            3. 원본 소스 입력 <span class="text-xs font-normal text-slate-500 ml-1">(텍스트, 파일, 링크 등)</span>
+                        </label>
+                        <div class="flex gap-2 text-xs">
+                            <label id="fileInputLabel" class="cursor-pointer bg-white hover:bg-slate-50 text-slate-600 py-1.5 px-3 rounded-md border border-slate-200 transition-colors flex items-center gap-1.5 shadow-sm">
+                                <span id="fileInputIcon"><i class="fa-solid fa-file-pdf text-red-500"></i> <i class="fa-solid fa-file-word text-blue-500"></i></span>
+                                <span id="fileInputText">워드·PDF 텍스트 추출</span>
+                                <input type="file" id="fileInput" accept=".pdf,.docx,.txt" class="hidden">
+                            </label>
+                            <button id="addUrlBtn" class="bg-white hover:bg-slate-50 text-slate-600 py-1.5 px-3 rounded-md border border-slate-200 transition-colors flex items-center gap-1.5 shadow-sm">
+                                <i class="fa-solid fa-link text-blue-500"></i> 웹 링크 추가
+                            </button>
+                        </div>
+                    </div>
+                    <textarea id="sourceText" placeholder="여기에 변환할 텍스트를 직접 입력하거나, 상단의 버튼으로 텍스트 파일이나 웹사이트 링크를 추가하세요..." 
+                        class="w-full flex-grow rounded-lg border border-slate-300 p-4 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none resize-none min-h-[250px]"></textarea>
+                </div>
+
+                <button id="generateBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-gears"></i> 맞춤형 프롬프트 생성하기
+                </button>
+            </div>
+
+            <!-- Right Column: Output Area -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
+                <div class="bg-slate-50 border-b border-slate-200 p-4 flex justify-between items-center">
+                    <h2 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-terminal text-slate-600"></i> NotebookLM 맞춤설정 입력용 텍스트
+                    </h2>
+                    <button id="copyBtn" class="hidden text-sm bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1.5 px-3 rounded shadow-sm transition-colors flex items-center gap-1.5 disabled:opacity-50">
+                        <i class="fa-regular fa-copy"></i> 복사하기
+                    </button>
+                </div>
+                
+                <div class="p-6 flex-grow relative overflow-y-auto custom-scrollbar bg-[#fcfdfd]" id="outputContainer">
+                    
+                    <!-- Placeholder State -->
+                    <div id="placeholderState" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 p-6 text-center">
+                        <i class="fa-regular fa-file-code text-5xl mb-4 opacity-50"></i>
+                        <p class="text-sm">왼쪽에서 소스를 입력하고 생성 버튼을 누르면,<br>NotebookLM에 바로 복사하여 붙여넣을 수 있는<br>3~5문장 길이의 완벽한 지시문이 이곳에 나타납니다.</p>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div id="loadingState" class="hidden absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                        <p class="text-slate-600 font-medium animate-pulse">지방행정 톤앤매너를 분석하여 지시문을 작성 중입니다...</p>
+                    </div>
+
+                    <!-- Result Area -->
+                    <div id="resultArea" class="markdown-body hidden">
+                        <!-- Markdown content will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+        <i class="fa-solid fa-check-circle text-green-400"></i>
+        <span>프롬프트가 클립보드에 복사되었습니다.</span>
+    </div>
+
+    <script>
+        // DOM Elements
+        const generateBtn = document.getElementById('generateBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const sourceTextInput = document.getElementById('sourceText');
+        const fileInput = document.getElementById('fileInput');
+        const addUrlBtn = document.getElementById('addUrlBtn');
+        const targetAudienceSelect = document.getElementById('targetAudience');
+        const placeholderState = document.getElementById('placeholderState');
+        const loadingState = document.getElementById('loadingState');
+        const resultArea = document.getElementById('resultArea');
+        const toast = document.getElementById('toast');
+
+        // State
+        let generatedRawMarkdown = "";
+
+        // UI Helpers
+        function showLoading(isLoading) {
+            if (isLoading) {
+                generateBtn.disabled = true;
+                generateBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 생성 중...';
+                placeholderState.classList.add('hidden');
+                resultArea.classList.add('hidden');
+                loadingState.classList.remove('hidden');
+                copyBtn.classList.add('hidden');
+            } else {
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<i class="fa-solid fa-gears"></i> 맞춤형 프롬프트 생성하기';
+                loadingState.classList.add('hidden');
+            }
+        }
+
+        function showToast(message) {
+            toast.querySelector('span').textContent = message;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        // Custom Modal UI as alternative to alert()
+        function showModal(title, message) {
+            const modalHtml = `
+                <div id="customModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-[fadeIn_0.2s_ease-out]">
+                        <h3 class="text-lg font-bold text-slate-800 mb-2">${title}</h3>
+                        <p class="text-sm text-slate-600 mb-6">${message}</p>
+                        <div class="flex justify-end">
+                            <button onclick="document.getElementById('customModal').remove()" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700 transition-colors">확인</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        // Custom URL Input Modal
+        function showUrlModal(callback) {
+            const modalHtml = `
+                <div id="urlModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-6 animate-[fadeIn_0.2s_ease-out]">
+                        <h3 class="text-lg font-bold text-slate-800 mb-2">웹사이트 링크 추가</h3>
+                        <p class="text-sm text-slate-600 mb-4">참고할 웹사이트의 주소(URL)를 입력하세요.</p>
+                        <input type="url" id="urlInput" placeholder="https://..." class="w-full rounded border border-slate-300 p-2.5 mb-5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                        <div class="flex justify-end gap-2">
+                            <button onclick="document.getElementById('urlModal').remove()" class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium">취소</button>
+                            <button id="confirmUrlBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium shadow-sm">추가하기</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Auto focus
+            setTimeout(() => document.getElementById('urlInput').focus(), 100);
+
+            document.getElementById('confirmUrlBtn').addEventListener('click', () => {
+                const url = document.getElementById('urlInput').value.trim();
+                if(url) {
+                    callback(url);
+                }
+                document.getElementById('urlModal').remove();
+            });
+            
+            // Enter key support
+            document.getElementById('urlInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('confirmUrlBtn').click();
+                }
+            });
+        }
+
+        async function generatePrompt() {
+            const sourceText = sourceTextInput.value.trim();
+            if (!sourceText) {
+                showModal('입력 오류', '원본 소스를 입력해주세요.');
+                return;
+            }
+
+            const docType = document.querySelector('input[name="docType"]:checked').value;
+            const targetAudience = targetAudienceSelect.value;
+
+            showLoading(true);
+
+            const systemInstruction = `
+당신은 대한민국 지방자치단체 및 공공기관 공무원들의 업무 효율을 극대화하는 '수석 AI 프롬프트 엔지니어'입니다.
+사용자는 구글 NotebookLM(노트북LM)을 활용하여 문서(슬라이드, 보고서, 인포그래픽 등)를 자동 생성하려고 합니다.
+
+[당신의 유일한 목표]
+사용자가 입력한 원본 자료(소스)를 분석하여, NotebookLM UI의 **'만들려는 자료에 대한 설명' 입력 칸에 그대로 복사해서 붙여넣을 수 있는 핵심 가이드 텍스트(3~5문장 내외의 하나의 완성된 단락)**만을 출력하는 것입니다.
+인사말, 마크다운 기호(#, -, *, \`\`\`), 부연 설명은 **절대** 출력하지 마세요. 오직 사용자가 복사할 순수한 텍스트만 출력해야 합니다.
+
+[가이드 텍스트 필수 포함 요소]
+NotebookLM이 완벽한 결과물을 만들 수 있도록 아래 4가지 요소를 자연스러운 문장으로 녹여내세요.
+1. 핵심 목적 및 내용 요약: 원본 소스에서 가장 강조해야 할 핵심 메시지
+2. 대상 독자 및 톤앤매너: [${targetAudience}]에게 적합한 문체(예: 정중한 해요체, 명확한 단답형/명사형 종결 등)
+3. Visual Identity (시각 정체성): 공공기관에 어울리는 색상(예: 신뢰의 딥 네이비, 강조용 웜 오렌지 등)과 시각적 분위기
+4. Layout Rules (레이아웃 규칙): [${docType}]에 맞는 구조적 배치 지시 (예: 인포그래픽의 경우 시각적 대조, 슬라이드의 경우 핵심 키워드 중심의 여백 확보 등)
+
+[출력 예시]
+이 자료는 공무원 교육용 슬라이드입니다. 2027 예산 수립 시 'AI가 잘하는 일'과 '사람이 해야 하는 일'의 차이를 명확히 대조하여 강조해 주세요. 시각적으로는 신뢰감을 주는 딥 네이비와 화이트를 메인 컬러로 사용하고, 좌우 양분할 레이아웃을 통해 직관적인 비교가 되도록 구성해 주세요. 문체는 교육생에게 친근하면서도 전문성을 띤 해요체를 사용하고 핵심 키워드는 굵은 폰트로 강조해 주시기 바랍니다.
+
+[현재 사용자 설정]
+- 만들고자 하는 자료: ${docType}
+- 대상 독자: ${targetAudience}
+`;
+
+            const userQuery = `[원본 소스]\n${sourceText}\n\n위 소스를 바탕으로 NotebookLM '자료에 대한 설명' 입력창에 바로 붙여넣을 수 있는 3~5문장의 가이드 텍스트만 작성해 줘.`;
+
+            const apiKey = ""; // Managed by environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0) {
+                    generatedRawMarkdown = result.candidates[0].content.parts[0].text;
+                    
+                    // Render Markdown
+                    resultArea.innerHTML = marked.parse(generatedRawMarkdown);
+                    
+                    resultArea.classList.remove('hidden');
+                    copyBtn.classList.remove('hidden');
+                    copyBtn.classList.add('flex');
+                } else {
+                    throw new Error("결과를 생성하지 못했습니다.");
+                }
+            } catch (error) {
+                console.error("API Error:", error);
+                showModal('생성 실패', '프롬프트 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                placeholderState.classList.remove('hidden');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function copyToClipboard() {
+            if (!generatedRawMarkdown) return;
+            
+            // Create a temporary textarea to copy raw markdown
+            const el = document.createElement('textarea');
+            el.value = generatedRawMarkdown;
+            document.body.appendChild(el);
+            el.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast('클립보드에 복사되었습니다! 제미나이에 붙여넣기 하세요.');
+            } catch (err) {
+                showModal('복사 실패', '클립보드 복사를 지원하지 않는 환경입니다. 텍스트를 직접 드래그하여 복사해주세요.');
+            } finally {
+                document.body.removeChild(el);
+            }
+        }
+
+        // Event Listeners
+        generateBtn.addEventListener('click', generatePrompt);
+        copyBtn.addEventListener('click', copyToClipboard);
+
+        // PDF.js Worker 설정
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const iconSpan = document.getElementById('fileInputIcon');
+            const textSpan = document.getElementById('fileInputText');
+            const originalIcon = iconSpan.innerHTML;
+            const originalText = textSpan.innerText;
+
+            try {
+                // UI 로딩 상태 변경
+                iconSpan.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-500"></i>';
+                textSpan.innerText = '추출 중...';
+                fileInput.disabled = true;
+
+                const arrayBuffer = await file.arrayBuffer();
+                let extractedText = '';
+
+                // PDF 문서 파싱
+                if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+                    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const textContent = await page.getTextContent();
+                        extractedText += textContent.items.map(item => item.str).join(' ') + '\n';
+                    }
+                } 
+                // Word 문서(.docx) 파싱
+                else if (file.name.toLowerCase().endsWith('.docx')) {
+                    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                    extractedText = result.value;
+                } 
+                // 기타 텍스트 파일 폴백
+                else {
+                    extractedText = await file.text();
+                }
+
+                if (!extractedText.trim()) {
+                    throw new Error("추출된 텍스트가 없습니다.");
+                }
+
+                const currentVal = sourceTextInput.value;
+                sourceTextInput.value = currentVal + (currentVal ? '\n\n' : '') + `--- [파일 내용 추출: ${file.name}] ---\n` + extractedText.trim() + '\n----------------------\n';
+                showToast(`'${file.name}' 파일의 텍스트가 추출되었습니다.`);
+                
+            } catch (error) {
+                console.error("File Parse Error:", error);
+                showModal('추출 실패', '텍스트를 추출할 수 없습니다. 스캔된 이미지로 된 PDF이거나 지원되지 않는 문서 형식일 수 있습니다.');
+            } finally {
+                // UI 원상복구
+                iconSpan.innerHTML = originalIcon;
+                textSpan.innerText = originalText;
+                fileInput.disabled = false;
+                e.target.value = ''; // 입력 초기화 (동일한 파일 재선택 허용)
+            }
+        });
+
+        addUrlBtn.addEventListener('click', () => {
+            showUrlModal((url) => {
+                const currentVal = sourceTextInput.value;
+                sourceTextInput.value = currentVal + (currentVal ? '\n\n' : '') + `--- [웹사이트 링크 참조] ---\nURL: ${url}\n(위 링크에 접속하여 내용을 확인하고 분석하여 작업해주세요.)\n-------------------\n`;
+                showToast('참조 링크가 추가되었습니다.');
+            });
+        });
+        
+        // Custom Tailwind animations injection
+        document.head.insertAdjacentHTML('beforeend', `
+            <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: scale(0.95); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+            </style>
+        `);
+    </script>
+</body>
+</html>

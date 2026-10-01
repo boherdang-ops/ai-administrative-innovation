@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>행정문서 어시스턴트</title>
+<style>
+:root{
+  --paper:#EDF5FB; --surface:#FFFFFF;
+  --ink:#111417; --ink2:#3C444A; --ink3:#5E666D;
+  --line:#949489; --line2:#C2C2B8;
+  --rail:#14181C; --rail2:#1F262C; --rail3:#A9B3BA;
+  --signal:#4BC5AE; --blue:#1B4F72; --blue-s:#EAF1F6;
+  --amber:#B0760C; --amber-s:#FBF4E4; --red:#9B3A2E;
+  --sans:-apple-system,BlinkMacSystemFont,"Pretendard","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --serif:"Nanum Myeongjo","Batang","Apple SD Gothic Neo",serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+
+/* header */
+header{background:#0B4F8A;border-bottom:1px solid #073B69;position:sticky;top:0;z-index:20;color:#fff}
+.hd{display:flex;align-items:center;gap:12px;padding:13px 22px}
+.mk{width:25px;height:25px;border:1.5px solid #fff;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.bn{font-size:15.5px;font-weight:600;letter-spacing:-.01em}
+.who{margin-left:auto;font-size:12.5px;color:#D7E9F7}
+.tabs{display:flex;gap:2px;padding:0 22px}
+.tb{background:none;border:0;border-bottom:2px solid transparent;color:#D7E9F7;padding:11px 16px;cursor:pointer;font-size:14.5px}
+.tb:hover{color:#fff}
+.tb[aria-selected=true]{color:#fff;border-bottom-color:#8ED1FF;font-weight:600}
+
+/* layout */
+.shell{display:grid;grid-template-columns:1fr 216px;min-height:calc(100vh - 88px)}
+.main{padding:20px 22px 60px;min-width:0}
+.view{display:none}.view.on{display:block}
+.cols{display:grid;grid-template-columns:318px 1fr;gap:20px;align-items:start}
+@media(max-width:1100px){.shell{grid-template-columns:1fr}}
+@media(max-width:900px){.cols{grid-template-columns:1fr}}
+
+.panel{background:var(--surface);border:1px solid #8E8E86;padding:18px}
+.panel h2{margin:0 0 14px;font-size:12.5px;font-weight:600;color:var(--ink2);padding-bottom:8px;border-bottom:1px solid var(--line2)}
+.fd{margin-bottom:12px}
+.fd label{display:block;font-size:13px;font-weight:500;color:var(--ink);margin-bottom:5px}
+select,input[type=text],input[type=password],input[type=number],textarea{width:100%;background:var(--surface);border:1px solid #8E8E86;padding:8px 10px;border-radius:2px;font-size:14.5px}
+::placeholder{color:#6E7377;opacity:1}
+select:hover,input:hover,textarea:hover{border-color:#6E6E66}
+textarea{resize:vertical;line-height:1.6}
+.btn{display:block;width:100%;padding:10px;border:0;cursor:pointer;font-weight:600;border-radius:2px}
+.btn.pri{background:var(--blue);color:#fff}
+.btn.pri:hover{background:#143C58}
+.btn.sec{background:var(--surface);border:1px solid #85857D;color:var(--ink);font-weight:500;margin-top:7px}
+.btn.sec:hover{border-color:var(--ink3)}
+.btn:disabled{opacity:.5;cursor:default}
+.mini{display:inline-block;width:auto;padding:7px 13px;font-size:13.5px;font-weight:500;background:var(--surface);border:1px solid #85857D;border-radius:2px;cursor:pointer;color:var(--ink)}
+.mini:hover{border-color:var(--ink3)}
+.mini.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* type picker */
+.meter{text-align:right;font-size:12.5px;color:var(--ink2);min-width:210px;white-space:pre-line;line-height:1.6}
+.mtrk{height:5px;background:var(--line2);margin-top:5px;width:190px}
+.mfil{height:5px;width:0;background:var(--blue);transition:width .3s}
+.mfil.over{background:var(--amber)}
+.csec{background:var(--surface);border:1px solid #8E8E86;padding:20px 22px;margin-bottom:16px}
+.csec h3{margin:0 0 5px;font-size:15.5px;font-weight:600}
+.csec .why{margin:0 0 15px;font-size:13px;color:var(--ink2);line-height:1.65}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:760px){.cgrid{grid-template-columns:1fr}}
+.cgrid .wide{grid-column:1/-1}
+.drop{border:1.5px dashed #85857D;padding:16px 18px;background:#FAFAF7;margin-bottom:12px}
+.drop.hot{border-color:var(--blue);background:var(--blue-s)}
+.spec{margin:10px 0 0;font-size:12.5px;color:var(--ink2);line-height:1.75;border-top:1px solid var(--line2);padding-top:9px}
+.drop .hint{display:inline}
+.frow{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #8E8E86;margin-bottom:6px;background:var(--surface)}
+.frow .fn{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.frow .fc{font-size:12px;color:var(--ink3);flex:none;font-variant-numeric:tabular-nums}
+.frow.off{opacity:.5}
+.wip{display:flex;align-items:center;gap:7px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);padding:9px 13px;margin-bottom:16px}
+.wip .lb2{font-size:12.5px;color:var(--ink3);margin-right:2px}
+.wip select{width:auto;min-width:230px;max-width:360px;flex:1}
+.grp{font-size:11px;color:var(--ink3);margin:0 0 5px;letter-spacing:.02em}
+.grp.two{margin-top:12px}
+.stps{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:13px;padding-bottom:13px;border-bottom:1px solid var(--line2)}
+.sp{font-size:11.5px;padding:4px 8px;border:1px solid var(--line);border-radius:2px;color:var(--ink3);background:var(--surface)}
+.sp.now{border-color:var(--blue);background:var(--blue-s);color:var(--blue);font-weight:600}
+.sp.ok{border-color:var(--signal);color:#2A7264;background:#F0FAF7}
+.guide{border-top:1px solid var(--line2);padding:14px 18px;background:#FBFBFA}
+.guide h3{margin:0 0 8px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+.guide li{font-size:12.5px;color:var(--ink2);margin-bottom:5px;line-height:1.6}
+.guide ul{margin:0;padding-left:17px}
+.tps{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:14px}
+.tp{padding:9px 8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:12.5px;text-align:left;border-radius:2px;color:var(--ink2)}
+.tp:hover{border-color:var(--ink3)}
+.tp[aria-pressed=true]{border-color:var(--blue);background:var(--blue-s);color:var(--blue);font-weight:600}
+
+/* document */
+.doc{background:var(--surface);border:1px solid #8E8E86;min-height:560px;display:flex;flex-direction:column}
+.dbar{display:flex;align-items:center;gap:9px;padding:11px 16px;border-bottom:1px solid var(--line2);font-size:12.5px;color:var(--ink3);min-height:44px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--ink3);flex:none}
+.dot.busy{background:var(--amber);animation:pulse 1.1s infinite}
+.dot.ok{background:var(--signal)}
+@keyframes pulse{50%{opacity:.25}}
+.dacts{margin-left:auto;display:flex;gap:6px}
+#out{flex:1;border:0;background:none;padding:30px 40px;font-family:var(--serif);font-size:15.5px;line-height:2.02;min-height:380px;resize:none;border-radius:0}
+#out:focus{outline:0;background:#FEFEFD}
+#out::placeholder{font-family:var(--sans);font-size:13.5px;color:var(--ink3);line-height:1.8}
+.checks{border-top:1px solid var(--line2);padding:15px 18px;background:#FCFCFB}
+.checks h3{margin:0 0 9px;font-size:12.5px;font-weight:600;color:var(--ink2)}
+.ck{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink2);padding:4px 0;cursor:pointer}
+.ck input{margin:3px 0 0;flex:none;accent-color:var(--blue)}
+.fin{margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fin .note{font-size:12px;color:var(--ink3)}
+
+/* rail */
+.rail{background:var(--rail);color:#fff;padding:20px 18px;position:sticky;top:88px;align-self:start;height:calc(100vh - 88px);overflow:auto}
+@media(max-width:1100px){.rail{position:static;height:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}}
+.rail h3{margin:0 0 16px;font-size:11px;font-weight:600;color:var(--rail3);letter-spacing:.04em}
+@media(max-width:1100px){.rail h3{display:none}}
+.mt{margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--rail2)}
+.mt:last-child{border:0;margin:0;padding:0}
+.mt .lb{font-size:11.5px;color:var(--rail3);margin:0 0 3px}
+.mt .nm{font-size:27px;font-weight:600;letter-spacing:-.02em;margin:0;font-variant-numeric:tabular-nums;transition:color .25s}
+.mt .nm small{font-size:13px;font-weight:400;color:var(--rail3);letter-spacing:0}
+.mt .sb{font-size:11.5px;color:var(--rail3);margin:2px 0 0}
+.flash{color:var(--signal)!important}
+
+/* report */
+.rh{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.rh h1{margin:0;font-size:20px;font-weight:600;letter-spacing:-.01em}
+.rh p{margin:4px 0 0;font-size:12.5px;color:var(--ink3)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:20px}
+@media(max-width:760px){.kpis{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--surface);padding:15px 17px}
+.kpi .k{font-size:12px;color:var(--ink3);margin:0}
+.kpi .v{font-size:25px;font-weight:600;margin:5px 0 3px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:13px;font-weight:400;color:var(--ink3)}
+.kpi .d{font-size:11.5px;margin:0;color:var(--ink3)}
+.g2{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.g2{grid-template-columns:1fr}}
+.blk{background:var(--surface);border:1px solid #8E8E86;padding:18px 20px}
+.blk h3{margin:0 0 15px;font-size:14px;font-weight:600}
+.row{display:flex;align-items:center;gap:12px;margin-bottom:11px}
+.row:last-child{margin:0}
+.row .nm2{width:104px;flex:none;font-size:13px;color:var(--ink2)}
+.trk{flex:1;height:7px;background:var(--line2)}
+.fil{height:7px;width:0;background:var(--blue);transition:width .8s cubic-bezier(.22,.8,.3,1)}
+.row .pc{width:52px;flex:none;text-align:right;font-size:12.5px;color:var(--ink2);font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-weight:600;color:var(--ink2);padding:7px 8px;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;border-bottom:1px solid var(--line2);color:var(--ink2)}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+.adv{background:var(--amber-s);border:1px solid #E9DCC1;padding:16px 18px;margin-top:20px}
+.adv h3{margin:0 0 8px;font-size:14px;font-weight:600;color:var(--amber)}
+.adv p{margin:0 0 6px;font-size:13px;line-height:1.7;color:#6D4A0C}
+.adv p:last-child{margin:0}
+.empty{padding:70px 20px;text-align:center;color:var(--ink3);font-size:13.5px;line-height:1.9}
+
+/* settings */
+.set{max-width:640px}
+.hint{font-size:12.5px;color:var(--ink2);margin:5px 0 0;line-height:1.65}
+.warn{background:var(--blue-s);border:1px solid #CFE0EC;padding:13px 15px;font-size:12.5px;color:var(--blue);line-height:1.7;margin-bottom:18px}
+.bar{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(12px);background:var(--rail);color:#fff;padding:10px 18px;font-size:13px;border-radius:3px;opacity:0;pointer-events:none;transition:.28s;z-index:60}
+.toast.on{opacity:1;transform:translateX(-50%)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hd">
+    <div class="mk" aria-hidden="true">行</div>
+    <span class="bn">행정문서 어시스턴트</span>
+    <span class="who" id="who">소속 미설정</span>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tb" role="tab" aria-selected="false" data-v="ctx">기관 정보</button>
+    <button class="tb" role="tab" aria-selected="true" data-v="work">문서 작성</button>
+    <button class="tb" role="tab" aria-selected="false" data-v="rep">활용 현황</button>
+    <button class="tb" role="tab" aria-selected="false" data-v="set">설정</button>
+  </div>
+</header>
+
+<div class="shell">
+<div class="main">
+
+<!-- ================= 기관 정보 ================= -->
+<section class="view" id="v-ctx">
+  <div class="rh">
+    <div><h1>기관 정보</h1><p>이미 가지고 계신 문서를 올리십시오. 문서로 대신할 수 없는 것만 직접 적으면 됩니다.</p></div>
+    <div class="meter" id="meter"><span id="meterT">지시문 반영 0자</span><div class="mtrk"><div class="mfil" id="mfil"></div></div></div>
+  </div>
+  <div id="ctxForm"></div>
+  <p class="foot">자료는 이 브라우저에만 저장되며 외부로 전송되지 않습니다. 개인정보가 담긴 문서는 올리지 마십시오.</p>
+</section>
+
+<!-- ================= 작성 ================= -->
+<section class="view on" id="v-work">
+<div class="warn" id="ctxWarn" style="display:none;background:var(--amber-s);border-color:#E9DCC1;color:#6D4A0C"></div>
+<div class="wip">
+  <span class="lb2">보관함</span>
+  <select id="wipSel"><option value="">저장된 진행 건이 없습니다</option></select>
+  <button class="mini" id="wipLoad">불러오기</button>
+  <button class="mini" id="wipSave">현재 작업 저장</button>
+  <button class="mini" id="wipDel">삭제</button>
+</div>
+<div class="cols">
+
+  <div class="panel">
+    <h2>작성 조건</h2>
+    <div class="tps" id="tps"></div>
+    <div id="steps"></div>
+    <div id="fields"></div>
+    <div class="fd">
+      <label for="src" id="srcLab">원문</label>
+      <textarea id="src" rows="8"></textarea>
+    </div>
+    <div class="fd">
+      <label for="ref">관련 근거 (이번 건에만 적용)</label>
+      <textarea id="ref" rows="4" placeholder="이번 건에 필요한 조례, 지침, 통계, 이전 문서 등을 붙여 넣으십시오."></textarea>
+    </div>
+    <button class="btn pri" id="tpl">서식 초안 만들기</button>
+    <button class="btn sec" id="gen">AI 초안 생성</button>
+    <button class="btn sec" id="copyp">지시문만 복사</button>
+    <button class="btn sec" id="nxt" style="display:none">이 단계 확정하고 다음으로</button>
+    <p class="hint" id="modeHint"></p>
+  </div>
+
+  <div class="doc">
+    <div class="dbar">
+      <span class="dot" id="dot"></span><span id="st">유형을 고르고 원문을 넣으세요</span>
+      <span class="dacts">
+        <button class="mini" id="cpy">복사</button>
+        <button class="mini" id="dl">Word 저장</button>
+      </span>
+    </div>
+    <textarea id="out" placeholder="생성된 문서가 여기에 표시됩니다.&#10;그대로 고쳐 쓰셔도 됩니다."></textarea>
+    <div class="guide" id="guide" style="display:none"></div>
+    <div class="checks">
+      <h3>산출물 검증</h3>
+      <div id="cks"></div>
+      <div class="fin">
+        <button class="mini on" id="done">작업 완료</button>
+        <span class="note" id="fnote"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</section>
+
+<!-- ================= 현황 ================= -->
+<section class="view" id="v-rep">
+  <div class="rh">
+    <div><h1>활용 현황</h1><p id="rsub"></p></div>
+    <div class="bar">
+      <button class="mini" data-p="7">최근 7일</button>
+      <button class="mini on" data-p="30">최근 30일</button>
+      <button class="mini" data-p="0">전체</button>
+    </div>
+  </div>
+  <div id="repBody"></div>
+  <div class="bar">
+    <button class="mini" id="share">현황 요약 만들기</button>
+    <button class="mini" id="csv">기록 CSV 내보내기</button>
+    <button class="mini" id="seed">예시 기록 채우기</button>
+    <button class="mini" id="wipe">기록 전체 삭제</button>
+  </div>
+</section>
+
+<!-- ================= 설정 ================= -->
+<section class="view" id="v-set">
+  <div class="set">
+    <div class="warn">API 키는 이 브라우저에만 저장되며 외부로 전송되지 않습니다. 업무망에서 외부 호출이 차단된 경우 키 없이 <b>지시문만 복사</b>로 사용하십시오. 결과를 붙여 넣어도 기록은 동일하게 남습니다.</div>
+
+    <div class="panel" style="margin-bottom:16px">
+      <h2>사용자</h2>
+      <div class="fd"><label for="s_org">소속 기관</label><input type="text" id="s_org" placeholder="서울 ○○구청"></div>
+      <div class="fd"><label for="s_dept">부서</label><input type="text" id="s_dept" placeholder="민원여권과"></div>
+      <div class="fd"><label for="s_name">성명</label><input type="text" id="s_name" placeholder="홍길동"></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:16px">
+      <h2>AI 연결</h2>
+      <div class="fd"><label for="s_prov">제공자</label>
+        <select id="s_prov">
+          <option value="none">사용 안 함 (지시문 복사 방식)</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="openai">OpenAI</option>
+          <option value="claude">Anthropic Claude</option>
+        </select>
+      </div>
+      <div class="fd"><label for="s_model">모델</label><input type="text" id="s_model" placeholder="gemini-2.0-flash"></div>
+      <div class="fd"><label for="s_key">API 키</label><input type="password" id="s_key" placeholder="키를 붙여 넣으세요"></div>
+      <button class="mini" id="test">연결 확인</button>
+      <span class="note" id="tres" style="margin-left:8px;font-size:12.5px;color:var(--ink3)"></span>
+    </div>
+
+    <div class="warn" style="margin-bottom:16px">기관 개요·현안·문서 예시는 상단의 <b>기관 정보</b> 메뉴에서 관리합니다.</div>
+
+    <div class="panel">
+      <h2>절감 시간 산정 기준</h2>
+      <p class="hint" style="margin:0 0 12px">AI 없이 작성할 때의 평균 소요 시간(분)입니다. 실제 소요 시간을 빼서 절감분을 계산하므로, 기관 실정에 맞게 조정하십시오.</p>
+      <div id="bases"></div>
+    </div>
+
+    <div class="bar"><button class="btn pri" style="width:auto;padding:10px 22px" id="save">설정 저장</button></div>
+  </div>
+</section>
+
+</div>
+
+<aside class="rail">
+  <h3>실시간 계측</h3>
+  <div class="mt"><p class="lb">오늘 완료</p><p class="nm" id="m1">0<small>건</small></p><p class="sb" id="m1s">—</p></div>
+  <div class="mt"><p class="lb">누적 완료</p><p class="nm" id="m2">0<small>건</small></p><p class="sb" id="m2s">—</p></div>
+  <div class="mt"><p class="lb">절감 시간</p><p class="nm" id="m3">0<small>분</small></p><p class="sb" id="m3s">—</p></div>
+  <div class="mt"><p class="lb">검증 이행률</p><p class="nm" id="m4">—</p><p class="sb" id="m4s">—</p></div>
+</aside>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var $=function(s){return document.querySelector(s)};
+var LS_C='gaa_cfg', LS_L='gaa_logs', LS_W='gaa_wips', LS_F='gaa_files';
+var wips=[], curWip=null;
+
+/* ---------- 업무 유형 ---------- */
+var TYPES={
+ minwon:{n:'민원 회신',base:45,
+  f:[{id:'g',l:'민원 분야',o:['소음','주차','도로·시설','폐기물','복지','기타']},
+     {id:'r',l:'처리 결과',o:['현장 확인 후 조치','관계 기관 이첩','기준 미해당 안내','처리 예정 안내']},
+     {id:'t',l:'문체',o:['표준 격식체','간결체']}],
+  s:'민원 내용',
+  sp:'접수된 민원 원문을 붙여 넣으십시오.',
+  i:'민원인에게 발송할 회신문을 작성한다. 구성은 ①인사 ②민원 요지 확인 ③처리 경과와 근거 ④향후 조치 ⑤문의처 안내 순으로 한다. 관련 법령이 있으면 「법령명」 제○조 형식으로 인용하되, 확실하지 않으면 [법령 확인 필요]로 표시한다.',
+  c:['민원 요지가 정확히 반영되었는가','인용 법령·조문을 원문에서 확인하였는가','처리 결과가 사실과 일치하는가','개인정보·제3자 정보가 노출되지 않았는가']},
+
+ press:{n:'보도자료',base:70,
+  f:[{id:'g',l:'분야',o:['정책 발표','행사 안내','사업 성과','수상·선정','기타']},
+     {id:'r',l:'배포 시점',o:['즉시','예정일 지정','엠바고']},
+     {id:'t',l:'분량',o:['1매','2매']}],
+  s:'사업 개요·주요 내용',
+  sp:'사업명, 일시, 장소, 대상, 예산, 주요 내용 등 확인된 사실을 적으십시오.',
+  i:'언론 배포용 보도자료를 작성한다. 구성은 ①제목 ②부제 ③리드문(핵심을 한 문단) ④본문(육하원칙) ⑤기관장 또는 부서장 코멘트 ⑥문의처 순으로 한다. 코멘트는 제공된 사실 범위를 벗어나지 않게 쓰고, 근거 없는 수식어를 넣지 않는다.',
+  c:['일시·장소·수치가 원자료와 일치하는가','기관장 코멘트를 사전 확인받았는가','확정되지 않은 사항을 단정하지 않았는가','문의처와 배포 시점이 정확한가']},
+
+ minutes:{n:'회의록 정리',base:60,
+  f:[{id:'g',l:'회의 성격',o:['내부 부서회의','관계 기관 협의','주민 간담회','위원회']},
+     {id:'r',l:'정리 방식',o:['결정사항 중심','발언 요지 포함']},
+     {id:'t',l:'후속 조치',o:['포함','미포함']}],
+  s:'회의 메모·녹취 정리',
+  sp:'회의 중 작성한 메모나 녹취 초벌 정리본을 붙여 넣으십시오.',
+  i:'공식 회의록을 작성한다. 구성은 ①회의 개요(일시·장소·참석) ②안건 ③논의 요지 ④결정사항 ⑤후속 조치(담당·기한) 순으로 한다. 발언자를 임의로 추정하지 않으며, 메모에 없는 내용을 보충하지 않는다. 불명확한 부분은 [확인 필요]로 남긴다.',
+  c:['결정사항이 원 메모와 일치하는가','발언 귀속이 임의로 추정되지 않았는가','후속 조치에 담당과 기한이 있는가','참석자 명단과 직위가 정확한가']},
+
+ report:{n:'업무보고',base:80,
+  f:[{id:'g',l:'보고 성격',o:['추진상황 보고','계획 보고','결과 보고','현안 보고']},
+     {id:'r',l:'보고 대상',o:['부서장','국장','부단체장','단체장']},
+     {id:'t',l:'형식',o:['개조식','서술식']}],
+  s:'보고 자료·경과',
+  sp:'추진 경과, 수치, 현안, 검토 사항 등을 적으십시오.',
+  i:'상급자 보고용 문서를 작성한다. 구성은 ①보고 요지 ②추진 배경 ③추진 경과 ④문제점 및 검토 사항 ⑤향후 계획 순으로 한다. 개조식일 경우 1. 가. 1) 체계를 지키고 한 항목은 두 줄을 넘기지 않는다. 판단이 필요한 사항은 대안을 함께 제시한다.',
+  c:['수치와 일정이 원자료와 일치하는가','문제점을 누락 없이 적었는가','대안에 예산·인력 영향이 검토되었는가','상급 부서 방침과 배치되지 않는가']},
+
+ gongmun:{n:'공문 기안',base:50,
+  f:[{id:'g',l:'문서 성격',o:['협조 요청','자료 제출 요구','안내·통보','회신']},
+     {id:'r',l:'수신',o:['관내 기관','타 지자체','상급기관','민간 단체']},
+     {id:'t',l:'붙임',o:['없음','있음']}],
+  s:'기안 취지·근거',
+  sp:'요청 사항, 근거 규정, 기한 등을 적으십시오.',
+  i:'대외 발송 공문을 기안한다. 구성은 ①관련 근거 ②본문(요청 또는 통보 사항) ③기한 ④붙임 순으로 한다. 첫머리는 「관련: 」으로 시작하고, 요청 사항은 번호를 붙여 구분한다. 행정안전부 순화 대상어를 쓰지 않는다.',
+  c:['관련 근거의 문서번호·일자가 정확한가','요청 사항과 기한이 명확한가','수신처와 직위 표기가 맞는가','붙임 목록이 실제 첨부와 일치하는가']},
+
+ answer:{n:'의회 답변 초안',base:90,
+  f:[{id:'g',l:'질의 성격',o:['시정질문','행정사무감사','예산심사','서면질의']},
+     {id:'r',l:'대응 기조',o:['현황 설명','개선 계획 제시','입장 유보']},
+     {id:'t',l:'분량',o:['간략','상세']}],
+  s:'질의 내용·관련 현황',
+  sp:'의원 질의 요지와 우리 부서가 확인한 현황·수치를 적으십시오.',
+  i:'의회 질의에 대한 답변 초안을 작성한다. 구성은 ①질의 요지 확인 ②현황과 사실관계 ③그간의 조치 ④향후 계획 순으로 한다. 확정되지 않은 예산이나 일정을 약속하지 않으며, 확인되지 않은 수치는 [확인 필요]로 표시한다. 방어적 표현보다 사실 중심으로 쓴다.',
+  c:['인용 수치의 출처를 확인하였는가','확정되지 않은 사항을 약속하지 않았는가','관련 부서와 사전 협의하였는가','과거 답변과 모순되지 않는가']}
+};
+
+/* ---------- 서식 초안 엔진 (AI 미사용) ---------- */
+function bits(s,n){
+  return (s||'').split(/[.\n。!?]+/).map(function(x){return x.trim().replace(/^[-·•\s]+/,'')})
+    .filter(function(x){return x.length>5}).slice(0,n||3);
+}
+function mk(v,m){return v?v:'['+m+']'}
+function dateIn(s){
+  var m=(s||'').match(/\d{4}\s*[.\-\/년]\s*\d{1,2}\s*[.\-\/월]\s*\d{1,2}\s*일?|\d{1,2}월\s*\d{1,2}일/);
+  return m?m[0]:'';
+}
+function numIn(s){
+  var m=(s||'').match(/[\d,]+\s*(명|건|억원|만원|천원|원|%|퍼센트|개소|개)/g);
+  return m?m.slice(0,4):[];
+}
+function li(a,pad,mark){
+  if(!a.length)return pad+mark+' [내용 기재]';
+  return a.map(function(x){return pad+mark+' '+x}).join('\n');
+}
+
+var TPL={
+ minwon:function(f,s,c){
+  var q=bits(s,3),d=dateIn(s);
+  var res={'현장 확인 후 조치':'현장 확인 결과에 따라 [조치 내용 기재]하였습니다.',
+   '관계 기관 이첩':'소관 기관인 [기관명]으로 이첩하였으며, 처리 결과는 해당 기관에서 별도 안내할 예정입니다.',
+   '기준 미해당 안내':'관련 규정상 [해당 기준 기재]에 해당하지 아니하여 조치가 어려운 점 양해하여 주시기 바랍니다.',
+   '처리 예정 안내':'[처리 예정일]까지 조치할 예정이며, 완료 후 별도로 안내하겠습니다.'}[f.r];
+  return f.g+' 민원 처리 결과 회신\n\n'+
+   '1. 안녕하십니까. 우리 '+mk(c.org,'기관명')+' '+mk(c.dept,'부서명')+'에 관심을 가져 주셔서 감사합니다.\n\n'+
+   '2. 귀하께서 '+mk(d,'접수일 기재')+' 제기하신 '+f.g+' 관련 민원에 대하여 다음과 같이 회신합니다.\n\n'+
+   '  가. 민원 요지\n'+li(q,'    ','-')+'\n\n'+
+   '  나. 처리 경과\n'+
+   '    - [현장 확인 일시 및 방법 기재]\n'+
+   '    - 관련 근거: 「[법령명]」 제[ ]조 [확인 필요]\n\n'+
+   '  다. 처리 결과\n    - '+res+'\n\n'+
+   '3. 향후 [이행 점검 계획 기재]할 예정입니다.\n\n'+
+   '4. 추가로 문의하실 사항이 있으시면 '+mk(c.dept,'부서명')+'([전화번호 기재])로 연락하여 주시기 바랍니다. 감사합니다.';
+ },
+ press:function(f,s,c){
+  var q=bits(s,4),d=dateIn(s),n=numIn(s);
+  return '[제목 기재 — 핵심을 한 줄로]\n'+
+   '[부제 기재 — 보충 사실 한 줄]\n\n'+
+   '□ 배포 시점: '+f.r+'    □ 분야: '+f.g+'    □ 분량: '+f.t+'\n\n'+
+   '1. 리드\n'+
+   '  '+mk(c.org,'기관명')+'은(는) '+mk(d,'일자 기재')+' [핵심 내용을 한 문장으로]이라고 밝혔다.\n\n'+
+   '2. 주요 내용\n'+li(q,'  ','○')+'\n\n'+
+   '3. 주요 수치\n'+
+   (n.length?n.map(function(x){return '  - '+x+' [출처 확인 필요]'}).join('\n'):'  - [수치 및 출처 기재]')+'\n\n'+
+   '4. 기관장 코멘트\n'+
+   '  '+mk(c.org,'기관명')+' 관계자는 "[사전 확인된 발언만 기재]"라고 말했다.\n\n'+
+   '5. 문의\n'+
+   '  '+mk(c.dept,'부서명')+' [담당자] [전화번호]';
+ },
+ minutes:function(f,s,c){
+  var q=bits(s,5),d=dateIn(s);
+  return '회의록\n\n'+
+   '1. 회의 개요\n'+
+   '  가. 일시: '+mk(d,'일시 기재')+'\n'+
+   '  나. 장소: [장소 기재]\n'+
+   '  다. 구분: '+f.g+'\n'+
+   '  라. 참석: [직위 성명 기재]\n\n'+
+   '2. 안건\n  가. [안건 기재]\n\n'+
+   '3. 논의 요지\n'+li(q,'  ','-')+'\n\n'+
+   '4. 결정사항\n'+
+   '  가. [결정 내용 기재]\n'+
+   '  나. [결정 내용 기재]\n\n'+
+   (f.t==='포함'
+    ? '5. 후속 조치\n'+
+      '  ┌ 과제: [과제명]  담당: [부서·성명]  기한: [일자]\n'+
+      '  └ 과제: [과제명]  담당: [부서·성명]  기한: [일자]\n\n'
+    : '')+
+   '※ 메모에 없는 사항은 기재하지 아니하였음. 불명확한 부분은 [확인 필요]로 표시함.';
+ },
+ report:function(f,s,c){
+  var q=bits(s,4),n=numIn(s);
+  var head=f.t==='개조식';
+  return f.g+' ('+f.r+' 보고)\n\n'+
+   '1. 보고 요지\n'+
+   '  □ [핵심을 두 줄 이내로 기재]\n\n'+
+   '2. 추진 배경\n'+
+   '  가. [근거 법령 또는 상급기관 방침 기재]\n'+
+   '  나. [지역 여건 기재]\n\n'+
+   '3. 추진 경과\n'+li(q,'  ','가.').replace(/가\. /g,function(){return '- '})+'\n'+
+   (n.length?'    ※ 주요 수치: '+n.join(', ')+' [원자료 대조 필요]\n':'')+'\n'+
+   '4. 문제점 및 검토 사항\n'+
+   '  가. [문제점 기재]\n'+
+   '    - 대안 1: [내용] (예산 [ ]백만원, 인력 [ ]명)\n'+
+   '    - 대안 2: [내용]\n\n'+
+   '5. 향후 계획\n'+
+   '  가. [시기]: [추진 내용]\n'+
+   '  나. [시기]: [추진 내용]\n\n'+
+   (head?'':'※ 서술식 요청 — 위 항목을 문단으로 풀어 작성할 것');
+ },
+ gongmun:function(f,s,c){
+  var q=bits(s,3),d=dateIn(s);
+  var due=d?d+' 까지':'[일자] 까지';
+  return mk(c.org,'기관명')+'\n\n'+
+   '수신  [수신처] ('+f.r+')\n'+
+   '경유\n'+
+   '제목  ['+f.g+' 제목 기재]\n\n'+
+   '1. 관련: [문서번호 및 일자 기재]\n\n'+
+   '2. 위 호와 관련하여 다음과 같이 '+
+   ({'협조 요청':'협조를 요청하오니','자료 제출 요구':'자료 제출을 요구하오니','안내·통보':'알려드리오니','회신':'회신하오니'}[f.g]||'알려드리오니')+
+   ' 조치하여 주시기 바랍니다.\n\n'+
+   '  가. 요청 사항\n'+li(q,'    ','-')+'\n\n'+
+   '  나. 제출 기한: '+due+'\n'+
+   '  다. 제출 방법: [방법 기재]\n\n'+
+   (f.t==='있음'?'붙임  1. [붙임 명칭] 1부.\n      2. [붙임 명칭] 1부.  끝.':'끝.');
+ },
+ answer:function(f,s,c){
+  var q=bits(s,4),n=numIn(s);
+  var tone={'현황 설명':'현황을 설명드리겠습니다','개선 계획 제시':'개선 계획을 말씀드리겠습니다','입장 유보':'검토 중임을 말씀드립니다'}[f.r];
+  return f.g+' 답변 자료\n\n'+
+   '1. 질의 요지\n'+li(q.slice(0,2),'  ','○')+'\n\n'+
+   '2. 답변\n'+
+   '  가. 존경하는 [의원명] 의원님의 질의에 대하여 '+tone+'.\n\n'+
+   '  나. 현황 및 사실관계\n'+li(q.slice(2),'    ','-')+'\n'+
+   (n.length?'    ※ 인용 수치: '+n.join(', ')+' [출처 확인 필요]\n':'')+'\n'+
+   '  다. 그간의 조치\n'+
+   '    - [조치 내용 및 시기 기재]\n\n'+
+   '  라. 향후 계획\n'+
+   '    - [계획 기재 — 확정되지 않은 예산·일정은 약속하지 말 것]\n\n'+
+   '3. 참고\n'+
+   '  - 관련 부서 사전 협의: [부서명] ([협의 일자])\n'+
+   '  - 과거 답변 대조: [확인 필요]';
+ }
+};
+
+/* ---------- 기획 업무 (단계형) ---------- */
+var PLAN={
+ newbiz:{n:'신규 사업 기획',base:480,
+  f:[{id:'g',l:'분야',o:['인구·청년','복지·보건','경제·일자리','안전·재난','환경','문화·관광','행정 혁신']},
+     {id:'r',l:'재원',o:['자체 예산','국비 매칭','도비 매칭','미정']},
+     {id:'t',l:'규모',o:['1억 미만','1~5억','5~20억','20억 이상']}],
+  s:'배경 메모',sp:'이 사업을 검토하게 된 계기, 들은 이야기, 확인한 자료를 그대로 적으십시오.',
+  st:[
+   {n:'문제 정의',q:'무엇이 문제라고 보십니까',
+    g:['이 문제를 겪는 사람은 구체적으로 누구인가','현상만 적고 문제라 부르고 있지는 않은가','왜 하필 지금 다루어야 하는가','우리 부서 소관이 맞는가','방치하면 3년 뒤 무엇이 달라지는가'],
+    i:'제시된 메모에서 문제를 정의한다. 현상과 문제를 구분하고, 문제를 겪는 대상을 특정한다. 근거가 없는 단정은 [근거 필요]로 표시한다. 문제 정의문 3개 이내와 각각의 판단 근거를 제시한다.'},
+   {n:'현황·근거 확인',q:'확보한 자료와 수치를 적으십시오',
+    g:['인용할 통계의 출처와 기준 연도가 확인되었는가','이미 하고 있는 유사 사업은 없는가','타 부서가 같은 대상에 쓰고 있는 예산은 없는가','법적 근거 또는 상급기관 방침이 있는가'],
+    i:'앞 단계에서 확정한 문제에 대하여, 제시된 자료로 뒷받침되는 부분과 아직 근거가 없는 부분을 나누어 정리한다. 추가로 확보해야 할 자료 목록을 출처와 함께 제시한다. 수치를 지어내지 않는다.'},
+   {n:'대안 도출·비교',q:'떠오르는 방안을 적으십시오 (없으면 비워 두십시오)',
+    g:['새로 만들지 않고 기존 사업을 재배열해 해결되지 않는가','대안이 3개 이상인가','비교 기준을 정했는가 (효과·비용·실현성·지속성)','가장 하고 싶은 안을 먼저 정해 놓고 나머지를 들러리로 세우지 않았는가'],
+    i:'앞 단계 결과를 바탕으로 대안을 3개 이상 제시한다. 반드시 하나는 신규 사업이 아니라 기존 사업·조직·절차의 재배열로 해결하는 안을 포함한다. 효과, 비용, 실현 가능성, 지속 가능성 네 기준으로 비교표를 만들고 각 칸에 판단 근거를 적는다.'},
+   {n:'사업 설계',q:'선택한 대안과 그 이유를 적으십시오',
+    g:['성과지표가 산출이 아니라 성과를 재는가','대상과 규모의 산정 근거가 있는가','추진 체계에 협업 부서를 확인했는가','1년 차에 무엇까지 하는지 정해졌는가'],
+    i:'선택된 대안을 사업으로 설계한다. 사업 목표, 성과지표(정의·산식·목표치), 대상과 규모, 추진 체계, 연차별 일정, 소요 예산 항목을 제시한다. 산정 근거가 없는 수치는 [산정 근거 필요]로 표시한다.'},
+   {n:'사업계획서 작성',q:'보완할 사항이 있으면 적으십시오',
+    g:['결재선이 물을 질문에 답이 들어 있는가','예산 부서가 물을 질문에 답이 들어 있는가','문서만 읽고 이해되는가'],
+    i:'앞 단계 결과를 종합하여 사업계획서를 작성한다. 구성은 1. 추진 배경 2. 현황 및 문제점 3. 추진 계획 4. 소요 예산 5. 기대 효과 6. 행정 사항 순으로 한다. 개조식으로 쓰고 한 항목은 두 줄을 넘기지 않는다.'}],
+  c:['수치와 출처를 원자료에서 확인하였는가','기존 유사 사업과의 중복을 검토하였는가','성과지표가 측정 가능한가','예산·인력 소요를 협의하였는가']},
+
+ grant:{n:'공모사업 대응',base:600,
+  f:[{id:'g',l:'공모 주체',o:['중앙부처','광역자치단체','공공기관','재단·민간']},
+     {id:'r',l:'경쟁 형태',o:['전국 경쟁','권역 경쟁','지정 협의']},
+     {id:'t',l:'남은 기간',o:['1주 이내','2~3주','1개월 이상']}],
+  s:'공모 공고문 요약',sp:'공고문의 목적, 지원 규모, 평가 항목, 제출 서류, 기한을 옮겨 적으십시오.',
+  st:[
+   {n:'공모 요건 해부',q:'공고문에서 확인한 내용을 적으십시오',
+    g:['평가지표와 배점이 확인되었는가','배점이 가장 큰 항목이 무엇인가','제외 요건에 걸리지 않는가','필수 제출 서류 중 발급에 시간이 걸리는 것은 무엇인가','기한과 제출 방식이 확인되었는가'],
+    i:'공고문에서 평가지표와 배점, 필수 요건, 제외 요건, 제출 서류, 기한을 표로 정리한다. 공고문에 없는 내용은 추정하지 말고 [공고문 확인 필요]로 표시한다. 배점이 큰 순으로 정렬한다.'},
+   {n:'우리 강점 대조',q:'우리 지역·부서의 실적과 여건을 적으십시오',
+    g:['평가지표별로 내세울 근거가 있는가','다른 지자체도 똑같이 말할 수 있는 내용은 아닌가','기존 실적 중 숫자로 말할 수 있는 것은 무엇인가','협력 기관을 확보할 수 있는가'],
+    i:'앞 단계의 평가지표별로 우리가 제시할 수 있는 근거를 대조한다. 근거가 약한 지표를 명시하고, 그 지표를 보완할 방법을 제안한다. 다른 지자체도 동일하게 주장할 수 있는 일반적 서술은 차별성이 없다고 표시한다.'},
+   {n:'논리 구조 설계',q:'강조하고 싶은 메시지를 적으십시오',
+    g:['심사자가 3분 안에 기억할 한 문장이 있는가','배점 큰 항목에 분량을 배분했는가','우리 지역이어야 하는 이유가 있는가'],
+    i:'심사자 관점에서 신청서의 논리 구조를 설계한다. 핵심 메시지 한 문장, 평가지표별 대응 논리, 분량 배분안을 제시한다. 배점이 큰 항목에 더 많은 분량을 배정한다.'},
+   {n:'신청서 작성',q:'작성할 항목을 지정하십시오',
+    g:['공고문이 요구한 항목명을 그대로 썼는가','분량 제한을 지켰는가','증빙과 본문이 일치하는가'],
+    i:'앞 단계 구조에 따라 신청서 본문을 작성한다. 공고문이 지정한 항목명과 순서를 그대로 따른다. 확인되지 않은 수치는 [확인 필요]로 표시한다.'}],
+  c:['공고문 요건을 빠짐없이 반영하였는가','제출 서류 발급 일정을 확인하였는가','인용 실적의 증빙이 있는가','기한과 제출 방식을 확인하였는가']},
+
+ issue:{n:'현안 진단',base:300,
+  f:[{id:'g',l:'현안 성격',o:['주민 갈등','사고·사건','언론 보도','감사 지적','의회 지적']},
+     {id:'r',l:'시급성',o:['즉시 대응','금주 내','통상 처리']},
+     {id:'t',l:'보고 대상',o:['부서장','국장','부단체장','단체장']}],
+  s:'파악된 상황',sp:'들은 것, 확인한 것, 추정한 것을 구분 없이 일단 적으십시오.',
+  st:[
+   {n:'사실과 추정 분리',q:'지금까지 파악한 내용을 적으십시오',
+    g:['직접 확인한 것과 전해 들은 것이 구분되는가','확인 주체와 시점이 기록되었는가','아직 모르는 것이 무엇인지 아는가'],
+    i:'제시된 내용을 확인된 사실, 확인이 필요한 사항, 추정으로 3분한다. 각 항목에 확인 주체와 시점을 적을 자리를 만든다. 추정을 사실로 승격하지 않는다.'},
+   {n:'원인 구조화',q:'원인이라고 생각하는 것을 적으십시오',
+    g:['표면 원인과 구조적 원인을 나누었는가','우리 기관의 책임 영역이 어디까지인가','같은 일이 다른 곳에서도 일어났는가'],
+    i:'확인된 사실을 바탕으로 원인을 표면 원인과 구조적 원인으로 나누어 구조화한다. 책임 소재를 단정하지 않되, 우리 기관의 관리 범위에 해당하는 부분을 명시한다.'},
+   {n:'이해관계자 분석',q:'관련된 사람과 조직을 적으십시오',
+    g:['각자가 무엇을 잃고 얻는지 파악했는가','반대가 예상되는 쪽의 논리를 알고 있는가','언론·의회가 물을 질문은 무엇인가'],
+    i:'이해관계자별로 입장, 요구, 우려, 예상 반응을 정리한다. 각 이해관계자가 제기할 가장 강한 반론을 우리 논리와 함께 제시한다.'},
+   {n:'대응 방안·보고',q:'보완할 사항을 적으십시오',
+    g:['즉시 조치와 중장기 대책이 구분되었는가','재발 방지에 담당과 기한이 있는가','상급자가 결정할 사항이 명확한가'],
+    i:'앞 단계를 종합하여 현안 보고서를 작성한다. 구성은 1. 현황 2. 원인 3. 조치 사항 4. 향후 대책 5. 검토 요청 사항 순으로 한다. 상급자가 결정해야 할 사항을 별도로 명시한다.'}],
+  c:['사실과 추정을 구분하여 기재하였는가','관련 부서와 사실관계를 대조하였는가','재발 방지책에 담당·기한이 있는가','상급자 결정 사항이 명시되었는가']},
+
+ budget:{n:'예산 요구 논리',base:360,
+  f:[{id:'g',l:'요구 성격',o:['신규 사업','계속 사업 증액','시설비','인건비·운영비']},
+     {id:'r',l:'단계',o:['부서 내부 검토','예산 부서 협의','의회 심사 대비']},
+     {id:'t',l:'전년 대비',o:['신규','증액','동액','감액']}],
+  s:'사업 개요와 요구 금액',sp:'사업 내용, 요구 금액, 산출 근거로 쓸 수 있는 자료를 적으십시오.',
+  st:[
+   {n:'요구 사업 정리',q:'요구 내용을 적으십시오',
+    g:['사업 목적이 한 문장으로 정리되는가','법적 근거나 상급기관 방침이 있는가','전년도 집행률은 얼마인가'],
+    i:'요구 사업의 목적, 근거, 내용, 요구액을 정리한다. 계속 사업이면 전년 집행 실적을 적을 자리를 만든다. 근거 법령이 불확실하면 [근거 확인 필요]로 표시한다.'},
+   {n:'필요성 논증',q:'왜 필요한지 적으십시오',
+    g:['예산 부서가 가장 먼저 물을 질문이 무엇인가','안 하면 어떻게 되는지 말할 수 있는가','다른 사업을 줄여서 할 수는 없는가','수혜 대상 수를 숫자로 말할 수 있는가'],
+    i:'예산 부서 심사자 관점에서 제기될 반론을 5개 이상 예상하고, 각각에 대한 답변을 제시한다. 반론을 약하게 설정하지 않는다. 답할 수 없는 반론은 그대로 남겨 표시한다.'},
+   {n:'산출 근거',q:'단가와 수량 자료를 적으십시오',
+    g:['단가의 출처가 있는가 (계약 실적·조달 단가·유사 사례)','수량 산정 방식이 설명되는가','유사 지자체 대비 과다하지 않은가'],
+    i:'요구액을 비목별로 분해하고 각 항목의 단가, 수량, 산출 근거를 표로 제시한다. 근거 없는 항목은 [산출 근거 필요]로 명시한다. 합계가 요구액과 일치하는지 확인한다.'},
+   {n:'요구서 작성',q:'보완할 사항을 적으십시오',
+    g:['성과지표가 예산과 연결되는가','문서만으로 심사가 가능한가'],
+    i:'앞 단계를 종합하여 예산 요구 설명자료를 작성한다. 구성은 1. 사업 개요 2. 추진 근거 3. 필요성 4. 산출 내역 5. 기대 효과 순으로 한다.'}],
+  c:['단가의 출처를 확인하였는가','비목별 합계가 요구액과 일치하는가','전년 집행 실적을 반영하였는가','성과지표가 제시되었는가']},
+
+ bench:{n:'사례 적용 검토',base:240,
+  f:[{id:'g',l:'검토 목적',o:['신규 사업 참고','기존 사업 개선','상급자 지시 검토','타 기관 요청']},
+     {id:'r',l:'사례 출처',o:['타 지자체','해외','민간','중앙부처 시범']},
+     {id:'t',l:'결과물',o:['검토 의견서','적용 계획','보고 자료']}],
+  s:'참고 사례 자료',sp:'사례의 내용, 성과 수치, 추진 방식 등 확인한 내용을 적으십시오.',
+  st:[
+   {n:'사례 특정',q:'사례 내용을 적으십시오',
+    g:['언제, 어느 규모로 한 사업인가','성과 수치의 출처가 어디인가','홍보 자료만 보고 판단하고 있지 않은가'],
+    i:'사례의 사실관계를 정리한다. 추진 시기, 대상 규모, 예산, 조직, 성과 수치와 그 출처를 구분한다. 출처가 보도자료뿐인 수치는 그렇게 표시한다.'},
+   {n:'성공 조건 분해',q:'그 지역에서 통한 이유를 적으십시오',
+    g:['그 지역에만 있던 조건은 무엇인가','사업이 아니라 사람이나 조직 때문은 아닌가','실패한 부분은 확인했는가'],
+    i:'해당 사례가 작동한 조건을 분해한다. 지역 고유 조건, 조직 조건, 재정 조건, 시기 조건으로 나눈다. 사례에서 드러나지 않은 실패 요인의 가능성도 제시한다.'},
+   {n:'우리 조건 대조',q:'우리 지역 여건을 적으십시오',
+    g:['옮길 수 있는 것과 없는 것이 구분되는가','인구·재정·조직 규모가 비교 가능한가','우리에게만 있는 제약은 무엇인가'],
+    i:'앞 단계의 성공 조건을 우리 지역 여건과 하나씩 대조한다. 충족, 부분 충족, 미충족으로 판정하고 근거를 적는다. 미충족 조건을 보완할 방법 또는 포기해야 할 요소를 명시한다.'},
+   {n:'적용안 작성',q:'보완할 사항을 적으십시오',
+    g:['그대로 베끼지 않고 우리 조건에 맞췄는가','적용하지 않기로 한 부분과 그 이유가 있는가'],
+    i:'대조 결과를 바탕으로 적용 방안을 작성한다. 그대로 적용할 부분, 수정할 부분, 적용하지 않을 부분을 각각 이유와 함께 제시한다.'}],
+  c:['성과 수치의 출처를 확인하였는가','지역 조건 차이를 검토하였는가','적용하지 않을 부분과 이유가 명시되었는가','소요 예산·인력을 추정하였는가']}
+};
+for(var _p in PLAN){PLAN[_p].plan=true;TYPES[_p]=PLAN[_p];}
+
+var COMMON='당신은 대한민국 지방자치단체의 문서 작성을 돕는다. 다음 원칙을 지킨다.\n'+
+ '1. 공문서 어투로 쓴다. 격식체를 쓰고 구어체·감탄사·이모지를 쓰지 않는다.\n'+
+ '2. 제공된 사실 범위를 벗어나 내용을 지어내지 않는다. 확인이 필요한 부분은 대괄호로 [확인 필요]라고 표시한다.\n'+
+ '3. 개인정보는 성명 첫 글자만 남기고 가림 처리한다(예: 홍○○).\n'+
+ '4. 설명이나 머리말 없이 문서 본문만 출력한다.\n';
+
+/* ---------- 상태 ---------- */
+var cfg={org:'',dept:'',name:'',prov:'none',model:'gemini-2.0-flash',key:'',base:{},
+  ctx:{scale:'',pop:'',ind:'',issue:'',plan:'',duty:'',basis:'',style:'',avoid:''}};
+var logs=[];
+var cur='minwon', t0=0, regen=0, hasOut=false, lastSrc='';
+
+function load(){
+  var dc={scale:'',pop:'',ind:'',issue:'',plan:'',duty:'',basis:'',style:'',avoid:''};
+  try{var c=JSON.parse(localStorage.getItem(LS_C)||'{}');for(var k in c)cfg[k]=c[k];}catch(e){}
+  if(!cfg.ctx)cfg.ctx={};
+  for(var d in dc){if(cfg.ctx[d]==null)cfg.ctx[d]=dc[d]}
+  try{logs=JSON.parse(localStorage.getItem(LS_L)||'[]');}catch(e){logs=[]}
+  try{wips=JSON.parse(localStorage.getItem(LS_W)||'[]');}catch(e){wips=[]}
+  try{files=JSON.parse(localStorage.getItem(LS_F)||'[]');}catch(e){files=[]}
+  files.forEach(function(f){
+    if(!f.cat)f.cat='etc';
+    if(!f.mode)f.mode=(f.on===false?'off':(f.text.length<=1500?'full':'search'));
+    if(!f.ch)f.ch=chunkify(f.text);
+  });
+  for(var k in TYPES){if(cfg.base[k]==null)cfg.base[k]=TYPES[k].base;}
+  if(!cfg.uid){cfg.uid='U'+Math.random().toString(36).slice(2,8).toUpperCase();saveCfg()}
+}
+function saveCfg(){localStorage.setItem(LS_C,JSON.stringify(cfg))}
+function saveLogs(){localStorage.setItem(LS_L,JSON.stringify(logs))}
+
+function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2000)}
+
+/* ---------- 탭 ---------- */
+document.querySelectorAll('.tb').forEach(function(t){
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.tb').forEach(function(x){x.setAttribute('aria-selected','false')});
+    t.setAttribute('aria-selected','true');
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on')});
+    $('#v-'+t.dataset.v).classList.add('on');
+    if(t.dataset.v==='rep')drawRep();
+    window.scrollTo(0,0);
+  });
+});
+
+/* ---------- 유형 UI ---------- */
+var step=0, sres=[];
+
+function buildTypes(){
+  var d='',p='';
+  for(var k in TYPES){
+    var b='<button class="tp" data-k="'+k+'" aria-pressed="'+(k===cur)+'">'+TYPES[k].n+'</button>';
+    if(TYPES[k].plan)p+=b;else d+=b;
+  }
+  $('#tps').outerHTML='<div id="tpsWrap"><p class="grp">정형 문서</p><div class="tps">'+d+
+    '</div><p class="grp two">기획 업무 — 단계별 진행</p><div class="tps" style="margin-bottom:0">'+p+'</div></div>';
+  document.querySelectorAll('.tp').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(b.dataset.k===cur)return;
+      if(sres.length&&!confirm('진행 중인 단계 결과가 사라집니다. 유형을 바꾸시겠습니까?'))return;
+      cur=b.dataset.k;step=0;sres=[];reset();refresh();
+    });
+  });
+}
+function refresh(){
+  document.querySelectorAll('.tp').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.k===cur)});
+  buildFields();
+}
+function buildSteps(){
+  var T=TYPES[cur],box=$('#steps');
+  if(!T.plan){box.innerHTML='';$('#nxt').style.display='none';return}
+  var h='<div class="stps">';
+  T.st.forEach(function(s,i){
+    var c=i<step?'sp ok':(i===step?'sp now':'sp');
+    h+='<span class="'+c+'">'+(i+1)+'. '+s.n+(i<step?' ✓':'')+'</span>';
+  });
+  h+='</div>';box.innerHTML=h;
+  $('#nxt').style.display=step<T.st.length?'block':'none';
+  $('#nxt').textContent=step<T.st.length-1?'이 단계 확정하고 다음으로':'최종 문서로 정리';
+}
+function buildFields(){
+  var T=TYPES[cur],h='';
+  T.f.forEach(function(f){
+    h+='<div class="fd"><label for="x_'+f.id+'">'+f.l+'</label><select id="x_'+f.id+'">';
+    f.o.forEach(function(o){h+='<option>'+o+'</option>'});h+='</select></div>';
+  });
+  $('#fields').innerHTML=h;
+  buildSteps();
+  if(T.plan&&step<T.st.length){
+    var s=T.st[step];
+    $('#srcLab').textContent='단계 '+(step+1)+'. '+s.n+' — '+s.q;
+    $('#src').placeholder='이 단계에서 확인한 내용을 적으십시오. 앞 단계의 확정 결과는 자동으로 함께 전달됩니다.';
+    $('#guide').style.display='block';
+    $('#guide').innerHTML='<h3>이 단계에서 스스로 물어야 할 것</h3><ul>'+
+      s.g.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul>';
+  }else{
+    $('#srcLab').textContent=T.s;
+    $('#src').placeholder=T.sp;
+    $('#guide').style.display='none';
+  }
+  var c='';T.c.forEach(function(x,i){c+='<label class="ck"><input type="checkbox" data-i="'+i+'"><span>'+x+'</span></label>'});
+  $('#cks').innerHTML=c;
+}
+
+/* ---------- 지시문 ---------- */
+function ctxBlock(query){
+  var p='',used=0,any=false;
+  CTXDEF.forEach(function(g){
+    var lines=[];
+    g.it.forEach(function(i){
+      var v=(cfg.ctx[i.k]||'').trim();
+      if(v)lines.push('· '+i.l.replace(/\s*\(.*\)$/,'')+': '+v.replace(/\n/g,' / '));
+    });
+    if(lines.length){any=true;p+='\n['+g.g.replace(/^\d+\.\s*/,'')+']\n'+lines.join('\n')+'\n';used+=lines.join('').length}
+  });
+  var full=files.filter(function(f){return f.mode==='full'});
+  if(full.length){
+    any=true;p+='\n[기관 등록 자료]\n';
+    full.forEach(function(f){
+      var left=CAP_TOTAL-used;if(left<200)return;
+      var t=f.text.slice(0,left);
+      p+='── '+f.name+'\n'+t+(t.length<f.text.length?'\n(이하 생략)':'')+'\n\n';
+      used+=t.length;
+    });
+  }
+  var hits=search(query||'',Math.max(0,CAP_TOTAL-used));
+  if(hits.length){
+    any=true;
+    p+='\n[등록 자료에서 찾은 관련 대목 — 이번 작업과 관련된 부분만 발췌함]\n';
+    hits.forEach(function(x){p+='── '+x.f+' (발췌)\n'+x.t+'\n\n';used+=x.t.length});
+    p+='발췌된 수치와 표현을 우선 사용한다. 발췌에 없는 내용은 [확인 필요]로 표시한다.\n';
+  }
+  if(any)p+='\n위 기관 정보에 비추어 이 기관에 실제로 해당하는 내용을 쓴다. 어느 지자체에나 통하는 일반론을 쓰지 않는다.\n'+
+     '기관 정보에 없는 지역 통계·사실·조례는 지어내지 말고 [확인 필요]로 표시한다.\n';
+  var r=($('#ref')?$('#ref').value:'').trim();
+  if(r)p+='\n[이번 건의 관련 근거 — 실무자가 확인한 자료]\n'+r+'\n';
+  return p;
+}
+function prompt(){
+  var T=TYPES[cur],p=COMMON+'\n[업무 유형] '+T.n+'\n';
+  T.f.forEach(function(f){p+='['+f.l+'] '+$('#x_'+f.id).value+'\n'});
+  if(cfg.org)p+='[기관] '+cfg.org+'\n';
+  if(cfg.dept)p+='[부서] '+cfg.dept+'\n';
+  var qry=[$('#src').value,($('#ref')?$('#ref').value:''),T.n,
+    T.f.map(function(f){return $('#x_'+f.id).value}).join(' '),
+    (T.plan&&step<T.st.length)?T.st[step].n+' '+T.st[step].g.join(' '):''].join(' ');
+  p+=ctxBlock(qry);
+  if(T.plan&&step<T.st.length){
+    var s=T.st[step];
+    p+='\n[진행 단계] '+(step+1)+'/'+T.st.length+' — '+s.n+'\n';
+    if(sres.length){
+      p+='\n[이전 단계 확정 결과]\n';
+      sres.forEach(function(r,i){p+='── '+(i+1)+'. '+T.st[i].n+'\n'+r+'\n\n'});
+    }
+    p+='[이번 단계 지시]\n'+s.i+'\n';
+    p+='\n[이번 단계에서 스스로 점검할 사항 — 결과에 반영하되 그대로 옮기지 말 것]\n'+
+      s.g.map(function(x){return '- '+x}).join('\n')+'\n';
+    p+='\n[실무자 입력]\n'+($('#src').value.trim()||'(입력 없음 — 앞 단계 결과만으로 진행)')+'\n';
+    return p;
+  }
+  p+='\n[작성 지침]\n'+T.i+'\n\n[원문 및 확인된 사실]\n'+$('#src').value.trim()+'\n';
+  return p;
+}
+
+/* ---------- API ---------- */
+function ep(){
+  if(cfg.prov==='gemini')return 'https://generativelanguage.googleapis.com/v1beta/models/'+cfg.model+':streamGenerateContent?alt=sse&key='+encodeURIComponent(cfg.key);
+  if(cfg.prov==='openai')return 'https://api.openai.com/v1/chat/completions';
+  if(cfg.prov==='claude')return 'https://api.anthropic.com/v1/messages';
+  return '';
+}
+function headers(){
+  var h={'Content-Type':'application/json'};
+  if(cfg.prov==='openai')h['Authorization']='Bearer '+cfg.key;
+  if(cfg.prov==='claude'){h['x-api-key']=cfg.key;h['anthropic-version']='2023-06-01';h['anthropic-dangerous-direct-browser-access']='true'}
+  return h;
+}
+function payload(p,stream){
+  if(cfg.prov==='gemini')return {contents:[{role:'user',parts:[{text:p}]}]};
+  if(cfg.prov==='openai')return {model:cfg.model,messages:[{role:'user',content:p}],stream:!!stream};
+  return {model:cfg.model,max_tokens:2048,stream:!!stream,messages:[{role:'user',content:p}]};
+}
+function pick(j){
+  try{
+    if(cfg.prov==='gemini')return (j.candidates&&j.candidates[0].content.parts[0].text)||'';
+    if(cfg.prov==='openai')return (j.choices&&j.choices[0].delta&&j.choices[0].delta.content)||'';
+    if(j.type==='content_block_delta')return (j.delta&&j.delta.text)||'';
+  }catch(e){}
+  return '';
+}
+
+async function stream(p,onChunk){
+  var res=await fetch(ep(),{method:'POST',headers:headers(),body:JSON.stringify(payload(p,true))});
+  if(!res.ok){var t=await res.text();throw new Error('('+res.status+') '+t.slice(0,180))}
+  var rd=res.body.getReader(),dec=new TextDecoder(),buf='';
+  while(true){
+    var r=await rd.read();if(r.done)break;
+    buf+=dec.decode(r.value,{stream:true});
+    var parts=buf.split('\n\n');buf=parts.pop();
+    for(var i=0;i<parts.length;i++){
+      var lines=parts[i].split('\n');
+      for(var j=0;j<lines.length;j++){
+        var ln=lines[j].trim();
+        if(ln.indexOf('data:')!==0)continue;
+        var d=ln.slice(5).trim();
+        if(d==='[DONE]')continue;
+        try{var o=JSON.parse(d);var tx=pick(o);if(tx)onChunk(tx)}catch(e){}
+      }
+    }
+  }
+}
+
+/* ---------- 생성 ---------- */
+$('#gen').addEventListener('click',async function(){
+  if(!$('#src').value.trim()&&!sres.length){toast('원문을 입력하십시오');$('#src').focus();return}
+  if(cfg.prov==='none'){toast('설정에서 AI를 연결하거나 지시문 복사를 쓰십시오');return}
+  var b=$('#gen');b.disabled=true;b.textContent='생성 중';lastSrc='api';
+  $('#dot').className='dot busy';$('#st').textContent='생성 중';
+  $('#out').value='';hasOut=false;
+  if(t0===0)t0=Date.now(); else regen++;
+  var s=Date.now(),tick=setInterval(function(){$('#st').textContent='생성 중 '+((Date.now()-s)/1000).toFixed(1)+'초'},100);
+  try{
+    await stream(prompt(),function(tx){$('#out').value+=tx;$('#out').scrollTop=$('#out').scrollHeight});
+    clearInterval(tick);
+    hasOut=true;$('#dot').className='dot ok';
+    $('#st').textContent='생성 완료 '+((Date.now()-s)/1000).toFixed(1)+'초'+(regen?' · 재생성 '+regen+'회':'');
+  }catch(e){
+    clearInterval(tick);$('#dot').className='dot';
+    $('#st').textContent='생성 실패';
+    $('#out').value='[오류] '+e.message+'\n\n설정의 제공자·모델·키를 확인하십시오. 업무망에서 외부 호출이 막힌 경우 「지시문만 복사」를 사용하십시오.';
+  }
+  b.disabled=false;b.textContent='초안 생성';
+});
+
+$('#copyp').addEventListener('click',function(){
+  if(!$('#src').value.trim()){toast('원문을 입력하십시오');return}
+  if(t0===0)t0=Date.now();
+  lastSrc='copy';
+  navigator.clipboard.writeText(prompt()).then(function(){
+    toast('지시문을 복사했습니다. 결과를 문서 칸에 붙여 넣으십시오');
+    $('#dot').className='dot busy';$('#st').textContent='외부 AI 작업 중 — 결과를 붙여 넣으세요';
+  },function(){toast('복사에 실패했습니다')});
+});
+
+$('#out').addEventListener('input',function(){
+  if($('#out').value.trim().length>40&&!hasOut){hasOut=true;$('#dot').className='dot ok';$('#st').textContent='작성 중'}
+});
+
+$('#cpy').addEventListener('click',function(){
+  if(!$('#out').value.trim()){toast('문서가 비어 있습니다');return}
+  navigator.clipboard.writeText($('#out').value).then(function(){toast('문서를 복사했습니다')});
+});
+
+$('#dl').addEventListener('click',function(){
+  var v=$('#out').value.trim();if(!v){toast('문서가 비어 있습니다');return}
+  var body=v.split('\n').map(function(l){return '<p>'+l.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</p>'}).join('');
+  var html='<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8">'+
+    '<style>body{font-family:"바탕",serif;font-size:11pt;line-height:1.9}p{margin:0 0 8pt}</style></head><body>'+body+'</body></html>';
+  var blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='draft_'+stamp()+'.doc';a.click();URL.revokeObjectURL(a.href);
+});
+
+function stamp(){var d=new Date(),p=function(n){return(n<10?'0':'')+n};
+  return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
+
+/* ---------- 서식 초안 ---------- */
+function reveal(text,done){
+  var out=$('#out'),i=0;out.value='';
+  (function step(){
+    var n=Math.min(i+3,text.length);
+    out.value=text.slice(0,n);i=n;out.scrollTop=out.scrollHeight;
+    if(i<text.length)setTimeout(step,12);else if(done)done();
+  })();
+}
+$('#tpl').addEventListener('click',function(){
+  if(t0===0)t0=Date.now();else regen++;
+  var T=TYPES[cur],f={};
+  T.f.forEach(function(x){f[x.id]=$('#x_'+x.id).value});
+  var txt;
+  if(T.plan&&step<T.st.length){
+    var s=T.st[step],src=$('#src').value.trim();
+    txt='['+T.n+'] 단계 '+(step+1)+'/'+T.st.length+' — '+s.n+'\n'+
+        '조건: '+T.f.map(function(x){return x.l+' '+f[x.id]}).join(' / ')+'\n'+
+        '────────────────────────────────\n\n'+
+        '□ 점검 질문\n'+
+        s.g.map(function(x,i){return '  '+(i+1)+') '+x+'\n     → '}).join('\n')+'\n\n'+
+        '□ 이번 단계 작성란\n'+
+        (src?bits(src,6).map(function(x){return '  - '+x}).join('\n')+'\n  - [추가 기재]':'  - [내용 기재]\n  - [내용 기재]\n  - [내용 기재]')+'\n\n'+
+        (sres.length?'□ 앞 단계 확정 내용 (참고)\n'+sres.map(function(r,i){
+          return '  '+(i+1)+'. '+T.st[i].n+'\n'+r.split('\n').slice(0,4).map(function(l){return '     '+l}).join('\n')}).join('\n')+'\n\n':'')+
+        '□ 이 단계 결론 (한 문장으로)\n  → [결론 기재]';
+  }else{
+    try{txt=TPL[cur](f,$('#src').value,cfg)}
+    catch(e){toast('서식 구성에 실패했습니다');return}
+  }
+  lastSrc='tpl';hasOut=false;
+  $('#dot').className='dot busy';$('#st').textContent='서식 구성 중';
+  reveal(txt,function(){
+    hasOut=true;$('#dot').className='dot ok';
+    $('#st').textContent='서식 작업지 완료 · AI 미사용'+(regen?' · 재작성 '+regen+'회':'');
+  });
+});
+
+/* ---------- 단계 확정 ---------- */
+$('#nxt').addEventListener('click',function(){
+  var T=TYPES[cur];if(!T.plan)return;
+  var v=$('#out').value.trim();
+  if(!v){toast('이 단계의 결과가 비어 있습니다');return}
+  sres[step]=v;step++;
+  wipSave(true);
+  if(step<T.st.length){
+    $('#out').value='';$('#src').value='';hasOut=false;
+    $('#dot').className='dot';$('#st').textContent='단계 '+(step+1)+' — '+T.st[step].n;
+    buildFields();$('#src').focus();
+    toast('단계 '+step+' 확정 · 다음 단계로 이동했습니다');
+  }else{
+    var all=sres.map(function(r,i){return '■ '+(i+1)+'. '+T.st[i].n+'\n\n'+r}).join('\n\n\n');
+    $('#out').value=all;hasOut=true;
+    $('#dot').className='dot ok';$('#st').textContent='전 단계 완료 · 최종 문서 정리됨';
+    buildFields();toast('모든 단계를 마쳤습니다. 검증 후 완료하십시오');
+  }
+});
+
+/* ---------- 보관함 ---------- */
+function saveWips(){localStorage.setItem(LS_W,JSON.stringify(wips))}
+function wipTitle(){
+  var T=TYPES[cur];
+  var head=((sres[0]||$('#src').value||'').trim()).replace(/\s+/g,' ').slice(0,22);
+  var d=new Date(),p=function(n){return(n<10?'0':'')+n};
+  return T.n+(T.plan?' ('+step+'/'+T.st.length+'단계)':'')+(head?' — '+head:'')+
+    ' · '+(d.getMonth()+1)+'/'+d.getDate()+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+function snap(){
+  var f={};TYPES[cur].f.forEach(function(x){f[x.id]=$('#x_'+x.id).value});
+  return {id:curWip||('w'+Date.now()),ts:Date.now(),type:cur,step:step,sres:sres.slice(),
+    f:f,src:$('#src').value,ref:$('#ref').value,out:$('#out').value,t0:t0,regen:regen,
+    title:wipTitle()};
+}
+function wipSave(quiet){
+  if(!$('#out').value.trim()&&!$('#src').value.trim()&&!sres.length){
+    if(!quiet)toast('저장할 내용이 없습니다');return;
+  }
+  var s=snap();
+  var i=wips.findIndex(function(w){return w.id===s.id});
+  if(i>=0)wips[i]=s;else wips.push(s);
+  if(wips.length>20)wips=wips.slice(-20);
+  curWip=s.id;saveWips();paintWips();
+  if(!quiet)toast('보관함에 저장했습니다');
+}
+function paintWips(){
+  var sel=$('#wipSel');
+  if(!wips.length){sel.innerHTML='<option value="">저장된 진행 건이 없습니다</option>';return}
+  sel.innerHTML=wips.slice().reverse().map(function(w){
+    return '<option value="'+w.id+'"'+(w.id===curWip?' selected':'')+'>'+w.title+'</option>';
+  }).join('');
+}
+$('#wipSave').addEventListener('click',function(){wipSave(false)});
+$('#wipLoad').addEventListener('click',function(){
+  var id=$('#wipSel').value;if(!id){toast('불러올 건이 없습니다');return}
+  var w=wips.find(function(x){return x.id===id});if(!w)return;
+  if(($('#out').value.trim()||sres.length)&&w.id!==curWip&&
+     !confirm('현재 작업이 사라집니다. 불러오시겠습니까?'))return;
+  cur=w.type;step=w.step;sres=w.sres.slice();curWip=w.id;
+  t0=w.t0||Date.now();regen=w.regen||0;lastSrc='';
+  refresh();
+  for(var k in w.f){var e=$('#x_'+k);if(e)e.value=w.f[k]}
+  $('#src').value=w.src||'';$('#ref').value=w.ref||'';$('#out').value=w.out||'';
+  hasOut=!!(w.out||'').trim();
+  $('#dot').className=hasOut?'dot ok':'dot';
+  $('#st').textContent='보관함에서 불러옴'+(TYPES[cur].plan?' · 단계 '+(step+1):'');
+  paintWips();toast('불러왔습니다');
+});
+$('#wipDel').addEventListener('click',function(){
+  var id=$('#wipSel').value;if(!id)return;
+  var w=wips.find(function(x){return x.id===id});
+  if(!confirm('다음 건을 삭제합니다.\n\n'+(w?w.title:'')+'\n\n되돌릴 수 없습니다.'))return;
+  wips=wips.filter(function(x){return x.id!==id});
+  if(curWip===id)curWip=null;
+  saveWips();paintWips();toast('삭제했습니다');
+});
+
+/* ---------- 완료 기록 ---------- */
+$('#done').addEventListener('click',function(){
+  if(!$('#out').value.trim()){toast('완료할 문서가 없습니다');return}
+  if(TYPES[cur].plan&&step===0&&
+     !confirm('기획 업무의 단계를 하나도 확정하지 않았습니다.\n이대로 완료하면 단계 기록이 남지 않습니다.\n\n계속하시겠습니까?'))return;
+  var boxes=$('#cks').querySelectorAll('input'),ck=0;
+  boxes.forEach(function(b){if(b.checked)ck++});
+  var mins=t0?Math.max(0.5,(Date.now()-t0)/60000):1;
+  var base=cfg.base[cur]||TYPES[cur].base;
+  /* 실제로 손을 댄 시간이 1분에 못 미치면 절감으로 세지 않는다.
+     또 아무리 빨라도 기준 시간의 80%를 넘겨 절감으로 잡지 않는다. */
+  var tooFast=mins<1;
+  var saved=tooFast?0:Math.max(0,Math.min(base-mins,base*0.8));
+  var T=TYPES[cur],fx={};
+  T.f.forEach(function(x){fx[x.l]=$('#x_'+x.id).value});
+  var field1=T.f.length?$('#x_'+T.f[0].id).value:'';
+  var rec={ts:Date.now(),type:cur,dept:cfg.dept||'미설정',uid:cfg.uid,fx:fx,f1:field1,min:+mins.toFixed(1),
+    saved:+saved.toFixed(1),fast:tooFast,chars:$('#out').value.length,
+    regen:regen,ck:ck,ckAll:boxes.length,mode:lastSrc||'manual',
+    stepDone:T.plan?step:0,stepAll:T.plan?T.st.length:0};
+  logs.push(rec);saveLogs();
+  if(curWip){wips=wips.filter(function(x){return x.id!==curWip});saveWips()}
+  $('#fnote').textContent='기록됨 · 소요 '+rec.min+'분 · '+
+    (tooFast?'절감 미산정(소요 1분 미만)':'절감 '+rec.saved+'분')+' · 검증 '+ck+'/'+boxes.length+
+    (T.plan?' · 단계 '+step+'/'+T.st.length:'');
+  reset();paintRail(true);paintWips();toast('작업을 기록했습니다');
+});
+function reset(){
+  $('#out').value='';$('#src').value='';$('#ref').value='';
+  t0=0;regen=0;hasOut=false;lastSrc='';step=0;sres=[];curWip=null;
+  $('#dot').className='dot';$('#st').textContent='유형을 고르고 원문을 넣으세요';
+  buildFields();
+}
+
+/* ---------- 레일 ---------- */
+function paintRail(flash){
+  var d0=new Date();d0.setHours(0,0,0,0);var d0t=d0.getTime();
+  var today=logs.filter(function(l){return l.ts>=d0t});
+  var sv=logs.reduce(function(a,l){return a+l.saved},0);
+  var ckS=logs.reduce(function(a,l){return a+l.ck},0),ckT=logs.reduce(function(a,l){return a+l.ckAll},0);
+  $('#m1').innerHTML=today.length+'<small>건</small>';
+  $('#m1s').textContent=today.length?'절감 '+Math.round(today.reduce(function(a,l){return a+l.saved},0))+'분':'—';
+  $('#m2').innerHTML=logs.length+'<small>건</small>';
+  var ds=new Set(logs.map(function(l){return new Date(l.ts).toDateString()}));
+  $('#m2s').textContent=logs.length?ds.size+'일간 사용':'—';
+  $('#m3').innerHTML=(sv>=60?(sv/60).toFixed(1):Math.round(sv))+'<small>'+(sv>=60?'시간':'분')+'</small>';
+  $('#m3s').textContent=logs.length?'건당 평균 '+Math.round(sv/logs.length)+'분':'—';
+  $('#m4').innerHTML=ckT?Math.round(ckS/ckT*100)+'<small>%</small>':'—';
+  $('#m4s').textContent=ckT?ckS+' / '+ckT+' 항목':'—';
+  if(flash){['#m1','#m2','#m3','#m4'].forEach(function(s){
+    var e=$(s);e.classList.add('flash');setTimeout(function(){e.classList.remove('flash')},900)})}
+}
+
+/* ---------- 현황 ---------- */
+var period=30;
+document.querySelectorAll('[data-p]').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('[data-p]').forEach(function(x){x.classList.remove('on')});
+    b.classList.add('on');period=+b.dataset.p;drawRep();
+  });
+});
+
+/* 활용 수준 판정 — 설문이 아니라 실제 사용 기록으로 정한다 */
+var LEVELS=[
+ {n:'1단계 미착수',d:'완료한 문서가 없습니다.'},
+ {n:'2단계 체험',d:'써 보기는 했으나 아직 업무에 붙지 않았습니다.'},
+ {n:'3단계 반복 사용',d:'여러 날에 걸쳐 되풀이해 쓰고 있습니다.'},
+ {n:'4단계 검증 습관',d:'산출물을 확인하는 절차가 몸에 붙었습니다.'},
+ {n:'5단계 기획 활용',d:'정형 문서를 넘어 기획 업무까지 끌고 갑니다.'}
+];
+function assess(L){
+  var days=new Set(L.map(function(l){return new Date(l.ts).toDateString()})).size;
+  var ckS=L.reduce(function(a,l){return a+l.ck},0),ckT=L.reduce(function(a,l){return a+l.ckAll},0);
+  var ckP=ckT?ckS/ckT:0;
+  var plan=L.filter(function(l){return l.stepAll>0&&l.stepDone>=l.stepAll}).length;
+  /* 앞 조건을 채워야 다음 단계로 올라간다. 단계 수와 조건 수를 일치시킨다 */
+  var cond=[
+   {t:'문서를 1건 이상 완료했는가',ok:L.length>=1,v:L.length+'건'},
+   {t:'5건 이상을 3일 이상에 나누어 썼는가',ok:L.length>=5&&days>=3,v:L.length+'건 / '+days+'일'},
+   {t:'검증 항목 이행률이 70% 이상인가',ok:ckP>=0.7,v:Math.round(ckP*100)+'%'},
+   {t:'기획 업무를 전 단계까지 끌고 간 적이 있는가',ok:plan>=1,v:plan+'건'}
+  ];
+  var lv=0;for(var i=0;i<cond.length;i++){if(cond[i].ok)lv=i+1;else break}
+  return {lv:lv,cond:cond,days:days,ckP:ckP,plan:plan};
+}
+function settle(L){
+  if(!L.length)return null;
+  var now=Date.now(),d7=now-7*864e5,d14=now-14*864e5;
+  var s7=new Set(L.filter(function(l){return l.ts>=d7}).map(function(l){return new Date(l.ts).toDateString()})).size;
+  var s14=new Set(L.filter(function(l){return l.ts>=d14}).map(function(l){return new Date(l.ts).toDateString()})).size;
+  var first=Math.min.apply(null,L.map(function(l){return l.ts}));
+  var last=Math.max.apply(null,L.map(function(l){return l.ts}));
+  return {s7:s7,s14:s14,first:first,last:last,
+    since:Math.floor((now-first)/864e5),idle:Math.floor((now-last)/864e5)};
+}
+function bar(label,val,pct,warn){
+  return '<div class="row"><span class="nm2">'+label+'</span><div class="trk"><div class="fil'+
+    (warn?' low':'')+'" data-w="'+pct+'"></div></div><span class="pc">'+val+'</span></div>';
+}
+
+function drawRep(){
+  var cut=period?Date.now()-period*864e5:0;
+  var L=logs.filter(function(l){return l.ts>=cut});
+  $('#rsub').textContent=(cfg.org||'기관 미설정')+(cfg.dept?' '+cfg.dept:'')+
+    (cfg.name?' '+cfg.name:'')+' · 실제 사용 기록에서 산출';
+  if(!L.length){$('#repBody').innerHTML='<div class="blk"><p class="empty">해당 기간의 기록이 없습니다.<br>문서를 작성하고 「작업 완료」를 누르면 기록이 쌓입니다.</p></div>';return}
+
+  var A=assess(L),S=settle(L);
+  var sv=L.reduce(function(a,l){return a+l.saved},0);
+  var mn=L.reduce(function(a,l){return a+l.min},0);
+  var rg=L.filter(function(l){return l.regen>0}).length;
+
+  var h='<div class="kpis">'+
+   '<div class="kpi"><p class="k">완료 문서</p><p class="v">'+L.length+'<small>건</small></p><p class="d">'+A.days+'일간 · 일평균 '+(L.length/A.days).toFixed(1)+'건</p></div>'+
+   '<div class="kpi"><p class="k">절감 시간</p><p class="v">'+(sv/60).toFixed(1)+'<small>시간</small></p><p class="d">건당 평균 '+Math.round(sv/L.length)+'분</p></div>'+
+   '<div class="kpi"><p class="k">최근 7일 사용</p><p class="v">'+S.s7+'<small>일</small></p><p class="d">'+(S.idle===0?'오늘 사용':S.idle+'일째 사용 없음')+'</p></div>'+
+   '<div class="kpi"><p class="k">활용 수준</p><p class="v">'+(A.lv+1)+'<small>단계</small></p><p class="d">'+LEVELS[A.lv].n.replace(/^\d단계 /,'')+'</p></div>'+
+   '</div>';
+
+  /* 누가 — 활용 수준 판정 근거 */
+  h+='<div class="blk" style="margin-bottom:18px"><h3>활용 수준 판정</h3>'+
+     '<p class="hint" style="margin:0 0 14px">설문이나 시험이 아니라 실제 사용 기록으로 정한 결과입니다. '+
+     LEVELS[A.lv].d+'</p><table><tbody>';
+  A.cond.forEach(function(c,i){
+    var reached=i<=A.lv, mark=c.ok&&reached?'✓':(reached?'·':'—');
+    var col=c.ok&&reached?'var(--green)':'var(--ink3)';
+    var note=(!reached&&c.ok)?' <span style="color:var(--ink3)">(앞 조건 충족 후 반영)</span>':'';
+    h+='<tr><td style="width:26px;color:'+col+'">'+mark+'</td>'+
+       '<td'+(c.ok&&reached?'':' style="color:var(--ink3)"')+'>'+c.t+note+'</td>'+
+       '<td class="n">'+c.v+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+
+  /* 어떤 업무에서 */
+  var byT={};L.forEach(function(l){byT[l.type]=(byT[l.type]||0)+1});
+  var arr=Object.keys(byT).map(function(k){return {k:k,v:byT[k]}}).sort(function(a,b){return b.v-a.v});
+  var mx=arr[0].v;
+  var byF={};
+  L.forEach(function(l){
+    var v=l.f1||(l.fx?l.fx[Object.keys(l.fx)[0]]:'');
+    if(v)byF[v]=(byF[v]||0)+1;
+  });
+  var fa=Object.keys(byF).map(function(k){return {k:k,v:byF[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,8);
+
+  h+='<div class="g2"><div class="blk"><h3>업무 유형별</h3>';
+  arr.forEach(function(a){h+=bar(TYPES[a.k].n,a.v+'건',Math.round(a.v/mx*100),false)});
+  h+='</div><div class="blk"><h3>업무 분야별</h3>';
+  if(fa.length){var fmx=fa[0].v;fa.forEach(function(a){h+=bar(a.k,a.v+'건',Math.round(a.v/fmx*100),false)})}
+  else h+='<p class="hint" style="margin:0">분야 정보가 없는 옛 기록입니다.</p>';
+  h+='</div></div>';
+
+  /* 얼마나 — 정착 추이 */
+  h+='<div class="blk" style="margin-top:18px"><h3>정착 추이</h3><table><tbody>'+
+     '<tr><td>처음 사용</td><td class="n">'+new Date(S.first).toLocaleDateString('ko-KR')+' ('+S.since+'일 전)</td></tr>'+
+     '<tr><td>마지막 사용</td><td class="n">'+new Date(S.last).toLocaleDateString('ko-KR')+' ('+(S.idle===0?'오늘':S.idle+'일 전')+')</td></tr>'+
+     '<tr><td>최근 14일 중 사용한 날</td><td class="n">'+S.s14+'일</td></tr>'+
+     '<tr><td>검증 이행률</td><td class="n">'+Math.round(A.ckP*100)+'%</td></tr>'+
+     '<tr><td>재생성이 있었던 문서</td><td class="n">'+rg+'건</td></tr>'+
+     '<tr><td>총 투입 시간</td><td class="n">'+Math.round(mn)+'분</td></tr>'+
+     '</tbody></table></div>';
+
+  h+='<div class="blk" style="margin-top:18px"><h3>최근 기록</h3><table><thead><tr><th>일시</th><th>유형</th><th>분야</th><th class="n">소요</th><th class="n">검증</th></tr></thead><tbody>';
+  L.slice(-8).reverse().forEach(function(l){
+    var d=new Date(l.ts),f1=l.f1||(l.fx?l.fx[Object.keys(l.fx)[0]]:'');
+    h+='<tr><td>'+(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes()+
+       '</td><td>'+TYPES[l.type].n+'</td><td>'+(f1||'—')+'</td><td class="n">'+l.min+'분</td><td class="n">'+l.ck+'/'+l.ckAll+'</td></tr>';
+  });
+  h+='</tbody></table></div>';
+
+  /* 관찰된 사항 */
+  var weak=arr.length>1?arr[arr.length-1]:null;
+  var ckPct=Math.round(A.ckP*100);
+  h+='<div class="adv"><h3>관찰된 사항</h3>';
+  var said=false;
+  if(S.idle>=7){h+='<p>마지막 사용이 '+S.idle+'일 전입니다. 교육 직후 반짝 쓰다 중단되는 전형적 양상일 수 있습니다.</p>';said=true}
+  if(ckPct<60){h+='<p>검증 이행률이 '+ckPct+'퍼센트입니다. 산출물을 확인하지 않고 쓰는 비중이 높아 검증 절차 안내가 필요합니다.</p>';said=true}
+  if(L.length>=10&&weak&&weak.v<=Math.max(1,Math.round(mx*0.25))){h+='<p>'+TYPES[weak.k].n+' 유형이 '+weak.v+'건에 그칩니다. 해당 업무에 서식이 맞지 않거나 활용 방법이 알려지지 않았을 수 있습니다.</p>';said=true}
+  if(rg>L.length*0.4){h+='<p>재생성이 발생한 문서가 '+rg+'건입니다. 최초 지시문의 조건 설정을 재검토할 필요가 있습니다.</p>';said=true}
+  var pl=L.filter(function(l){return l.stepAll>0});
+  if(pl.length){
+    var plDone=pl.filter(function(l){return l.stepDone>=l.stepAll}).length;
+    h+='<p>기획 업무 '+pl.length+'건 중 '+plDone+'건이 전 단계를 마쳤습니다'+
+      (plDone<pl.length?'. 중도에 멈춘 지점을 보면 어느 사고 단계에서 어려움을 겪는지 드러납니다.':'.')+'</p>';said=true;
+  }else if(A.lv>=3){h+='<p>정형 문서 위주로 쓰고 있습니다. 기획 업무를 한 건 끌고 가 보면 활용 범위가 넓어집니다.</p>';said=true}
+  if(!said)h+='<p>현재 기록 범위에서 특이 사항은 확인되지 않았습니다.</p>';
+  h+='</div>';
+
+  $('#repBody').innerHTML=h;
+  setTimeout(function(){document.querySelectorAll('.fil').forEach(function(f,i){
+    setTimeout(function(){f.style.width=f.dataset.w+'%'},i*60)})},60);
+}
+
+/* ---------- 기록 관리 ---------- */
+function summaryText(){
+  var L=logs.slice();
+  if(!L.length)return null;
+  var A=assess(L),S=settle(L);
+  var sv=L.reduce(function(a,l){return a+l.saved},0);
+  var byT={};L.forEach(function(l){byT[l.type]=(byT[l.type]||0)+1});
+  var arr=Object.keys(byT).map(function(k){return {k:k,v:byT[k]}}).sort(function(a,b){return b.v-a.v});
+  var byF={};L.forEach(function(l){var v=l.f1||(l.fx?l.fx[Object.keys(l.fx)[0]]:'');if(v)byF[v]=(byF[v]||0)+1});
+  var fa=Object.keys(byF).map(function(k){return {k:k,v:byF[k]}}).sort(function(a,b){return b.v-a.v}).slice(0,5);
+  var pl=L.filter(function(l){return l.stepAll>0});
+  var plDone=pl.filter(function(l){return l.stepDone>=l.stepAll}).length;
+  var md={};L.forEach(function(l){md[l.mode]=(md[l.mode]||0)+1});
+  var mdn={tpl:'서식만',api:'AI 직접 연결',copy:'외부 AI 복사',manual:'직접 작성'};
+
+  var t='[행정문서 어시스턴트 활용 요약]\n';
+  t+='식별자 '+(cfg.uid||'미상')+' · 기관 '+(cfg.org||'미기재')+' · 부서 '+(cfg.dept||'미기재')+'\n';
+  t+='작성 시점 '+new Date().toLocaleString('ko-KR')+'\n';
+  t+='※ 문서 내용은 담기지 않으며, 사용 기록의 통계값만 담습니다.\n\n';
+  t+='1. 얼마나 쓰고 있는가\n';
+  t+='  완료 문서 '+L.length+'건 / 사용한 날 '+A.days+'일\n';
+  t+='  처음 사용 '+new Date(S.first).toLocaleDateString('ko-KR')+' (경과 '+S.since+'일)\n';
+  t+='  마지막 사용 '+new Date(S.last).toLocaleDateString('ko-KR')+' ('+(S.idle===0?'오늘':S.idle+'일 전')+')\n';
+  t+='  최근 7일 중 '+S.s7+'일 / 최근 14일 중 '+S.s14+'일 사용\n';
+  t+='  추정 절감 '+(sv/60).toFixed(1)+'시간 (건당 평균 '+Math.round(sv/L.length)+'분)\n\n';
+  t+='2. 어떤 업무에서 쓰고 있는가\n';
+  arr.forEach(function(a){t+='  '+TYPES[a.k].n+' '+a.v+'건\n'});
+  if(fa.length){t+='  [분야] '+fa.map(function(a){return a.k+' '+a.v+'건'}).join(' / ')+'\n'}
+  t+='\n3. 어떻게 쓰고 있는가\n';
+  for(var m in md)t+='  '+(mdn[m]||m)+' '+md[m]+'건\n';
+  t+='  검증 이행률 '+Math.round(A.ckP*100)+'%\n';
+  t+='  기획 업무 '+pl.length+'건 중 완주 '+plDone+'건\n\n';
+  t+='4. 활용 수준 판정\n';
+  t+='  '+LEVELS[A.lv].n+' — '+LEVELS[A.lv].d+'\n';
+  A.cond.forEach(function(c){t+='  '+(c.ok?'[충족]':'[미충족]')+' '+c.t+' ('+c.v+')\n'});
+  return t;
+}
+$('#share').addEventListener('click',function(){
+  var t=summaryText();
+  if(!t){toast('요약할 기록이 없습니다');return}
+  if(!confirm('사용 기록의 통계값만 담은 요약을 만듭니다.\n문서 내용, 기관 정보에 올린 자료, 입력하신 원문은 담기지 않습니다.\n\n계속하시겠습니까?'))return;
+  navigator.clipboard.writeText(t).then(function(){toast('요약을 복사했습니다. 메일이나 메신저에 붙여 넣으십시오')},
+    function(){toast('복사에 실패했습니다. 파일로 저장합니다')});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\ufeff'+t],{type:'text/plain'}));
+  a.download='usage_summary_'+stamp()+'.txt';a.click();URL.revokeObjectURL(a.href);
+});
+
+$('#csv').addEventListener('click',function(){
+  if(!logs.length){toast('내보낼 기록이 없습니다');return}
+  var rows=[['일시','유형','분야','부서','소요분','절감분','절감미산정','글자수','재생성','검증','검증항목','단계완료','단계전체','방식','식별자']];
+  logs.forEach(function(l){
+    var f1=l.f1||(l.fx?l.fx[Object.keys(l.fx)[0]]:'')||'';
+    rows.push([new Date(l.ts).toLocaleString('ko-KR'),TYPES[l.type].n,f1,l.dept,l.min,l.saved,
+      l.fast?'Y':'',l.chars,l.regen,l.ck,l.ckAll,l.stepDone||0,l.stepAll||0,l.mode,l.uid||''])});
+  var csv='\ufeff'+rows.map(function(r){return r.join(',')}).join('\n');
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='usage_log_'+stamp()+'.csv';a.click();URL.revokeObjectURL(a.href);
+});
+$('#seed').addEventListener('click',function(){
+  if(!confirm('시연용 예시 기록 40건을 추가합니다. 실제 기록과 섞이므로 시연 후 삭제하십시오. 계속하시겠습니까?'))return;
+  var ks=Object.keys(TYPES),w=[.3,.22,.18,.14,.1,.06];
+  for(var i=0;i<40;i++){
+    var r=Math.random(),acc=0,k=ks[0];
+    for(var j=0;j<ks.length;j++){acc+=w[j];if(r<acc){k=ks[j];break}}
+    var base=cfg.base[k]||TYPES[k].base,mn=+(base*(0.18+Math.random()*0.3)).toFixed(1);
+    var all=TYPES[k].c.length;
+    var opts=TYPES[k].f[0].o,f1=opts[Math.floor(Math.random()*opts.length)];
+    var fx={};fx[TYPES[k].f[0].l]=f1;
+    logs.push({ts:Date.now()-Math.floor(Math.random()*26)*864e5-Math.floor(Math.random()*8)*36e5,
+      type:k,dept:cfg.dept||'미설정',uid:cfg.uid,fx:fx,f1:f1,
+      min:mn,saved:+Math.min(base-mn,base*0.8).toFixed(1),
+      chars:400+Math.floor(Math.random()*900),regen:Math.random()<0.3?1:0,
+      ck:Math.floor(Math.random()*(all+1)),ckAll:all,mode:'api',
+      stepDone:TYPES[k].plan?TYPES[k].st.length:0,stepAll:TYPES[k].plan?TYPES[k].st.length:0,demo:true});
+  }
+  logs.sort(function(a,b){return a.ts-b.ts});saveLogs();paintRail(true);drawRep();toast('예시 기록을 추가했습니다');
+});
+$('#wipe').addEventListener('click',function(){
+  if(!confirm('기록을 모두 삭제합니다. 되돌릴 수 없습니다. 계속하시겠습니까?'))return;
+  logs=[];saveLogs();paintRail();drawRep();toast('기록을 삭제했습니다');
+});
+
+/* ---------- 파일 읽기 (외부 라이브러리 없음) ---------- */
+var files=[];
+
+function u16(d,o){return d.getUint16(o,true)} function u32(d,o){return d.getUint32(o,true)}
+async function unzip(buf){
+  var d=new DataView(buf),n=buf.byteLength,eo=-1;
+  for(var i=n-22;i>=0&&i>n-65558;i--){if(u32(d,i)===0x06054b50){eo=i;break}}
+  if(eo<0)throw new Error('압축 구조를 읽을 수 없습니다');
+  var cnt=u16(d,eo+10),off=u32(d,eo+16),out={};
+  for(var c=0;c<cnt;c++){
+    if(u32(d,off)!==0x02014b50)break;
+    var m=u16(d,off+10),cs=u32(d,off+20),nl=u16(d,off+28),el=u16(d,off+30),cl=u16(d,off+32),lo=u32(d,off+42);
+    var name=new TextDecoder('utf-8').decode(new Uint8Array(buf,off+46,nl));
+    var lnl=u16(d,lo+26),lel=u16(d,lo+28),ds=lo+30+lnl+lel;
+    var raw=new Uint8Array(buf,ds,cs);
+    if(m===0)out[name]=raw.slice();
+    else if(m===8){
+      var st=new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      out[name]=new Uint8Array(await new Response(st).arrayBuffer());
+    }
+    off+=46+nl+el+cl;
+  }
+  return out;
+}
+function xml(bytes){
+  return new DOMParser().parseFromString(new TextDecoder('utf-8').decode(bytes),'application/xml');
+}
+function decodeText(bytes){
+  var t=new TextDecoder('utf-8',{fatal:false}).decode(bytes);
+  if(t.indexOf('\ufffd')>=0){try{t=new TextDecoder('euc-kr').decode(bytes)}catch(e){}}
+  return t;
+}
+/* 문단과 표를 문서에 놓인 차례대로 읽고, 표는 한 행을 한 줄로 묶는다 */
+function findAll(el,name){
+  var out=[];
+  (function w(n){for(var i=0;i<n.childNodes.length;i++){var c=n.childNodes[i];
+    if(c.nodeType!==1)continue;if(lnm(c)===name)out.push(c);w(c)}})(el);
+  return out;
+}
+function lnm(e){var n=e.localName||e.nodeName||'';var i=n.indexOf(':');return i<0?n:n.slice(i+1)}
+function walkDoc(root,pTag,tTag,rTag,cTag,txTag,tabTag){
+  var out=[];
+  function para(el){
+    var s='';
+    (function rec(n){
+      for(var i=0;i<n.childNodes.length;i++){
+        var c=n.childNodes[i];if(c.nodeType!==1)continue;
+        var t=lnm(c);
+        if(t===txTag)s+=c.textContent;
+        else if(tabTag&&t===tabTag)s+='\t';
+        else if(t!==tTag)rec(c);
+      }
+    })(el);
+    return s.trim();
+  }
+  function table(el){
+    var rows=findAll(el,rTag),r=[];
+    for(var i=0;i<rows.length;i++){
+      var cells=findAll(rows[i],cTag),line=[];
+      for(var j=0;j<cells.length;j++)line.push(para(cells[j]).replace(/\s+/g,' '));
+      if(line.join('').trim())r.push(line.join('\t'));
+    }
+    return r.join('\n');
+  }
+  (function scan(n){
+    for(var i=0;i<n.childNodes.length;i++){
+      var c=n.childNodes[i];if(c.nodeType!==1)continue;
+      var t=lnm(c);
+      if(t===tTag){var tt=table(c);if(tt)out.push(tt)}
+      else if(t===pTag){
+        var tb=findAll(c,tTag);
+        var s=para(c);if(s)out.push(s);
+        for(var k=0;k<tb.length;k++){var t2=table(tb[k]);if(t2)out.push(t2)}
+      }
+      else scan(c);
+    }
+  })(root);
+  return out.join('\n');
+}
+async function readDocx(z){
+  var f=z['word/document.xml'];if(!f)throw new Error('워드 본문을 찾을 수 없습니다');
+  return walkDoc(xml(f).documentElement,'p','tbl','tr','tc','t','tab');
+}
+async function readHwpx(z){
+  var ks=Object.keys(z).filter(function(k){return /^Contents\/section\d*\.xml$/i.test(k)}).sort();
+  if(!ks.length){
+    if(z['Preview/PrvText.txt'])return decodeText(z['Preview/PrvText.txt']);
+    throw new Error('한글 본문을 찾을 수 없습니다');
+  }
+  return ks.map(function(k){return walkDoc(xml(z[k]).documentElement,'p','tbl','tr','tc','t',null)}).join('\n');
+}
+async function readXlsx(z){
+  var sst=[];
+  if(z['xl/sharedStrings.xml']){
+    var si=findAll(xml(z['xl/sharedStrings.xml']).documentElement,'si');
+    for(var i=0;i<si.length;i++)sst.push(si[i].textContent);
+  }
+  var sheets=Object.keys(z).filter(function(k){return /^xl\/worksheets\/sheet\d+\.xml$/.test(k)}).sort();
+  var out=[];
+  sheets.forEach(function(sn,idx){
+    out.push('[시트 '+(idx+1)+']');
+    var rows=findAll(xml(z[sn]).documentElement,'row');
+    for(var r=0;r<rows.length;r++){
+      var cs=findAll(rows[r],'c'),line=[];
+      for(var c=0;c<cs.length;c++){
+        var t=cs[c].getAttribute('t'),v=findAll(cs[c],'v')[0];
+        var val=v?v.textContent:'';
+        if(t==='s')val=sst[+val]||'';
+        else if(t==='inlineStr')val=cs[c].textContent;
+        line.push(val);
+      }
+      if(line.join('').trim())out.push(line.join('\t'));
+    }
+  });
+  return out.join('\n');
+}
+async function extract(file){
+  var nm=file.name.toLowerCase(),buf;
+  if(/\.(txt|csv|md)$/.test(nm))return decodeText(new Uint8Array(await file.arrayBuffer()));
+  if(/\.hwp$/.test(nm))throw new Error('한글 .hwp는 읽을 수 없습니다. 「다른 이름으로 저장」에서 .hwpx를 고르십시오');
+  if(/\.pdf$/.test(nm))throw new Error('PDF는 글자를 안정적으로 읽지 못합니다. 워드나 한글(.hwpx)로 변환해 올리십시오');
+  buf=await file.arrayBuffer();
+  var z=await unzip(buf);
+  if(/\.docx$/.test(nm))return readDocx(z);
+  if(/\.hwpx$/.test(nm))return readHwpx(z);
+  if(/\.xlsx$/.test(nm))return readXlsx(z);
+  if(/\.zip$/.test(nm)){
+    var parts=[],ks=Object.keys(z).filter(function(k){return !/\/$/.test(k)&&!/^__MACOSX/.test(k)});
+    for(var i=0;i<ks.length;i++){
+      var k=ks[i],low=k.toLowerCase(),t='';
+      try{
+        if(/\.(txt|csv|md)$/.test(low))t=decodeText(z[k]);
+        else if(/\.docx$/.test(low))t=await readDocx(await unzip(z[k].buffer.slice(z[k].byteOffset,z[k].byteOffset+z[k].byteLength)));
+        else if(/\.hwpx$/.test(low))t=await readHwpx(await unzip(z[k].buffer.slice(z[k].byteOffset,z[k].byteOffset+z[k].byteLength)));
+        else if(/\.xlsx$/.test(low))t=await readXlsx(await unzip(z[k].buffer.slice(z[k].byteOffset,z[k].byteOffset+z[k].byteLength)));
+        else continue;
+      }catch(e){continue}
+      if(t.trim())parts.push('── '+k+'\n'+t);
+    }
+    if(!parts.length)throw new Error('압축 안에서 읽을 수 있는 문서를 찾지 못했습니다');
+    return parts.join('\n\n');
+  }
+  throw new Error('지원하지 않는 형식입니다');
+}
+/* ---------- 기관 정보 구성 ---------- */
+var CTXDEF=[
+ {id:'overview',g:'1. 기관 개요',
+  up:'통계연보 · 사회조사보고서 · 시정(군정)백서 · 주요업무계획 · 인구현황 자료',
+  why:'규모와 여건이 달라지면 같은 사업도 다른 설계가 됩니다. 매년 발행하는 통계 자료를 그대로 올리십시오.',
+  it:[{k:'scale',l:'핵심 수치 (문서로 대신하기 어려운 것만)',ph:'인구 ○만 명, 재정자립도 ○%, 정원 ○명'},
+      {k:'kind',l:'기관 유형',ph:'도농복합시 / 군 / 자치구 / 광역'}]},
+
+ {id:'policy',g:'2. 정책 맥락',
+  up:'국정운영계획 · 도정(시정) 운영계획 · 공약집 · 중장기 종합계획 · 의회 회의록 · 감사 지적사항',
+  why:'상위 계획에 맞물리지 않는 기획은 결재에서 멈춥니다. 늘 참고하시는 정책 문서를 올려 두면 매번 찾지 않아도 됩니다.',
+  it:[{k:'issue',l:'현재 주요 현안 (문서에 없는 것)',ph:'지금 부서가 붙들고 있는 문제를 줄바꿈으로 나열',a:3,w:1},
+      {k:'duty',l:'부서 소관 업무',ph:'우리 부서가 맡은 범위와 주요 사업',a:2,w:1}]},
+
+ {id:'style',g:'3. 문서 관행',
+  up:'본인이 작성한 문서 · 기관 발송 공문 · 보도자료 · 보고서 샘플',
+  why:'같은 내용도 기관마다 쓰는 방식이 다릅니다. 실제 문서를 올리면 그 어투와 형식을 따라갑니다. 성명·주소·연락처는 지우고 올리십시오.',
+  it:[{k:'appr',l:'결재·보고 관행',ph:'보고 형식, 분량 관행, 상급자가 중시하는 항목',a:2,w:1},
+      {k:'avoid',l:'피해야 할 표현',ph:'우리 기관에서 쓰지 않는 용어, 주의할 표현',w:1}]},
+
+ {id:'etc',g:'4. 기타 자료',
+  up:'그밖에 업무에 필요한 자료',
+  why:'위 분류에 넣기 어렵지만 참고해야 할 자료를 올리십시오.',
+  it:[]}
+];
+var CTXK=[];CTXDEF.forEach(function(g){g.it.forEach(function(i){CTXK.push(i.k)})});
+
+/* ---------- 자료 보관과 검색 ---------- */
+var CAP_FILE=150000, CAP_TOTAL=12000, CAP_STORE=1600000, FULL_MAX=1500, CHUNK=700;
+var MAX_BYTES=20*1024*1024;
+var SPEC='읽을 수 있는 형식 — 한글 .hwpx · 워드 .docx · 엑셀 .xlsx · 텍스트 .txt .csv .md · 압축 .zip'
+  +'<br>파일 하나당 20MB · 글자 15만 자까지 담습니다. 넘으면 앞부분만 담고 알려 드립니다.'
+  +'<br>한글 .hwp와 .pdf는 읽지 못합니다. .hwp는 「다른 이름으로 저장」에서 .hwpx를, PDF는 원본 문서를 올리십시오.';
+
+function chunkify(t){
+  var lines=t.split('\n'),out=[],cur='';
+  for(var i=0;i<lines.length;i++){
+    if((cur+lines[i]).length>CHUNK&&cur){out.push(cur.trim());cur=''}
+    cur+=lines[i]+'\n';
+  }
+  if(cur.trim())out.push(cur.trim());
+  return out;
+}
+function tokens(s){
+  var t=[],w=(s||'').toLowerCase().match(/[가-힣]+|[a-z0-9]{2,}/g)||[];
+  for(var i=0;i<w.length;i++){
+    var x=w[i];
+    if(/[가-힣]/.test(x)){
+      if(x.length<=2)t.push(x);
+      else for(var j=0;j<x.length-1;j++)t.push(x.slice(j,j+2));
+    }else t.push(x);
+  }
+  return t;
+}
+function search(query,budget){
+  var qs={},qt=tokens(query);
+  for(var i=0;i<qt.length;i++)qs[qt[i]]=1;
+  if(!Object.keys(qs).length)return [];
+  var ch=[];
+  files.forEach(function(f){
+    if(f.mode!=='search')return;
+    (f.ch||[]).forEach(function(c,i){ch.push({f:f.name,i:i,t:c,tk:tokens(c)})});
+  });
+  if(!ch.length)return [];
+  /* 여러 조각에 두루 나오는 낱말은 변별력이 없으므로 가중치를 낮춘다 */
+  var df={};
+  ch.forEach(function(c){
+    var seen={};
+    for(var k=0;k<c.tk.length;k++){var x=c.tk[k];if(qs[x]&&!seen[x]){seen[x]=1;df[x]=(df[x]||0)+1}}
+    c.seen=seen;c.tk=null;
+  });
+  var N=ch.length,cand=[];
+  ch.forEach(function(c){
+    var sc=0,u=0,rare=0;
+    for(var x in c.seen){
+      var d=df[x];
+      sc+=Math.log(1+N/d);u++;
+      if(d<=Math.max(1,N*0.3))rare++;
+    }
+    if(u>=2)cand.push({s:sc+rare*2,r:rare,f:c.f,i:c.i,t:c.t});
+  });
+  /* 변별력 있는 낱말이 걸린 조각을 우선하되, 하나도 없으면 점수 순으로 대신한다 */
+  var strong=cand.filter(function(x){return x.r>=1});
+  if(strong.length)cand=strong;
+  cand.sort(function(a,b){return b.s-a.s});
+  var out=[],used=0;
+  for(var i=0;i<cand.length&&used<budget&&out.length<8;i++){
+    if(used+cand[i].t.length>budget)continue;
+    out.push(cand[i]);used+=cand[i].t.length;
+  }
+  return out;
+}
+
+function saveFiles(){
+  try{localStorage.setItem(LS_F,JSON.stringify(files))}
+  catch(e){toast('저장 공간이 부족합니다. 오래된 자료를 지우십시오')}
+}
+function storeSize(){var n=0;files.forEach(function(f){n+=f.text.length});return n}
+
+function renderCtx(){
+  var h='';
+  CTXDEF.forEach(function(g){
+    h+='<div class="csec"><h3>'+g.g+'</h3><p class="why">'+g.why+'</p>'+
+       '<div class="drop" data-cat="'+g.id+'">'+
+       '<div style="font-size:13.5px;font-weight:500;color:var(--ink);margin-bottom:9px">'+g.up+'</div>'+
+       '<button class="mini" data-pick="'+g.id+'">파일 고르기</button>'+
+       '<span class="hint" style="margin-left:8px">여기로 끌어다 놓아도 됩니다</span>'+
+       '<p class="spec">'+SPEC+'</p>'+
+       '<input type="file" id="file_'+g.id+'" multiple accept=".hwpx,.docx,.xlsx,.txt,.csv,.md,.zip" style="display:none">'+
+       '</div><div id="list_'+g.id+'" class="flist"></div>';
+    if(g.it.length){
+      h+='<div class="cgrid" style="margin-top:14px">';
+      g.it.forEach(function(i){
+        h+='<div class="fd'+(i.w?' wide':'')+'"><label for="c_'+i.k+'">'+i.l+'</label>'+
+          (i.a?'<textarea id="c_'+i.k+'" rows="'+i.a+'" placeholder="'+i.ph+'"></textarea>'
+              :'<input type="text" id="c_'+i.k+'" placeholder="'+i.ph+'">')+'</div>';
+      });
+      h+='</div>';
+    }
+    h+='</div>';
+  });
+  $('#ctxForm').innerHTML=h;
+
+  CTXK.forEach(function(k){
+    var e=$('#c_'+k);if(!e)return;
+    e.value=cfg.ctx[k]||'';
+    e.addEventListener('input',function(){cfg.ctx[k]=e.value;saveCfg();paintMeter();paintCtx()});
+  });
+  document.querySelectorAll('[data-pick]').forEach(function(b){
+    b.addEventListener('click',function(){$('#file_'+b.dataset.pick).click()});
+  });
+  CTXDEF.forEach(function(g){
+    var inp=$('#file_'+g.id);
+    inp.addEventListener('change',function(e){addFiles(e.target.files,g.id);e.target.value=''});
+  });
+  document.querySelectorAll('.drop').forEach(function(dz){
+    ['dragenter','dragover'].forEach(function(t){dz.addEventListener(t,function(e){e.preventDefault();dz.classList.add('hot')})});
+    ['dragleave','drop'].forEach(function(t){dz.addEventListener(t,function(e){e.preventDefault();dz.classList.remove('hot')})});
+    dz.addEventListener('drop',function(e){if(e.dataTransfer.files.length)addFiles(e.dataTransfer.files,dz.dataset.cat)});
+  });
+  paintFiles();
+}
+
+function paintFiles(){
+  CTXDEF.forEach(function(g){
+    var box=$('#list_'+g.id);if(!box)return;
+    var mine=files.filter(function(f){return f.cat===g.id});
+    if(!mine.length){box.innerHTML='<p class="hint" style="margin:4px 0 0">올린 자료가 없습니다.</p>';return}
+    box.innerHTML=mine.map(function(f){
+      return '<div class="frow'+(f.mode==='off'?' off':'')+'">'+
+        '<span class="fn" title="'+f.name+'">'+f.name+'</span>'+
+        '<span class="fc">'+f.text.length.toLocaleString()+'자'+(f.mode==='search'?' · '+f.ch.length+'조각':'')+'</span>'+
+        '<select data-mode="'+f.id+'" style="width:auto;padding:4px 6px;font-size:12px">'+
+          '<option value="full"'+(f.mode==='full'?' selected':'')+'>전체 반영</option>'+
+          '<option value="search"'+(f.mode==='search'?' selected':'')+'>관련 대목만</option>'+
+          '<option value="off"'+(f.mode==='off'?' selected':'')+'>반영 안 함</option>'+
+        '</select>'+
+        '<button class="mini" data-view="'+f.id+'">내용</button>'+
+        '<button class="mini" data-del="'+f.id+'">삭제</button></div>';
+    }).join('');
+  });
+  document.querySelectorAll('[data-mode]').forEach(function(sel){
+    sel.addEventListener('change',function(){
+      var f=files.find(function(x){return x.id===sel.dataset.mode});
+      if(sel.value==='full'&&f.text.length>FULL_MAX*4){
+        if(!confirm('이 자료는 '+f.text.length.toLocaleString()+'자입니다. 전체를 넣으면 지시문 한도를 넘겨 대부분이 잘립니다.\n\n「관련 대목만」을 권합니다. 그래도 전체로 하시겠습니까?')){
+          sel.value=f.mode;return;
+        }
+      }
+      f.mode=sel.value;saveFiles();paintFiles();paintMeter();paintCtx();
+    });
+  });
+  document.querySelectorAll('[data-del]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var f=files.find(function(x){return x.id===b.dataset.del});
+      if(!confirm('다음 자료를 삭제합니다.\n\n'+f.name))return;
+      files=files.filter(function(x){return x.id!==b.dataset.del});
+      saveFiles();paintFiles();paintMeter();paintCtx();
+    });
+  });
+  document.querySelectorAll('[data-view]').forEach(function(b){
+    b.addEventListener('click',function(){
+      var f=files.find(function(x){return x.id===b.dataset.view});
+      alert(f.name+' ('+f.text.length.toLocaleString()+'자)\n\n'+f.text.slice(0,1500)+(f.text.length>1500?'\n\n… 이하 생략':''));
+    });
+  });
+}
+
+function ctxChars(){
+  var n=0;CTXK.forEach(function(k){n+=(cfg.ctx[k]||'').trim().length});
+  files.forEach(function(f){if(f.mode==='full')n+=f.text.length});
+  return n;
+}
+function paintMeter(){
+  var n=ctxChars(),sr=files.filter(function(f){return f.mode==='search'}).length;
+  var pct=Math.min(100,Math.round(n/CAP_TOTAL*100));
+  var t='지시문 반영 '+n.toLocaleString()+'자 / '+CAP_TOTAL.toLocaleString()+'자';
+  if(sr)t+=' (+ 검색 자료 '+sr+'건)';
+  if(n>CAP_TOTAL)t+=' — 초과분은 잘립니다';
+  var st=storeSize();
+  t+='\n보관 '+st.toLocaleString()+'자 / '+CAP_STORE.toLocaleString()+'자 ('+Math.round(st/CAP_STORE*100)+'%)';
+  $('#meterT').textContent=t;
+  var f=$('#mfil');f.style.width=pct+'%';f.className=n>CAP_TOTAL?'mfil over':'mfil';
+}
+
+async function addFiles(list,cat){
+  for(var i=0;i<list.length;i++){
+    var f=list[i];
+    if(f.size>MAX_BYTES){toast(f.name+' — '+(f.size/1048576).toFixed(1)+'MB로 한도(20MB)를 넘습니다');continue}
+    if(!/\.(hwpx|docx|xlsx|txt|csv|md|zip)$/i.test(f.name)){
+      toast(f.name+' — 읽을 수 없는 형식입니다'+(/\.hwp$/i.test(f.name)?'. .hwpx로 저장해 올리십시오':'')
+        +(/\.pdf$/i.test(f.name)?'. 원본 워드나 한글 문서를 올리십시오':''));continue}
+    try{
+      var t=(await extract(f)||'').replace(/\n{3,}/g,'\n\n').trim();
+      if(!t){toast(f.name+' — 읽을 글자가 없습니다');continue}
+      var cut=t.length>CAP_FILE;if(cut)t=t.slice(0,CAP_FILE);
+      if(storeSize()+t.length>CAP_STORE){toast('저장 한도를 넘었습니다. 오래된 자료를 지우십시오');break}
+      var mode=t.length<=FULL_MAX?'full':'search';
+      files.push({id:'f'+Date.now()+i,cat:cat,name:f.name,text:t,mode:mode,ch:chunkify(t)});
+      toast(f.name+' — '+t.length.toLocaleString()+'자'+(mode==='search'?', 관련 대목만 반영합니다':'')+(cut?' (일부 생략)':''));
+    }catch(e){toast(f.name+' — '+e.message)}
+  }
+  saveFiles();paintFiles();paintMeter();paintCtx();
+}
+
+/* ---------- 설정 ---------- */
+function fillSet(){
+  $('#s_org').value=cfg.org;$('#s_dept').value=cfg.dept;$('#s_name').value=cfg.name;
+  $('#s_prov').value=cfg.prov;$('#s_model').value=cfg.model;$('#s_key').value=cfg.key;
+  var h='';for(var k in TYPES){h+='<div class="fd" style="display:flex;align-items:center;gap:10px"><label style="flex:1;margin:0">'+TYPES[k].n+'</label><input type="number" id="b_'+k+'" value="'+(cfg.base[k])+'" style="width:88px" min="1"><span class="hint" style="margin:0">분</span></div>'}
+  $('#bases').innerHTML=h;
+}
+$('#s_prov').addEventListener('change',function(){
+  var d={gemini:'gemini-2.0-flash',openai:'gpt-4o-mini',claude:'claude-sonnet-4-6',none:''};
+  $('#s_model').value=d[$('#s_prov').value]||'';
+});
+$('#save').addEventListener('click',function(){
+  cfg.org=$('#s_org').value.trim();cfg.dept=$('#s_dept').value.trim();cfg.name=$('#s_name').value.trim();
+  cfg.prov=$('#s_prov').value;cfg.model=$('#s_model').value.trim();cfg.key=$('#s_key').value.trim();
+  for(var k in TYPES){var v=+$('#b_'+k).value;if(v>0)cfg.base[k]=v}
+  saveCfg();paintWho();paintHint();paintCtx();toast('설정을 저장했습니다');
+});
+$('#test').addEventListener('click',async function(){
+  var p=$('#s_prov').value;if(p==='none'){$('#tres').textContent='복사 방식은 연결이 필요 없습니다';return}
+  var old={prov:cfg.prov,model:cfg.model,key:cfg.key};
+  cfg.prov=p;cfg.model=$('#s_model').value.trim();cfg.key=$('#s_key').value.trim();
+  $('#tres').textContent='확인 중';
+  try{var got='';await stream('한 단어로만 답하라: 확인',function(t){got+=t});
+    $('#tres').textContent='연결됨 (응답: '+got.trim().slice(0,12)+')';}
+  catch(e){$('#tres').textContent='실패 — '+e.message.slice(0,90);cfg.prov=old.prov;cfg.model=old.model;cfg.key=old.key}
+});
+
+function paintWho(){$('#who').textContent=(cfg.org||'소속 미설정')+(cfg.dept?' '+cfg.dept:'')+(cfg.name?' '+cfg.name:'')}
+function paintHint(){
+  var off=(cfg.prov==='none'||!cfg.key);
+  $('#gen').disabled=off;
+  $('#gen').className=off?'btn sec':'btn pri';
+  $('#tpl').className=off?'btn pri':'btn sec';
+  $('#modeHint').textContent=off
+   ? '「서식 초안 만들기」는 AI 없이 즉시 동작합니다. AI 문장이 필요하면 지시문을 복사해 외부 AI에 넣고 결과를 문서 칸에 붙여 넣으십시오.'
+   : cfg.model+' 직접 호출이 설정되어 있습니다. 서식 초안은 AI 없이도 언제든 쓸 수 있습니다.';
+}
+
+function paintCtx(){
+  var n=CTXK.filter(function(k){return (cfg.ctx[k]||'').trim()}).length;
+  var fn=files.filter(function(f){return f.mode!=='off'}).length;
+  var e=$('#ctxWarn');
+  if(n===0&&fn===0){e.style.display='block';
+    e.innerHTML='<b>기관 정보가 비어 있습니다.</b> 상단 「기관 정보」에서 통계연보·정책계획·문서 샘플을 올리지 않으면, 어느 지자체에서 돌려도 같은 결과가 나옵니다.'}
+  else if(fn===0){e.style.display='block';
+    e.innerHTML='직접 입력 '+n+'개 항목만 반영되고 있습니다. 통계연보나 정책계획 문서를 올리면 결과가 크게 달라집니다.'}
+  else if(n+fn<5){e.style.display='block';
+    e.innerHTML='자료 '+fn+'건, 직접 입력 '+n+'개가 반영되고 있습니다. 분류별로 한 건씩만 더 올려도 정확도가 올라갑니다.'}
+  else{e.style.display='none'}
+}
+
+/* ---------- 시작 ---------- */
+load();buildTypes();buildFields();fillSet();renderCtx();paintMeter();
+paintWho();paintHint();paintCtx();paintWips();paintRail();
+})();
+</script>
+</body>
+</html>

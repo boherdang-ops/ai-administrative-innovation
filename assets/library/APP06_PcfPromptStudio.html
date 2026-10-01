@@ -1,0 +1,1893 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<!-- 저작물 명칭: 공무원 AI 프롬프트 훈련소(PCF 스튜디오) (v1.0)
+     파일명: 04-pcf-prompt-studio.html
+     사용 과정: 04 제로빌드 심화 워크숍 (보조)
+     저작권자: 박상득
+     발행: (주)한국공공자치연구원 AI행정혁신연구소 -->
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공무원 AI 프롬프트 훈련소(PCF 스튜디오) v1.0</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root{
+  --ink:#1F3864;        /* 표제 네이비 */
+  --ink-2:#2E5FA3;      /* 강조 블루 */
+  --ink-soft:#5A6B85;
+  --paper:#F4F5F7;      /* 배경 */
+  --card:#FFFFFF;
+  --rule:#D9DFE8;       /* 괘선 */
+  --rule-soft:#EBEEF3;
+  --red:#B8442E;        /* 교열 붉은 잉크 */
+  --red-soft:#FBEFEC;
+  --green:#2F7A5B;
+  --green-soft:#EDF5F1;
+  --amber:#9A6B12;
+  --amber-soft:#FBF3E2;
+  --shadow:0 1px 2px rgba(31,56,100,.06), 0 6px 20px rgba(31,56,100,.06);
+  --r:10px;
+  --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  background:var(--paper); color:#1B2333;
+  font-size:15px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column;
+}
+button{font-family:inherit; font-size:inherit; cursor:pointer}
+:focus-visible{outline:2px solid var(--ink-2); outline-offset:2px; border-radius:4px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- 머리글 ---------- */
+.top{
+  background:var(--ink); color:#fff; flex:none;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; padding:12px 20px;
+}
+.brand{display:flex; align-items:baseline; gap:12px; min-width:0}
+.brand .mark{
+  font-size:11px; letter-spacing:.22em; font-weight:700;
+  color:#AFC4E4; border:1px solid #4B6796; padding:3px 7px; border-radius:3px; white-space:nowrap;
+}
+.brand h1{font-size:17px; font-weight:700; margin:0; letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.brand p{margin:0; font-size:12px; color:#9FB6DA; white-space:nowrap}
+.top-actions{display:flex; gap:8px; flex:none}
+.top-btn{
+  background:transparent; color:#D6E2F4; border:1px solid #45618F;
+  padding:6px 11px; border-radius:6px; font-size:13px; font-weight:600;
+}
+.top-btn:hover{background:#2A4874; color:#fff}
+.top-btn[data-on="1"]{background:#fff; color:var(--ink); border-color:#fff}
+
+/* ---------- 본문 2단 ---------- */
+.shell{flex:1; display:flex; min-height:0}
+.pane{display:flex; flex-direction:column; min-width:0; min-height:0}
+.pane-left{flex:1 1 50%; background:var(--card); border-right:1px solid var(--rule)}
+.pane-right{flex:1 1 50%; background:var(--paper)}
+
+.tabs{display:flex; flex:none; border-bottom:1px solid var(--rule); background:#FAFBFD}
+.tabs button{
+  flex:1; background:none; border:0; border-bottom:2px solid transparent;
+  padding:11px 6px; font-size:13.5px; font-weight:600; color:var(--ink-soft);
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.tabs button:hover{background:#F2F5FA; color:var(--ink)}
+.tabs button[aria-selected="true"]{color:var(--ink); border-bottom-color:var(--ink); background:#fff}
+.tabs .num{
+  font-size:10.5px; font-weight:800; background:var(--rule-soft); color:var(--ink-soft);
+  width:17px; height:17px; border-radius:50%; display:grid; place-items:center;
+}
+.tabs button[aria-selected="true"] .num{background:var(--ink); color:#fff}
+.tabs .dot{width:6px;height:6px;border-radius:50%;background:var(--red);display:none}
+.tabs button[data-alert="1"] .dot{display:block}
+
+.scroll{flex:1; overflow-y:auto; padding:20px}
+.panel{display:none}
+.panel.on{display:block}
+
+/* ---------- 입력 필드 ---------- */
+.field{margin-bottom:22px}
+.field:last-child{margin-bottom:6px}
+.flabel{display:flex; align-items:center; gap:8px; margin-bottom:7px}
+.tag{
+  font-size:11px; font-weight:800; letter-spacing:.04em;
+  padding:2px 7px; border-radius:4px; background:#E7EDF7; color:var(--ink);
+}
+.tag.b{background:var(--ink); color:#fff}
+.flabel .name{font-weight:700; font-size:14px; color:#16233A}
+.flabel .hint{font-size:12px; color:var(--ink-soft); font-weight:400}
+.flabel .mark-ok,.flabel .mark-no{margin-left:auto; font-size:11.5px; font-weight:700}
+.mark-ok{color:var(--green)} .mark-no{color:var(--red)}
+textarea,input[type=text],input[type=password],select{
+  width:100%; font-family:inherit; font-size:14px; line-height:1.6; color:#16233A;
+  background:#FAFBFD; border:1px solid var(--rule); border-radius:8px;
+  padding:10px 12px; resize:vertical;
+}
+textarea:focus,input:focus,select:focus{
+  outline:none; border-color:var(--ink-2); background:#fff;
+  box-shadow:0 0 0 3px rgba(46,95,163,.13);
+}
+textarea::placeholder{color:#9AA6BA}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.chip{
+  background:#fff; border:1px solid var(--rule); color:#455573;
+  font-size:12.5px; padding:5px 10px; border-radius:20px;
+}
+.chip:hover{border-color:var(--ink-2); color:var(--ink-2); background:#F3F7FD}
+.chip:active{transform:scale(.96)}
+
+/* ---------- 카드 ---------- */
+.card{background:var(--card); border:1px solid var(--rule); border-radius:var(--r); box-shadow:var(--shadow); margin-bottom:16px; overflow:hidden}
+.card-hd{
+  display:flex; align-items:center; gap:8px; padding:9px 14px;
+  background:#FAFBFD; border-bottom:1px solid var(--rule-soft);
+}
+.card-hd h3{margin:0; font-size:13.5px; font-weight:700; color:#16233A}
+.card-hd .sub{font-size:11.5px; color:var(--ink-soft)}
+.card-hd .sp{margin-left:auto}
+.card-bd{padding:14px}
+
+/* ---------- 프롬프트 원고지 ---------- */
+.sheet{
+  font-size:13.5px; line-height:1.75; white-space:pre-wrap; word-break:break-word;
+  color:#1B2333; background:#fff; padding:16px 16px 16px 20px;
+  border-left:3px solid var(--ink-2); margin:0;
+  font-feature-settings:"tnum";
+}
+.sheet .ph{color:#B4BECD}
+
+/* ---------- 버튼 ---------- */
+.btn{
+  border:1px solid var(--rule); background:#fff; color:#33415C;
+  padding:6px 11px; border-radius:6px; font-size:12.5px; font-weight:600;
+  display:inline-flex; align-items:center; gap:5px;
+}
+.btn:hover{background:#F3F6FB; border-color:#BDCADB}
+a.btn{text-decoration:none}
+.btn.primary{background:var(--ink); border-color:var(--ink); color:#fff}
+.btn.primary:hover{background:#172C50}
+.btn.ghost-red{color:var(--red); border-color:#E8C6BD}
+.btn.ghost-red:hover{background:var(--red-soft)}
+.btn.wide{width:100%; justify-content:center; padding:10px}
+.btn[disabled]{opacity:.5; cursor:not-allowed}
+.btn.ok{color:var(--green); border-color:#BFDCCE; background:var(--green-soft)}
+
+/* ---------- 점수판 ---------- */
+.score-wrap{display:flex; align-items:center; gap:16px; padding:16px 14px; border-bottom:1px solid var(--rule-soft)}
+.dial{position:relative; width:96px; height:96px; flex:none}
+.dial svg{transform:rotate(-90deg)}
+.dial .val{
+  position:absolute; inset:0; display:grid; place-items:center; line-height:1.1; text-align:center;
+}
+.dial .val b{font-size:26px; font-weight:800; color:var(--ink); font-variant-numeric:tabular-nums}
+.dial .val span{font-size:10.5px; color:var(--ink-soft); display:block}
+.score-txt h4{margin:0 0 4px; font-size:15px; color:#16233A}
+.score-txt p{margin:0; font-size:12.5px; color:var(--ink-soft)}
+.badge{display:inline-block; font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:20px; margin-bottom:6px}
+
+/* ---------- 진단 항목 ---------- */
+.rowitem{display:flex; gap:10px; padding:10px 14px; border-bottom:1px solid var(--rule-soft); font-size:13px; align-items:flex-start}
+.rowitem:last-child{border-bottom:0}
+.rowitem .st{flex:none; width:19px; height:19px; border-radius:50%; display:grid; place-items:center; font-size:11px; font-weight:800; margin-top:1px}
+.st.full{background:var(--green-soft); color:var(--green)}
+.st.part{background:var(--amber-soft); color:var(--amber)}
+.st.none{background:var(--red-soft); color:var(--red)}
+.rowitem .tx{min-width:0}
+.rowitem .tx b{display:block; color:#16233A; font-size:13px}
+.rowitem .tx span{color:var(--ink-soft); font-size:12.5px}
+.rowitem .pt{margin-left:auto; flex:none; font-size:11.5px; color:var(--ink-soft); font-variant-numeric:tabular-nums}
+
+/* 교열 표시 */
+.redline{
+  border-left:3px solid var(--red); background:var(--red-soft);
+  padding:10px 12px; margin-bottom:8px; border-radius:0 6px 6px 0;
+}
+.redline b{display:block; font-size:12.5px; color:var(--red); margin-bottom:3px}
+.redline .q{
+  display:inline-block; font-family:var(--mono); font-size:12px; background:#fff;
+  border:1px solid #E8C6BD; padding:1px 5px; border-radius:3px; color:#8E3423; margin:2px 3px 2px 0;
+}
+.redline .fx{font-size:12.5px; color:#5C4238; margin-top:4px}
+.warnbox{border-left:3px solid var(--red); background:#FDF0EC; padding:12px 14px; border-radius:0 6px 6px 0; margin-bottom:14px}
+.warnbox h4{margin:0 0 5px; font-size:13.5px; color:var(--red)}
+.warnbox p{margin:0; font-size:12.5px; color:#7A4436}
+.okbox{border-left:3px solid var(--green); background:var(--green-soft); padding:12px 14px; border-radius:0 6px 6px 0; font-size:13px; color:#255F47}
+.notebox{border-left:3px solid var(--ink-2); background:#F1F6FD; padding:12px 14px; border-radius:0 6px 6px 0; font-size:12.5px; color:#2E4468; margin-bottom:14px}
+
+/* ---------- 코칭 3층 ---------- */
+.layer-no{
+  font-size:10.5px; font-weight:800; letter-spacing:.1em; color:#fff;
+  background:var(--ink-2); padding:2px 7px; border-radius:3px;
+}
+.layer-no.off{background:#A6B2C6}
+
+/* ---------- 미션 ---------- */
+.filters{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px}
+.fbtn{background:#fff; border:1px solid var(--rule); color:#455573; font-size:12.5px; padding:5px 11px; border-radius:6px; font-weight:600}
+.fbtn[data-on="1"]{background:var(--ink); border-color:var(--ink); color:#fff}
+.mcard{border:1px solid var(--rule); border-radius:9px; background:#fff; padding:12px 14px; margin-bottom:10px; cursor:pointer}
+.mcard:hover{border-color:var(--ink-2); box-shadow:var(--shadow)}
+.mcard[data-on="1"]{border-color:var(--ink); border-width:2px; padding:11px 13px}
+.mcard .mt{display:flex; align-items:center; gap:7px; margin-bottom:5px; flex-wrap:wrap}
+.lv{font-size:10.5px; font-weight:800; padding:2px 6px; border-radius:3px}
+.lv.초급{background:var(--green-soft); color:var(--green)}
+.lv.중급{background:var(--amber-soft); color:var(--amber)}
+.lv.고급{background:var(--red-soft); color:var(--red)}
+.ty{font-size:10.5px; font-weight:700; padding:2px 6px; border-radius:3px; background:#E7EDF7; color:var(--ink)}
+.mcard h4{margin:0; font-size:14px; font-weight:700; color:#16233A}
+.mcard p{margin:5px 0 0; font-size:12.5px; color:var(--ink-soft)}
+.bad{margin-top:8px; font-size:12px; color:#8E3423; background:var(--red-soft); border-radius:5px; padding:6px 9px; font-family:var(--mono)}
+.crit{margin:8px 0 0; padding-left:16px; font-size:12.5px; color:#455573}
+.crit li{margin-bottom:2px}
+
+/* ---------- 라이브러리/모달 ---------- */
+.modal{position:fixed; inset:0; background:rgba(20,32,55,.5); z-index:60; display:grid; place-items:center; padding:16px}
+.modal[hidden]{display:none}
+.modal-box{background:#fff; border-radius:12px; width:100%; max-width:600px; max-height:86vh; display:flex; flex-direction:column; box-shadow:0 20px 60px rgba(15,26,48,.3)}
+.modal-hd{display:flex; align-items:center; gap:10px; padding:14px 18px; border-bottom:1px solid var(--rule)}
+.modal-hd h3{margin:0; font-size:16px; font-weight:700; color:#16233A}
+.modal-hd .x{margin-left:auto; background:none; border:0; font-size:20px; color:#8794AB; line-height:1; padding:2px 6px; border-radius:5px}
+.modal-hd .x:hover{background:#F0F3F8; color:#333}
+.modal-bd{padding:18px; overflow-y:auto}
+.modal-ft{padding:12px 18px; border-top:1px solid var(--rule); background:#FAFBFD; display:flex; justify-content:flex-end; gap:8px; border-radius:0 0 12px 12px}
+.frow{margin-bottom:14px}
+.frow label{display:block; font-size:12.5px; font-weight:700; color:#33415C; margin-bottom:5px}
+.frow .desc{font-size:12px; color:var(--ink-soft); font-weight:400; margin-top:4px}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+
+.libitem{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--rule-soft)}
+.libitem .li-t{min-width:0; flex:1}
+.libitem b{display:block; font-size:13.5px; color:#16233A; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.libitem span{font-size:11.5px; color:var(--ink-soft)}
+.sc-pill{font-size:11.5px; font-weight:800; padding:2px 8px; border-radius:20px; background:#E7EDF7; color:var(--ink); font-variant-numeric:tabular-nums}
+
+.empty{text-align:center; padding:40px 20px; color:var(--ink-soft)}
+.empty b{display:block; color:#33415C; font-size:14.5px; margin-bottom:5px}
+.empty p{margin:0 0 14px; font-size:13px}
+
+/* 마크다운 출력 */
+.md{font-size:13.5px; color:#26314A}
+.md h2{font-size:15px; color:var(--ink); margin:16px 0 7px; padding-bottom:4px; border-bottom:1px solid var(--rule-soft)}
+.md h2:first-child{margin-top:0}
+.md h3{font-size:14px; color:#16233A; margin:12px 0 5px}
+.md p{margin:0 0 9px}
+.md ul,.md ol{margin:0 0 10px; padding-left:19px}
+.md li{margin-bottom:3px}
+.md code{font-family:var(--mono); font-size:12.5px; background:#F0F3F8; padding:1px 5px; border-radius:3px; color:#8E3423}
+.md strong{color:#0F1A2E}
+
+.spin{width:30px; height:30px; border:3px solid var(--rule); border-top-color:var(--ink-2); border-radius:50%; animation:sp .8s linear infinite; margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.toast{
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+  background:var(--ink); color:#fff; padding:10px 18px; border-radius:8px; font-size:13.5px; font-weight:600;
+  z-index:90; box-shadow:0 8px 24px rgba(15,26,48,.25);
+}
+.toast[hidden]{display:none}
+
+/* ---------- 모바일 ---------- */
+.mobile-switch{display:none}
+@media (max-width:860px){
+  .shell{flex-direction:column}
+  .pane-left,.pane-right{flex:1 1 auto; border-right:0}
+  .pane[data-mob="off"]{display:none}
+  .mobile-switch{
+    display:flex; flex:none; background:var(--card); border-bottom:1px solid var(--rule); padding:8px; gap:6px;
+  }
+  .mobile-switch button{flex:1; background:#F1F4F9; border:1px solid var(--rule); color:#455573; padding:8px; border-radius:7px; font-weight:700; font-size:13px}
+  .mobile-switch button[data-on="1"]{background:var(--ink); border-color:var(--ink); color:#fff}
+  .brand p{display:none}
+  .brand h1{font-size:15px}
+  .grid2{grid-template-columns:1fr}
+  .scroll{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <span class="mark">PCF</span>
+    <h1>공무원 AI 프롬프트 훈련소</h1>
+    <p>맥락 설계 · 지시 조립 · 자가 진단 · 제출</p>
+  </div>
+  <div class="top-actions">
+    <button class="top-btn" onclick="UI.openLibrary()">보관함</button>
+    <button class="top-btn" onclick="UI.openSettings()">설정</button>
+  </div>
+</header>
+
+<div class="mobile-switch">
+  <button id="mob-l" data-on="1" onclick="UI.mob('l')">작성하기</button>
+  <button id="mob-r" onclick="UI.mob('r')">진단 · 코칭</button>
+</div>
+
+<div class="shell">
+
+  <!-- ===== 왼쪽: 작성 ===== -->
+  <section class="pane pane-left" id="pane-l">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" id="t-mission" onclick="UI.left('mission')"><span class="num">1</span>실습 미션</button>
+      <button role="tab" aria-selected="false" id="t-ctx" onclick="UI.left('ctx')"><span class="num">2</span>사전 맥락</button>
+      <button role="tab" aria-selected="false" id="t-pcf" onclick="UI.left('pcf')"><span class="num">3</span>PCF 조립</button>
+    </div>
+    <div class="scroll">
+
+      <!-- 미션 -->
+      <div class="panel on" id="p-mission">
+        <div class="notebox">
+          미션을 고르면 상황과 성공 기준이 함께 열립니다. 먼저 <b>나쁜 프롬프트</b>를 읽고, 그것을 PCF로 다시 쓰는 것이 이 훈련의 핵심입니다.
+        </div>
+        <div class="filters" id="mission-filters"></div>
+        <div id="mission-list"></div>
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
+          <button class="btn" onclick="Mission.addCustom()">미션 직접 추가</button>
+          <button class="btn" onclick="Mission.exportSet()">미션 세트 내보내기</button>
+          <button class="btn" onclick="Mission.importSet()">미션 세트 불러오기</button>
+        </div>
+      </div>
+
+      <!-- 사전 맥락 -->
+      <div class="panel" id="p-ctx">
+        <div class="notebox">
+          블록 1은 AI에게 <b>내 업무 상황을 먼저 알려주는</b> 단계입니다. 이 블록을 먼저 보내고 "맥락 동기화 완료" 응답을 받은 뒤 블록 2를 보냅니다.
+        </div>
+        <div id="ctx-fields"></div>
+      </div>
+
+      <!-- PCF -->
+      <div class="panel" id="p-pcf">
+        <div class="notebox">
+          블록 2는 실제 지시입니다. <b>P</b> AI가 맡을 역할 · <b>C</b> 할 일과 지켜야 할 조건 · <b>F</b> 결과물의 모양.
+        </div>
+        <div id="pcf-fields"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ===== 오른쪽: 결과 ===== -->
+  <section class="pane pane-right" id="pane-r" data-mob="off">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" id="t-view" onclick="UI.right('view')">프롬프트</button>
+      <button role="tab" aria-selected="false" id="t-diag" onclick="UI.right('diag')">진단<span class="dot"></span></button>
+      <button role="tab" aria-selected="false" id="t-coach" onclick="UI.right('coach')">AI 코칭</button>
+      <button role="tab" aria-selected="false" id="t-submit" onclick="UI.right('submit')">제출</button>
+    </div>
+    <div class="scroll">
+
+      <!-- 프롬프트 뷰어 -->
+      <div class="panel on" id="p-view">
+        <div class="card">
+          <div class="card-hd">
+            <h3>블록 1 · 사전 맥락 설정</h3>
+            <span class="sub">먼저 보냅니다</span>
+            <span class="sp"></span>
+            <button class="btn" onclick="Studio.copy('block1', this)">복사</button>
+          </div>
+          <pre class="sheet" id="block1"></pre>
+        </div>
+        <div class="card">
+          <div class="card-hd">
+            <h3>블록 2 · 본 작업 지시 (PCF)</h3>
+            <span class="sub">응답을 받은 뒤 보냅니다</span>
+            <span class="sp"></span>
+            <button class="btn" onclick="Studio.copy('block2', this)">복사</button>
+          </div>
+          <pre class="sheet" id="block2"></pre>
+        </div>
+        <button class="btn wide" onclick="Studio.copyAll(this)">블록 1 + 2 한 번에 복사</button>
+      </div>
+
+      <!-- 진단 -->
+      <div class="panel" id="p-diag">
+        <div id="diag-body"></div>
+      </div>
+
+      <!-- 코칭 -->
+      <div class="panel" id="p-coach">
+        <div id="coach-body"></div>
+      </div>
+
+      <!-- 제출 -->
+      <div class="panel" id="p-submit">
+        <div id="submit-body"></div>
+      </div>
+
+    </div>
+  </section>
+</div>
+
+<!-- 설정 모달 -->
+<div class="modal" id="m-settings" hidden>
+  <div class="modal-box">
+    <div class="modal-hd"><h3>설정</h3><button class="x" onclick="UI.close('m-settings')" aria-label="닫기">×</button></div>
+    <div class="modal-bd">
+      <div class="notebox">
+        3층 코칭(AI 코치 직접 호출)을 쓸 때만 필요합니다. 키는 이 브라우저에만 저장되며 서버로 전송되지 않습니다.
+        <b>공용 PC에서는 입력하지 마세요.</b>
+      </div>
+      <div class="frow">
+        <label for="s-key">Gemini API 키</label>
+        <input type="password" id="s-key" placeholder="AIza...">
+        <div class="desc">Google AI Studio에서 무료로 발급받습니다. 기관 업무망에서는 차단될 수 있습니다.</div>
+      </div>
+      <div class="frow">
+        <label for="s-model">모델</label>
+        <select id="s-model">
+          <option value="gemini-2.5-flash">gemini-2.5-flash (빠름·권장)</option>
+          <option value="gemini-2.5-pro">gemini-2.5-pro (정밀)</option>
+          <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+        </select>
+      </div>
+      <div class="frow">
+        <label for="s-course">과정명</label>
+        <input type="text" id="s-course" placeholder="AI 실무활용 역량강화 실습">
+      </div>
+      <div class="frow">
+        <label>저장 상태</label>
+        <div class="desc" id="s-storage"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn ghost-red" onclick="Settings.clearKey()">키 삭제</button>
+      <button class="btn primary" onclick="Settings.save()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 보관함 모달 -->
+<div class="modal" id="m-library" hidden>
+  <div class="modal-box">
+    <div class="modal-hd"><h3>내 프롬프트 보관함</h3><button class="x" onclick="UI.close('m-library')" aria-label="닫기">×</button></div>
+    <div class="modal-bd"><div id="lib-body"></div></div>
+    <div class="modal-ft">
+      <button class="btn" onclick="Library.importFile()">파일 불러오기</button>
+      <button class="btn" onclick="Library.exportAll()">전체 내보내기</button>
+      <button class="btn primary" onclick="Library.saveCurrent()">지금 작성본 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 미션 편집 모달 -->
+<div class="modal" id="m-mission" hidden>
+  <div class="modal-box">
+    <div class="modal-hd"><h3 id="mm-title">미션 편집</h3><button class="x" onclick="UI.close('m-mission')" aria-label="닫기">×</button></div>
+    <div class="modal-bd">
+      <div class="notebox">강사용. 지역 현안에 맞춰 자유롭게 고쳐 쓰고, <b>미션 세트 내보내기</b>로 교육생에게 배포하세요.</div>
+      <div class="grid2">
+        <div class="frow"><label for="mm-type">업무 유형</label><input type="text" id="mm-type" placeholder="민원"></div>
+        <div class="frow"><label for="mm-level">난이도</label>
+          <select id="mm-level"><option>초급</option><option>중급</option><option>고급</option></select>
+        </div>
+      </div>
+      <div class="frow"><label for="mm-t">미션 제목</label><input type="text" id="mm-t"></div>
+      <div class="frow"><label for="mm-s">상황</label><textarea id="mm-s" rows="4"></textarea></div>
+      <div class="frow"><label for="mm-d">만들어야 할 결과물</label><textarea id="mm-d" rows="2"></textarea></div>
+      <div class="frow"><label for="mm-b">나쁜 프롬프트 예시</label><textarea id="mm-b" rows="2"></textarea>
+        <div class="desc">교육생이 "이렇게 쓰면 왜 안 되는지"를 먼저 느끼게 하는 장치입니다.</div>
+      </div>
+      <div class="frow"><label for="mm-c">성공 기준 (줄바꿈으로 구분)</label><textarea id="mm-c" rows="4"></textarea></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn ghost-red" id="mm-del" onclick="Mission.remove()">삭제</button>
+      <button class="btn primary" onclick="Mission.saveEdit()">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ============================================================
+   공무원 AI 프롬프트 훈련소 · PCF 스튜디오 v2
+   구조: 미션 → 사전맥락 → PCF 조립 → 자가진단 → 3층 코칭 → 제출
+   외부 서버 없이 브라우저 안에서만 동작합니다.
+   ============================================================ */
+
+/* ---------- 저장소 (localStorage 사용 불가 환경 대비) ---------- */
+const Store = (() => {
+  let ok = true, mem = {};
+  try {
+    localStorage.setItem('__t', '1'); localStorage.removeItem('__t');
+  } catch (e) { ok = false; }
+  return {
+    ok,
+    get(k, d) {
+      try {
+        const v = ok ? localStorage.getItem('pcf.' + k) : mem[k];
+        return v == null ? d : JSON.parse(v);
+      } catch (e) { return d; }
+    },
+    set(k, v) {
+      try {
+        const s = JSON.stringify(v);
+        if (ok) localStorage.setItem('pcf.' + k, s); else mem[k] = s;
+        return true;
+      } catch (e) { return false; }
+    },
+    del(k) { try { if (ok) localStorage.removeItem('pcf.' + k); else delete mem[k]; } catch (e) {} }
+  };
+})();
+
+/* ---------- 상태 ---------- */
+const S = {
+  mission: null,
+  ctx: { who: '', what: '', why1: '', why2: '' },
+  pcf: { p: '', c: '', f: '' },
+  meta: { org: '', dept: '', name: '', course: 'AI 실무활용 역량강화 실습' },
+  result: ''
+};
+
+/* ---------- 입력 필드 정의 ---------- */
+const FIELDS = {
+  ctx: [
+    { k: 'who', tag: 'Who', name: '나의 역할', hint: '소속과 직위까지', rows: 2,
+      ph: '예: 저는 ○○시청 기획예산과에서 신규 시책을 담당하는 주무관입니다.',
+      chips: ['○○시청 기획예산과 주무관', '읍·면·동 민원 담당자', '보건소 건강증진팀 담당', '신규 사업 총괄 팀장'] },
+    { k: 'what', tag: 'What', name: '현재 과업', hint: '무엇을 만들어야 하는가', rows: 2,
+      ph: '예: 내년도 청년정책 신규 시책 기획안 초안을 작성해야 합니다.',
+      chips: ['신규 시책 기획안 초안 작성', '의회 요구자료 및 예상 질의답변', '주민 안내문·보도자료 작성', '용역 결과보고서 요약과 시사점'] },
+    { k: 'why1', tag: 'Why 1', name: '추진 배경', hint: '왜 하게 되었는가', rows: 2,
+      ph: '예: 기관장 지시사항이며, 내년 본예산 편성 일정에 맞춰야 합니다.',
+      chips: ['기관장 지시사항 이행', '연례 반복 업무의 개선 필요', '상위 법령 개정에 따른 후속 조치', '반복 제기되는 주민 민원 해소'] },
+    { k: 'why2', tag: 'Why 2', name: '당면한 한계', hint: 'AI가 피해야 할 조건', rows: 3,
+      ph: '예: 유사 사례 자료가 없고, 가용 예산이 3천만 원 이내이며, 제출 기한은 3일입니다.',
+      chips: ['참고할 선행 사례·기초자료 부족', '제출 기한 촉박(3일 이내)', '가용 예산 한정', '이해관계자 간 찬반 대립'] }
+  ],
+  pcf: [
+    { k: 'p', tag: 'P', name: '페르소나', hint: 'AI가 맡을 역할', rows: 2,
+      ph: '예: 20년간 기초자치단체 기획부서에서 근무한 정책기획 전문가',
+      chips: ['20년 경력 기획조정실장', '주민 눈높이로 설명하는 민원 상담관', '적법성을 따지는 감사 담당관', '통계로 논증하는 정책 분석가'] },
+    { k: 'c', tag: 'C', name: '과업 지시와 제약 조건', hint: '할 일 + 지킬 조건', rows: 6,
+      ph: '예: 아래 순서로 작성할 것.\n1) 현황과 문제점 3가지\n2) 개선 방향\n3) 소요 예산 개략 추계\n- 통계 인용 시 출처와 연도를 반드시 표기할 것\n- 확인되지 않은 수치는 지어내지 말고 [확인 필요]로 표시할 것',
+      chips: ['통계·법령 근거를 함께 제시할 것', '모르는 사실은 [확인 필요]로 표시할 것', '예상 부작용과 대응 방안 3가지 포함', '전문용어 대신 쉬운 말로 쓸 것', '유사 지자체 사례 2건 이상 비교', '단계별 추진 일정 포함'] },
+    { k: 'f', tag: 'F', name: '출력 형식', hint: '분량 · 구조 · 문체', rows: 4,
+      ph: '예: A4 1장 분량, 개조식, 명사형 종결(~함, ~임), 핵심은 표로 정리',
+      chips: ['A4 1장 이내 개조식', '표로 정리 (항목/주요내용/비고)', '명사형 종결어미(~함, ~임)', '제목·중제목 계층 구조 명시', '보고 대상: 기관장 / 읽는 시간 3분'] }
+  ]
+};
+
+/* ---------- 기본 미션 세트 (6유형 × 3난이도) ---------- */
+const BASE_MISSIONS = [
+  { id:'m01', type:'민원', level:'초급', title:'반복 민원에 대한 회신문 작성',
+    situation:'같은 골목의 쓰레기 무단투기 문제로 최근 3개월간 동일 취지의 민원이 12건 접수되었다. 예산 사정상 CCTV 즉시 설치는 어렵고, 대신 계도 활동과 이동식 안내판 설치를 검토 중이다.',
+    deliverable:'민원인에게 보낼 회신문 1건',
+    bad:'쓰레기 민원 답변 좀 써줘',
+    criteria:['거절이 아니라 대안을 제시할 것','조치 일정이 구체적으로 들어갈 것','민원인이 무시당했다고 느끼지 않을 문장일 것'] },
+  { id:'m02', type:'민원', level:'중급', title:'장기 반복 민원인 대상 안내 통지문',
+    situation:'동일인이 같은 사안으로 1년간 40여 회 민원을 제기하고 있다. 법령상 더 이상 조치할 수 있는 사항이 없으나, 종결 통보만 하면 갈등이 커질 소지가 크다.',
+    deliverable:'법적 근거를 갖추되 감정을 자극하지 않는 안내 통지문',
+    bad:'반복민원 종결 통보서 만들어줘',
+    criteria:['법령·처리 경과가 사실관계로 정리될 것','고압적 표현이 없을 것','이후 이용 가능한 다른 절차를 안내할 것'] },
+  { id:'m03', type:'민원', level:'고급', title:'찬반이 갈리는 사업의 주민 설명자료',
+    situation:'주차장 신설 부지를 놓고 인근 상인회는 찬성, 바로 옆 아파트 주민은 소음·안전 문제로 반대한다. 다음 주 주민설명회에서 양측이 함께 듣는 자료를 써야 한다.',
+    deliverable:'양측 쟁점을 균형 있게 담은 설명자료',
+    bad:'주차장 주민설명회 자료 만들어줘',
+    criteria:['찬성·반대 논거를 각각 왜곡 없이 정리할 것','한쪽 편을 드는 표현이 없을 것','예상 질문과 답변이 포함될 것'] },
+
+  { id:'m04', type:'보고', level:'초급', title:'주간 업무보고 요약',
+    situation:'한 주 동안 처리한 업무 메모가 15건 흩어져 있다. 팀장은 A4 반 장 안에서 무엇이 중요한지 바로 보이길 원한다.',
+    deliverable:'주간 업무보고 1건',
+    bad:'이거 주간보고로 정리해줘',
+    criteria:['중요도 순으로 배열될 것','완료·진행·지연이 구분될 것','상급자 판단이 필요한 사항이 따로 표시될 것'] },
+  { id:'m05', type:'보고', level:'중급', title:'행정사무감사 예상 질의답변',
+    situation:'다음 달 의회 행정사무감사에서 담당 사업의 집행률 저조가 지적될 가능성이 높다. 집행률이 낮은 데에는 설계 변경과 자재 수급 지연이라는 사유가 있다.',
+    deliverable:'예상 질의 5건과 답변안',
+    bad:'행감 예상질문 뽑아줘',
+    criteria:['가장 아픈 질문이 빠지지 않을 것','변명이 아니라 사실과 대책으로 답할 것','답변마다 근거 자료명이 붙을 것'] },
+  { id:'m06', type:'보고', level:'고급', title:'감사 지적사항 개선 결과보고서',
+    situation:'상급기관 감사에서 보조금 정산 서류 미비를 지적받았다. 재발 방지 대책을 포함한 결과보고서를 제출해야 하며, 같은 지적이 2년 연속이라 형식적 대책은 통하지 않는다.',
+    deliverable:'개선 결과보고서',
+    bad:'감사 지적사항 개선보고서 써줘',
+    criteria:['원인이 사람 탓이 아니라 절차 문제로 분석될 것','재발 방지책에 검증 시점과 담당이 명시될 것','2년 연속인 이유가 설명될 것'] },
+
+  { id:'m07', type:'기획', level:'초급', title:'주민 아이디어 공모전 시행계획',
+    situation:'주민참여예산과 연계한 생활불편 개선 아이디어 공모전을 처음 열려 한다. 예산은 2천만 원, 준비 기간은 6주다.',
+    deliverable:'시행계획 1건',
+    bad:'공모전 계획서 좀 만들어줘',
+    criteria:['추진 일정이 주 단위로 나올 것','심사 기준이 구체적일 것','예산 항목이 구분될 것'] },
+  { id:'m08', type:'기획', level:'중급', title:'청년 유출 대응 신규 시책 기획안',
+    situation:'최근 5년간 20~34세 인구가 18% 감소했다. 기존 청년수당형 사업은 효과가 낮다는 평가를 받았고, 내년에는 다른 접근이 필요하다.',
+    deliverable:'신규 시책 기획안 초안',
+    bad:'청년 정책 아이디어 좀 줘',
+    criteria:['기존 사업이 왜 실패했는지가 전제될 것','타 지자체 사례가 그대로 베껴지지 않을 것','성과지표가 인구수 외에 하나 더 있을 것'] },
+  { id:'m09', type:'기획', level:'고급', title:'지방소멸대응기금 투자계획 사업 발굴',
+    situation:'투자계획 제출을 앞두고 신규 사업을 발굴해야 한다. 기존 제출안은 "생활인구 유입" 논리가 약하다는 지적을 받았다. 우리 지역의 강점은 농산물 가공과 폐교 유휴시설이다.',
+    deliverable:'신규 사업 후보 3건과 각각의 논리 구조',
+    bad:'지방소멸기금 사업 아이디어 알려줘',
+    criteria:['지역 고유 자원과 사업이 논리로 연결될 것','생활인구 증가 경로가 설명될 것','기금 목적과의 정합성이 근거로 제시될 것'] },
+
+  { id:'m10', type:'홍보', level:'초급', title:'주민 안내문 쉬운 말로 다시 쓰기',
+    situation:'상수도 노후관 교체 공사로 3일간 단수가 예정되어 있다. 기존 안내문 초안이 행정용어투성이라 어르신들이 이해하기 어렵다는 지적을 받았다.',
+    deliverable:'쉬운 말 안내문',
+    bad:'안내문 쉽게 좀 바꿔줘',
+    criteria:['단수 시간과 대상 구역이 한눈에 보일 것','주민이 준비할 일이 먼저 나올 것','한자어와 피동형이 줄어들 것'] },
+  { id:'m11', type:'홍보', level:'중급', title:'신규 사업 보도자료',
+    situation:'전국 최초로 시도하는 반려동물 돌봄 지원 사업을 시작한다. 언론에 알리고 싶지만 "전국 최초"만 강조하면 알맹이가 없다는 반응이 나올 수 있다.',
+    deliverable:'보도자료 1건',
+    bad:'보도자료 하나 써줘',
+    criteria:['첫 문장에 핵심 사실이 들어갈 것','수치가 최소 2개 포함될 것','기관장 인용문이 상투적이지 않을 것'] },
+  { id:'m12', type:'홍보', level:'고급', title:'반대 여론이 있는 정책의 설명 메시지',
+    situation:'생활폐기물 처리시설 입지가 발표된 뒤 온라인에서 반발이 확산되고 있다. 사실과 다른 내용도 함께 퍼지고 있어 대응 메시지가 필요하다.',
+    deliverable:'주민 대상 설명 메시지(홈페이지·SNS 공통)',
+    bad:'주민 반발 대응 메시지 만들어줘',
+    criteria:['잘못된 정보를 반복해 확산시키지 않을 것','불안의 원인을 인정하는 문장이 들어갈 것','검증 가능한 근거가 붙을 것'] },
+
+  { id:'m13', type:'분석', level:'초급', title:'설문 결과 요약표',
+    situation:'주민 만족도 설문 400부를 회수했다. 문항은 12개이고, 부서장은 표 하나로 보고 싶어 한다.',
+    deliverable:'요약표와 3줄 해석',
+    bad:'설문 결과 정리해줘',
+    criteria:['표 항목이 미리 지정될 것','해석과 사실이 구분될 것','표본 한계가 각주로 남을 것'] },
+  { id:'m14', type:'분석', level:'중급', title:'인구통계 추세 해석과 시사점',
+    situation:'최근 5년 읍면동별 인구·연령 자료를 확보했다. 단순 감소 서술이 아니라 정책 판단에 쓸 시사점이 필요하다.',
+    deliverable:'추세 해석과 정책 시사점',
+    bad:'인구 데이터 분석해줘',
+    criteria:['전체 평균이 감추는 지역 차이를 짚을 것','원인 추정과 확인된 사실이 구분될 것','추가로 확보해야 할 자료가 제시될 것'] },
+  { id:'m15', type:'분석', level:'고급', title:'사업 성과지표 설계',
+    situation:'평생학습 프로그램의 성과지표가 "참여 인원"뿐이라 실질 효과를 보여주지 못한다. 내년부터 적용할 지표 체계를 다시 짜야 한다.',
+    deliverable:'성과지표 체계안',
+    bad:'성과지표 만들어줘',
+    criteria:['투입·산출·성과가 구분될 것','측정 방법과 자료원이 함께 제시될 것','조작 가능성이 낮은 지표일 것'] },
+
+  { id:'m16', type:'법령', level:'초급', title:'조례안 쉬운 설명자료',
+    situation:'새로 제정하는 조례를 주민에게 설명해야 한다. 조문 그대로는 이해하기 어렵다.',
+    deliverable:'조문별 쉬운 설명자료',
+    bad:'조례 내용 쉽게 설명해줘',
+    criteria:['조문 번호와 설명이 짝지어질 것','달라지는 점이 먼저 나올 것','법률 효과를 임의로 바꿔 말하지 않을 것'] },
+  { id:'m17', type:'법령', level:'중급', title:'상위법 개정에 따른 자치법규 정비 검토',
+    situation:'상위 법률이 개정되어 관련 조례·규칙을 정비해야 한다. 손봐야 할 조문과 그대로 두어도 되는 조문을 가려내야 한다.',
+    deliverable:'정비 대상 목록과 검토 의견',
+    bad:'법 바뀐 거 조례 반영해줘',
+    criteria:['개정 전후 대비가 표로 정리될 것','정비 필요 여부의 판단 근거가 붙을 것','확인이 필요한 부분은 단정하지 않을 것'] },
+  { id:'m18', type:'법령', level:'고급', title:'재량행위 처분의 쟁점 정리',
+    situation:'허가 신청을 반려했는데 신청인이 행정심판을 예고했다. 처분 사유의 적법성과 재량권 일탈 여부를 미리 점검해야 한다.',
+    deliverable:'쟁점 정리와 보완 필요 사항',
+    bad:'이 처분 문제 없는지 봐줘',
+    criteria:['AI 답변을 법률 자문으로 쓰지 않는다는 전제가 명시될 것','쟁점별로 유리·불리가 함께 정리될 것','확인되지 않은 판례를 인용하지 않게 할 것'] }
+];
+
+/* ---------- 유틸 ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+let toastTimer = null;
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
+}
+
+function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text).then(() => true).catch(() => legacyCopy(text));
+  }
+  return Promise.resolve(legacyCopy(text));
+}
+function legacyCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+  document.body.appendChild(ta);
+  ta.select(); ta.setSelectionRange(0, 999999);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+  document.body.removeChild(ta);
+  return ok;
+}
+function flashBtn(btn, label) {
+  if (!btn) return;
+  const old = btn.textContent;
+  btn.textContent = label; btn.classList.add('ok');
+  setTimeout(() => { btn.textContent = old; btn.classList.remove('ok'); }, 1600);
+}
+function download(name, text, mime) {
+  const blob = new Blob([text], { type: (mime || 'text/plain') + ';charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function downloadBin(name, bytes, mime) {
+  const blob = new Blob([bytes], { type: mime });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+}
+function pickFile(cb) {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.json,application/json';
+  inp.onchange = () => {
+    const f = inp.files && inp.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => cb(r.result);
+    r.onerror = () => toast('파일을 읽지 못했습니다');
+    r.readAsText(f, 'utf-8');
+  };
+  inp.click();
+}
+function stamp() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+function fileStamp() {
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return '' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes());
+}
+
+/* ---------- 화면 전환 ---------- */
+const UI = {
+  left(id) {
+    ['mission', 'ctx', 'pcf'].forEach(k => {
+      $('t-' + k).setAttribute('aria-selected', String(k === id));
+      $('p-' + k).classList.toggle('on', k === id);
+    });
+  },
+  right(id) {
+    ['view', 'diag', 'coach', 'submit'].forEach(k => {
+      $('t-' + k).setAttribute('aria-selected', String(k === id));
+      $('p-' + k).classList.toggle('on', k === id);
+    });
+    if (id === 'diag') Diagnose.render();
+    if (id === 'coach') Coach.render();
+    if (id === 'submit') Submit.render();
+    if (window.innerWidth <= 860) UI.mob('r');
+  },
+  mob(side) {
+    $('pane-l').dataset.mob = side === 'l' ? 'on' : 'off';
+    $('pane-r').dataset.mob = side === 'r' ? 'on' : 'off';
+    $('mob-l').dataset.on = side === 'l' ? '1' : '0';
+    $('mob-r').dataset.on = side === 'r' ? '1' : '0';
+  },
+  open(id) { $(id).hidden = false; },
+  close(id) { $(id).hidden = true; },
+  openSettings() {
+    $('s-key').value = Store.get('apikey', '') || '';
+    $('s-model').value = Store.get('model', 'gemini-2.5-flash');
+    $('s-course').value = S.meta.course;
+    $('s-storage').textContent = Store.ok
+      ? '이 브라우저에 저장됩니다. 시크릿 창이나 다른 기기에서는 다시 입력해야 합니다.'
+      : '이 환경은 브라우저 저장을 막고 있어 창을 닫으면 설정이 사라집니다.';
+    UI.open('m-settings');
+  },
+  openLibrary() { Library.render(); UI.open('m-library'); }
+};
+/* ============================================================
+   입력 필드 렌더링
+   ============================================================ */
+function renderFields(group) {
+  const host = $(group + '-fields');
+  host.innerHTML = FIELDS[group].map(f => `
+    <div class="field">
+      <div class="flabel">
+        <span class="tag${group === 'pcf' ? ' b' : ''}">${esc(f.tag)}</span>
+        <span class="name">${esc(f.name)}</span>
+        <span class="hint">${esc(f.hint)}</span>
+        <span class="mark-no" id="mk-${f.k}"></span>
+      </div>
+      <textarea id="in-${f.k}" rows="${f.rows}" placeholder="${esc(f.ph)}"></textarea>
+      <div class="chips">
+        ${f.chips.map(c => `<button class="chip" data-k="${f.k}" data-v="${esc(c)}">${esc(c)}</button>`).join('')}
+      </div>
+    </div>`).join('');
+
+  FIELDS[group].forEach(f => {
+    const ta = $('in-' + f.k);
+    ta.value = (S.ctx[f.k] !== undefined ? S.ctx[f.k] : S.pcf[f.k]) || '';
+    ta.addEventListener('input', () => {
+      if (S.ctx[f.k] !== undefined) S.ctx[f.k] = ta.value; else S.pcf[f.k] = ta.value;
+      Studio.update();
+    });
+  });
+  host.querySelectorAll('.chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.k, v = btn.dataset.v, ta = $('in-' + k);
+      ta.value = ta.value.trim() ? ta.value.trim() + '\n- ' + v : '- ' + v;
+      if (S.ctx[k] !== undefined) S.ctx[k] = ta.value; else S.pcf[k] = ta.value;
+      ta.scrollTop = ta.scrollHeight;
+      Studio.update();
+    });
+  });
+}
+
+/* ============================================================
+   미션 보드
+   ============================================================ */
+const Mission = {
+  list: [],
+  filter: { type: '전체', level: '전체' },
+  editing: null,
+
+  init() {
+    this.list = Store.get('missions', null) || JSON.parse(JSON.stringify(BASE_MISSIONS));
+    this.renderFilters();
+    this.render();
+  },
+  save() { Store.set('missions', this.list); },
+
+  renderFilters() {
+    const types = ['전체'].concat(Array.from(new Set(this.list.map(m => m.type))));
+    const levels = ['전체', '초급', '중급', '고급'];
+    $('mission-filters').innerHTML =
+      types.map(t => `<button class="fbtn" data-f="type" data-v="${esc(t)}" data-on="${t === this.filter.type ? 1 : 0}">${esc(t)}</button>`).join('') +
+      '<span style="width:100%;height:0"></span>' +
+      levels.map(l => `<button class="fbtn" data-f="level" data-v="${esc(l)}" data-on="${l === this.filter.level ? 1 : 0}">${esc(l)}</button>`).join('');
+    $('mission-filters').querySelectorAll('.fbtn').forEach(b => {
+      b.addEventListener('click', () => {
+        this.filter[b.dataset.f] = b.dataset.v;
+        this.renderFilters(); this.render();
+      });
+    });
+  },
+
+  render() {
+    const f = this.filter;
+    const rows = this.list.filter(m =>
+      (f.type === '전체' || m.type === f.type) && (f.level === '전체' || m.level === f.level));
+    if (!rows.length) {
+      $('mission-list').innerHTML = '<div class="empty"><b>해당하는 미션이 없습니다</b><p>필터를 바꾸거나 미션을 직접 추가하세요.</p></div>';
+      return;
+    }
+    $('mission-list').innerHTML = rows.map(m => {
+      const on = S.mission && S.mission.id === m.id;
+      return `<div class="mcard" data-id="${m.id}" data-on="${on ? 1 : 0}">
+        <div class="mt">
+          <span class="ty">${esc(m.type)}</span>
+          <span class="lv ${esc(m.level)}">${esc(m.level)}</span>
+          <h4>${esc(m.title)}</h4>
+        </div>
+        <p>${esc(m.situation)}</p>
+        ${on ? `
+          <div class="bad">이렇게 쓰면 실패합니다 → "${esc(m.bad)}"</div>
+          <p style="margin-top:8px"><b>만들 것</b> · ${esc(m.deliverable)}</p>
+          <ul class="crit">${(m.criteria || []).map(c => `<li>${esc(c)}</li>`).join('')}</ul>
+          <div style="display:flex;gap:6px;margin-top:10px">
+            <button class="btn primary" data-act="go" data-id="${m.id}">이 미션으로 작성 시작</button>
+            <button class="btn" data-act="edit" data-id="${m.id}">미션 수정</button>
+          </div>` : ''}
+      </div>`;
+    }).join('');
+
+    $('mission-list').querySelectorAll('.mcard').forEach(c => {
+      c.addEventListener('click', e => {
+        const act = e.target.dataset.act;
+        if (act === 'go') { e.stopPropagation(); UI.left('ctx'); return; }
+        if (act === 'edit') { e.stopPropagation(); Mission.edit(e.target.dataset.id); return; }
+        const m = Mission.list.find(x => x.id === c.dataset.id);
+        S.mission = (S.mission && S.mission.id === m.id) ? null : m;
+        Mission.render(); Studio.update();
+      });
+    });
+  },
+
+  edit(id) {
+    const m = this.list.find(x => x.id === id);
+    if (!m) return;
+    this.editing = id;
+    $('mm-title').textContent = '미션 수정';
+    $('mm-type').value = m.type; $('mm-level').value = m.level;
+    $('mm-t').value = m.title; $('mm-s').value = m.situation;
+    $('mm-d').value = m.deliverable; $('mm-b').value = m.bad;
+    $('mm-c').value = (m.criteria || []).join('\n');
+    $('mm-del').style.display = '';
+    UI.open('m-mission');
+  },
+  addCustom() {
+    this.editing = null;
+    $('mm-title').textContent = '미션 추가';
+    $('mm-type').value = ''; $('mm-level').value = '중급';
+    $('mm-t').value = ''; $('mm-s').value = ''; $('mm-d').value = ''; $('mm-b').value = ''; $('mm-c').value = '';
+    $('mm-del').style.display = 'none';
+    UI.open('m-mission');
+  },
+  saveEdit() {
+    const title = $('mm-t').value.trim();
+    if (!title) { toast('미션 제목을 입력하세요'); return; }
+    const data = {
+      type: $('mm-type').value.trim() || '기타',
+      level: $('mm-level').value,
+      title,
+      situation: $('mm-s').value.trim(),
+      deliverable: $('mm-d').value.trim(),
+      bad: $('mm-b').value.trim(),
+      criteria: $('mm-c').value.split('\n').map(s => s.trim()).filter(Boolean)
+    };
+    if (this.editing) {
+      const m = this.list.find(x => x.id === this.editing);
+      Object.assign(m, data);
+      if (S.mission && S.mission.id === m.id) S.mission = m;
+    } else {
+      const m = Object.assign({ id: 'c' + Date.now() }, data);
+      this.list.unshift(m);
+    }
+    this.save(); this.renderFilters(); this.render(); Studio.update();
+    UI.close('m-mission'); toast('미션을 저장했습니다');
+  },
+  remove() {
+    if (!this.editing) return;
+    if (!confirm('이 미션을 삭제할까요?')) return;
+    this.list = this.list.filter(x => x.id !== this.editing);
+    if (S.mission && S.mission.id === this.editing) S.mission = null;
+    this.save(); this.renderFilters(); this.render();
+    UI.close('m-mission'); toast('미션을 삭제했습니다');
+  },
+  exportSet() {
+    download('pcf-mission-set-' + fileStamp() + '.json',
+      JSON.stringify({ kind: 'pcf-missions', savedAt: stamp(), missions: this.list }, null, 2), 'application/json');
+    toast('미션 세트를 내려받았습니다');
+  },
+  importSet() {
+    pickFile(txt => {
+      try {
+        const d = JSON.parse(txt);
+        const arr = Array.isArray(d) ? d : d.missions;
+        if (!Array.isArray(arr) || !arr.length) throw new Error('형식 오류');
+        this.list = arr.map((m, i) => Object.assign({ id: m.id || ('i' + i + Date.now()) }, m));
+        this.save(); this.renderFilters(); this.render();
+        toast('미션 ' + arr.length + '건을 불러왔습니다');
+      } catch (e) { toast('미션 세트 형식이 아닙니다'); }
+    });
+  }
+};
+
+/* ============================================================
+   프롬프트 조립 · 복사
+   ============================================================ */
+const Studio = {
+  block1() {
+    const c = S.ctx;
+    const sec = (t, v) => `[${t}]\n${v.trim() || '-'}\n`;
+    let s = 'AI 파트너, 본격적인 작업에 앞서 나의 업무 상황을 먼저 공유할게. 아래 내용을 읽고 이후 대화 내내 전제로 유지해 줘.\n\n';
+    if (S.mission) s += `[실습 미션]\n${S.mission.title} — ${S.mission.situation}\n\n`;
+    s += sec('나의 역할', c.who) + '\n' + sec('현재 과업', c.what) + '\n'
+       + sec('추진 배경', c.why1) + '\n' + sec('당면한 한계', c.why2);
+    s += '\n위 내용을 전제로 삼았다면 "맥락 동기화 완료"라고만 답하고 다음 지시를 기다려 줘.';
+    return s;
+  },
+  block2() {
+    const p = S.pcf;
+    const sec = (t, v) => `[${t}]\n${v.trim() || '-'}\n`;
+    let s = '앞서 공유한 업무 맥락을 그대로 유지한 상태에서, 다음 지시를 수행해 줘.\n\n';
+    s += sec('페르소나 (Persona)', p.p) + '\n'
+       + sec('과업 지시와 제약 조건 (Constraints)', p.c) + '\n'
+       + sec('출력 형식 (Format)', p.f);
+    return s;
+  },
+  update() {
+    $('block1').textContent = this.block1();
+    $('block2').textContent = this.block2();
+    const d = Diagnose.run();
+    ['who', 'what', 'why1', 'why2', 'p', 'c', 'f'].forEach(k => {
+      const el = $('mk-' + k);
+      if (!el) return;
+      const it = d.items.find(x => x.key === k);
+      if (!it) return;
+      el.textContent = it.status === 'full' ? '충족' : it.status === 'part' ? '보강 필요' : '미작성';
+      el.className = it.status === 'full' ? 'mark-ok' : 'mark-no';
+    });
+    $('t-diag').dataset.alert = (d.privacy.length || d.score < 50) ? '1' : '0';
+    if ($('p-diag').classList.contains('on')) Diagnose.render();
+    if ($('p-coach').classList.contains('on')) Coach.renderLayer1();
+  },
+  copy(id, btn) {
+    copyText($(id).textContent).then(ok => ok ? flashBtn(btn, '복사됨') : toast('복사에 실패했습니다'));
+  },
+  copyAll(btn) {
+    const t = this.block1() + '\n\n---\n\n' + this.block2();
+    copyText(t).then(ok => ok ? flashBtn(btn, '복사됨 — 붙여넣고 두 블록을 나눠 보내세요') : toast('복사에 실패했습니다'));
+  },
+  allText() {
+    return Object.values(S.ctx).join('\n') + '\n' + Object.values(S.pcf).join('\n');
+  }
+};
+
+/* ============================================================
+   진단 엔진 (1층) — 항목 채점 + 9 Case 점검 + 개인정보 검출
+   ============================================================ */
+const VAGUE = ['적절히','적절한','적당히','적당한','알아서','잘 좀','괜찮게','좋게','무난하게','깔끔하게','센스있게','센스 있게','대충','알잘딱','느낌 있게','있어 보이게'];
+
+const KOINE = [
+  { n:1, name:'지시복원격', layer:'지시·전제',
+    test:t => (t.match(/(이것|그것|저것|이거|그거|저거|이런 거|그런 거|해당 건|아까 그|위에 그)/g) || []),
+    why:'무엇을 가리키는지 AI가 알 수 없는 지시어가 있습니다.',
+    fix:'"그거" 대신 대상의 이름을 그대로 적으세요. 예: "그 자료" → "2025년 주민만족도 설문 결과표"' },
+  { n:2, name:'전제명시격', layer:'지시·전제',
+    test:t => (t.match(/(당연히|알다시피|아시겠지만|늘 하던|기존대로|평소처럼|여느 때처럼|말 안 해도)/g) || []),
+    why:'사람끼리는 통하지만 AI는 모르는 전제를 생략했습니다.',
+    fix:'"기존대로" 대신 기존 방식이 무엇인지 한 줄로 풀어 쓰세요.' },
+  { n:3, name:'배경공유격', layer:'지시·전제',
+    test:() => [],
+    custom:() => (!S.ctx.why1.trim() || !S.ctx.why2.trim()),
+    why:'추진 배경 또는 당면한 한계가 비어 있습니다. AI는 상황을 모른 채 일반론을 씁니다.',
+    fix:'왜 이 일을 하게 되었는지, 무엇이 걸림돌인지 각각 한 문장씩 적으세요.' },
+  { n:4, name:'사실치환격', layer:'의미·표현',
+    test:t => { const re = new RegExp('(' + VAGUE.join('|') + ')', 'g'); return t.match(re) || []; },
+    why:'판단을 AI에게 떠넘기는 모호한 표현이 있습니다.',
+    fix:'"적절히 요약" 대신 "핵심 3가지, 각 2문장 이내로 요약"처럼 관찰 가능한 기준으로 바꾸세요.' },
+  { n:5, name:'수량명시격', layer:'의미·표현',
+    test:() => [],
+    custom:() => !/\d/.test(S.pcf.c + S.pcf.f),
+    why:'지시와 형식 어디에도 숫자가 없습니다. 분량·개수·기한이 정해지지 않으면 결과가 매번 달라집니다.',
+    fix:'개수(3가지), 분량(A4 1장), 기한, 문장 수 중 최소 하나를 넣으세요.' },
+  { n:6, name:'접속명시격', layer:'의미·표현',
+    test:t => t.split('\n').filter(l => l.trim().length > 40 && (l.match(/(하고|되고|이며|하며|하여|해서)/g) || []).length >= 3),
+    why:'한 문장에 여러 지시가 연결어미로 이어져 논리 관계가 흐려집니다.',
+    fix:'번호를 매겨 줄을 나누세요. 1) ... 2) ... 3) ...' },
+  { n:7, name:'화행직결격', layer:'화행·관계',
+    test:t => (t.match(/(해주면 좋겠|할 수 있을까|가능할까|부탁해도 될까|어떨까|하면 어떨지|해줄 수 있어)/g) || []),
+    why:'요청을 완곡하게 돌려 말했습니다. AI는 이를 지시가 아닌 질문으로 처리할 수 있습니다.',
+    fix:'"~해 줄 수 있을까?" 대신 "~를 작성할 것"처럼 단정형으로 쓰세요.' },
+  { n:8, name:'기준명시격', layer:'화행·관계',
+    test:t => { const hit = t.match(/(최고의|최적의|가장 좋은|베스트|최선의|제일 나은)/g) || [];
+                return /(기준|우선순위|평가|지표|관점에서)/.test(t) ? [] : hit; },
+    why:'"가장 좋은"이라고 했지만 무엇을 기준으로 좋은지가 없습니다.',
+    fix:'"비용 대비 효과 기준으로 가장 나은 안"처럼 판단 기준을 붙이세요.' },
+  { n:9, name:'관계명시격', layer:'화행·관계',
+    test:() => [],
+    custom:() => !/(주민|시민|의원|기관장|상급자|국민|담당자|읽는|독자|보고 대상|대상은|어르신|민원인|언론)/.test(S.pcf.c + S.pcf.f),
+    why:'이 글을 누가 읽는지 지정되지 않았습니다. 읽는 사람이 정해져야 문체와 수준이 정해집니다.',
+    fix:'출력 형식에 "보고 대상: 기관장" 또는 "읽는 사람: 70대 주민"을 넣으세요.' }
+];
+
+const PII = [
+  { name:'주민등록번호', re:/\d{6}\s*[-–]\s*[1-4]\d{6}/g },
+  { name:'휴대전화번호', re:/01[016789][-.\s]?\d{3,4}[-.\s]?\d{4}/g },
+  { name:'이메일 주소', re:/[\w.+-]+@[\w-]+\.[\w.]{2,}/g },
+  { name:'차량번호', re:/\b\d{2,3}[가-힣]\d{4}\b/g },
+  { name:'상세 주소(동·호)', re:/\d+\s?동\s?\d+\s?호/g },
+  { name:'개인 성명 표기', re:/(민원인|신청인|대상자|수급자|보호자)\s*[가-힣]{2,4}\s*(씨|님|군|양)/g },
+  { name:'계좌·유선전화 번호 추정', re:/\d{3,6}-\d{2,6}-\d{4,8}/g }
+];
+
+const Diagnose = {
+  scoreField(k, v) {
+    const t = v.trim(), len = t.replace(/\s/g, '').length;
+    if (!len) return 'none';
+    const rules = {
+      who:  () => len >= 8 && /(과|팀|실|국|소|청|주무관|담당|팀장|과장|공무원|주사|서기|면|읍|동)/.test(t),
+      what: () => len >= 10 && /(보고서|기획안|안내문|보도자료|계획|답변|회신|요약|분석|공문|매뉴얼|자료|초안|검토|설명)/.test(t),
+      why1: () => len >= 10,
+      why2: () => len >= 10,
+      p:    () => len >= 10 && /(년|경력|전문가|담당관|분석가|실장|과장|기획|상담|감사|변호|연구)/.test(t),
+      c:    () => len >= 25 && (t.split('\n').filter(x => x.trim()).length >= 2 || /(반드시|말 것|제외|포함|지양|기준|순서)/.test(t)),
+      f:    () => len >= 10 && /(장|매|자|줄|개|쪽|표|목록|개조식|서술식|마크다운|단락|문단|형식|어미|분량|이내)/.test(t)
+    };
+    return rules[k]() ? 'full' : 'part';
+  },
+
+  run() {
+    const W = { who:10, what:15, why1:10, why2:10, p:15, c:25, f:15 };
+    const LABEL = { who:'나의 역할(Who)', what:'현재 과업(What)', why1:'추진 배경(Why 1)', why2:'당면한 한계(Why 2)',
+                    p:'페르소나(P)', c:'과업 지시와 제약(C)', f:'출력 형식(F)' };
+    const MSG = {
+      who:['소속·직위까지 쓰면 AI가 문체와 권한 범위를 맞춥니다.','소속과 직위를 함께 적으세요.','비어 있습니다.'],
+      what:['만들 결과물이 명확합니다.','"무엇을 만드는지"를 결과물 이름으로 적으세요.','비어 있습니다.'],
+      why1:['배경이 전달됩니다.','한 문장 더 — 누가 왜 요구했는지 적으세요.','비어 있습니다. AI가 일반론으로 답하게 됩니다.'],
+      why2:['제약이 분명해 헛다리 짚는 답이 줄어듭니다.','예산·기한·정치적 부담 중 실제 걸림돌을 적으세요.','비어 있습니다. 가장 자주 빠지는 칸입니다.'],
+      p:['역할이 구체적입니다.','"전문가"보다 경력·직무를 붙이면 답의 깊이가 달라집니다.','비어 있습니다.'],
+      c:['지시가 조건과 함께 정리되어 있습니다.','조건을 줄 단위로 2개 이상 나눠 적으세요.','비어 있습니다. 가장 중요한 칸입니다.'],
+      f:['결과물의 모양이 지정되었습니다.','분량이나 구조 중 하나는 숫자로 지정하세요.','비어 있습니다. 형식을 안 정하면 매번 다른 모양이 나옵니다.']
+    };
+    const items = [], all = Studio.allText();
+    let score = 0;
+    Object.keys(W).forEach(k => {
+      const v = (S.ctx[k] !== undefined) ? S.ctx[k] : S.pcf[k];
+      const st = this.scoreField(k, v);
+      const got = st === 'full' ? W[k] : st === 'part' ? Math.round(W[k] * 0.5) : 0;
+      score += got;
+      items.push({ key:k, label:LABEL[k], status:st, got, max:W[k],
+                   msg: MSG[k][st === 'full' ? 0 : st === 'part' ? 1 : 2] });
+    });
+
+    const koine = [];
+    KOINE.forEach(c => {
+      let hits = [];
+      if (c.custom) { if (c.custom()) hits = ['(항목 누락)']; }
+      else hits = c.test(all);
+      if (hits.length) koine.push({ n:c.n, name:c.name, layer:c.layer, why:c.why, fix:c.fix,
+                                    ev: Array.from(new Set(hits)).slice(0, 4).map(x => String(x).length > 26 ? String(x).slice(0, 26) + '…' : String(x)) });
+    });
+
+    const privacy = [];
+    PII.forEach(p => {
+      const m = all.match(p.re);
+      if (m) privacy.push({ name:p.name, count:m.length });
+    });
+
+    const penalty = Math.min(12, koine.filter(k => k.n === 4 || k.n === 2).reduce((a, k) => a + k.ev.length * 3, 0));
+    score = Math.max(0, Math.min(100, score - penalty));
+
+    const grade = score >= 85 ? { t:'숙련', c:'var(--green)', bg:'var(--green-soft)', d:'이 상태로 실무에 바로 써도 됩니다.' }
+                : score >= 70 ? { t:'활용', c:'var(--ink-2)', bg:'#EDF3FB', d:'쓸 만합니다. 아래 한두 곳만 손보면 완성입니다.' }
+                : score >= 45 ? { t:'기초', c:'var(--amber)', bg:'var(--amber-soft)', d:'AI가 되묻거나 일반론으로 답할 가능성이 높습니다.' }
+                : { t:'초안', c:'var(--red)', bg:'var(--red-soft)', d:'아직 지시라기보다 메모에 가깝습니다.' };
+
+    return { score, grade, items, koine, privacy, penalty };
+  },
+
+  render() {
+    const d = this.run();
+    const circ = 2 * Math.PI * 42, off = circ * (1 - d.score / 100);
+    let h = '';
+
+    if (d.privacy.length) {
+      h += `<div class="warnbox">
+        <h4>개인정보로 보이는 내용이 있습니다</h4>
+        <p>${d.privacy.map(p => esc(p.name) + ' ' + p.count + '건').join(' · ')} — 외부 AI 서비스에 입력하기 전에 반드시 지우거나 A씨·○○○처럼 바꾸세요.
+        업무상 알게 된 개인정보를 외부 서비스에 입력하는 것은 개인정보 보호법 위반이 될 수 있습니다.</p></div>`;
+    }
+
+    h += `<div class="card"><div class="score-wrap">
+      <div class="dial">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="42" fill="none" stroke="#E7EBF2" stroke-width="9"/>
+          <circle cx="48" cy="48" r="42" fill="none" stroke="${d.grade.c}" stroke-width="9" stroke-linecap="round"
+            stroke-dasharray="${circ.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/>
+        </svg>
+        <div class="val"><b>${d.score}</b><span>충족도</span></div>
+      </div>
+      <div class="score-txt">
+        <span class="badge" style="color:${d.grade.c};background:${d.grade.bg}">${d.grade.t}</span>
+        <h4>${esc(d.grade.d)}</h4>
+        <p>7개 항목 충족도에서 모호한 표현 감점 ${d.penalty}점을 뺀 값입니다. 글의 좋고 나쁨이 아니라 <b>지시가 갖춰졌는지</b>만 봅니다.</p>
+      </div></div>
+      ${d.items.map(it => `
+        <div class="rowitem">
+          <span class="st ${it.status}">${it.status === 'full' ? '○' : it.status === 'part' ? '△' : '×'}</span>
+          <span class="tx"><b>${esc(it.label)}</b><span>${esc(it.msg)}</span></span>
+          <span class="pt">${it.got}/${it.max}</span>
+        </div>`).join('')}
+    </div>`;
+
+    h += `<div class="card">
+      <div class="card-hd"><h3>한국어 화행 점검 · 9 Case</h3><span class="sub">말버릇이 만드는 의미 손실</span></div>
+      <div class="card-bd">`;
+    if (!d.koine.length) {
+      h += `<div class="okbox">9개 항목에서 걸리는 표현이 없습니다. 지시어·모호어·완곡표현 없이 잘 쓰셨습니다.</div>`;
+    } else {
+      h += d.koine.map(k => `
+        <div class="redline">
+          <b>Case ${k.n} ${esc(k.name)} · ${esc(k.layer)}</b>
+          ${esc(k.why)}
+          <div>${k.ev.map(e => `<span class="q">${esc(e)}</span>`).join('')}</div>
+          <div class="fx">→ ${esc(k.fix)}</div>
+        </div>`).join('');
+    }
+    h += `</div></div>`;
+    $('diag-body').innerHTML = h;
+  }
+};
+/* ============================================================
+   DOCX 생성기 — 외부 라이브러리 없이 ZIP(무압축) + OOXML 직접 조립
+   업무망에서 CDN이 막혀도 동작하도록 앱 안에 내장한다.
+   ============================================================ */
+
+/* ---------- 최소 ZIP (store 방식) ---------- */
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(buf) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < buf.length; i++) c = CRC_TABLE[(c ^ buf[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function zipStore(files) {
+  const enc = new TextEncoder();
+  const u16 = v => [v & 255, (v >>> 8) & 255];
+  const u32 = v => [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255];
+  const parts = [], dir = [];
+  let offset = 0;
+
+  files.forEach(f => {
+    const name = enc.encode(f.name);
+    const data = typeof f.data === 'string' ? enc.encode(f.data) : f.data;
+    const crc = crc32(data);
+    const head = new Uint8Array(
+      [0x50, 0x4b, 0x03, 0x04].concat(u16(20), u16(0), u16(0), u16(0), u16(0),
+        u32(crc), u32(data.length), u32(data.length), u16(name.length), u16(0)));
+    parts.push(head, name, data);
+    dir.push({ name, crc, size: data.length, offset });
+    offset += head.length + name.length + data.length;
+  });
+
+  const cd = [];
+  let cdSize = 0;
+  dir.forEach(c => {
+    const h = new Uint8Array(
+      [0x50, 0x4b, 0x01, 0x02].concat(u16(20), u16(20), u16(0), u16(0), u16(0), u16(0),
+        u32(c.crc), u32(c.size), u32(c.size),
+        u16(c.name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(c.offset)));
+    cd.push(h, c.name);
+    cdSize += h.length + c.name.length;
+  });
+
+  const eocd = new Uint8Array(
+    [0x50, 0x4b, 0x05, 0x06].concat(u16(0), u16(0), u16(dir.length), u16(dir.length),
+      u32(cdSize), u32(offset), u16(0)));
+
+  const all = parts.concat(cd, [eocd]);
+  const total = all.reduce((a, b) => a + b.length, 0);
+  const out = new Uint8Array(total);
+  let p = 0;
+  all.forEach(c => { out.set(c, p); p += c.length; });
+  return out;
+}
+
+/* ---------- OOXML 조각 ---------- */
+const Docx = (() => {
+  const NAVY = '1F3864', BLUE = '2E5FA3', GRAY = 'F2F2F2', LINE = 'BFC7D6';
+  const FONT = '맑은 고딕';
+  const X = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&apos;')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+
+  function rPr(o) {
+    o = o || {};
+    const f = o.font || FONT, sz = o.sz || 20;
+    return '<w:rPr>'
+      + '<w:rFonts w:ascii="' + f + '" w:eastAsia="' + f + '" w:hAnsi="' + f + '" w:cs="' + f + '"/>'
+      + (o.b ? '<w:b/>' : '') + (o.i ? '<w:i/>' : '')
+      + (o.color ? '<w:color w:val="' + o.color + '"/>' : '')
+      + '<w:sz w:val="' + sz + '"/><w:szCs w:val="' + sz + '"/>'
+      + '</w:rPr>';
+  }
+  function run(text, o) {
+    const lines = String(text == null ? '' : text).split('\n');
+    return '<w:r>' + rPr(o) + lines.map((t, i) =>
+      (i ? '<w:br/>' : '') + '<w:t xml:space="preserve">' + X(t) + '</w:t>').join('') + '</w:r>';
+  }
+  function para(text, o) {
+    o = o || {};
+    let pPr = '<w:pPr>';
+    pPr += '<w:spacing w:before="' + (o.before || 0) + '" w:after="' + (o.after == null ? 60 : o.after)
+         + '" w:line="' + (o.line || 280) + '" w:lineRule="auto"/>';
+    if (o.ind) pPr += '<w:ind w:left="' + o.ind + '" w:hanging="' + (o.hang || 0) + '"/>';
+    if (o.align) pPr += '<w:jc w:val="' + o.align + '"/>';
+    if (o.shd) pPr += '<w:shd w:val="clear" w:color="auto" w:fill="' + o.shd + '"/>';
+    if (o.rule) pPr += '<w:pBdr><w:bottom w:val="single" w:sz="' + (o.ruleSz || 8)
+                     + '" w:space="3" w:color="' + o.rule + '"/></w:pBdr>';
+    pPr += '</w:pPr>';
+    return '<w:p>' + pPr + (text === '' ? '' : run(text, o)) + '</w:p>';
+  }
+  function table(widths, rows) {
+    const total = widths.reduce((a, b) => a + b, 0);
+    let s = '<w:tbl><w:tblPr><w:tblW w:w="' + total + '" w:type="dxa"/><w:tblBorders>'
+      + ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']
+        .map(k => '<w:' + k + ' w:val="single" w:sz="4" w:space="0" w:color="' + LINE + '"/>').join('')
+      + '</w:tblBorders><w:tblLayout w:type="fixed"/></w:tblPr>';
+    s += '<w:tblGrid>' + widths.map(w => '<w:gridCol w:w="' + w + '"/>').join('') + '</w:tblGrid>';
+    rows.forEach(r => {
+      s += '<w:tr>' + (r.h ? '<w:trPr><w:trHeight w:val="' + r.h + '"/></w:trPr>' : '');
+      const cells = r.c || r;
+      let i = 0;
+      cells.forEach(c => {
+        const span = c.span || 1;
+        let w = 0;
+        for (let k = 0; k < span; k++) w += widths[i + k] || 0;
+        i += span;
+        const o = Object.assign({ after: 0, line: 260, sz: 19 }, c.o || {});
+        if (c.align) o.align = c.align;
+        s += '<w:tc><w:tcPr><w:tcW w:w="' + w + '" w:type="dxa"/>'
+           + (span > 1 ? '<w:gridSpan w:val="' + span + '"/>' : '')
+           + (c.shd ? '<w:shd w:val="clear" w:color="auto" w:fill="' + c.shd + '"/>' : '')
+           + '<w:tcMar><w:top w:w="60" w:type="dxa"/><w:bottom w:w="60" w:type="dxa"/>'
+           + '<w:left w:w="100" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tcMar>'
+           + '<w:vAlign w:val="center"/></w:tcPr>'
+           + para(c.t == null ? '' : c.t, o) + '</w:tc>';
+      });
+      s += '</w:tr>';
+    });
+    return s + '</w:tbl>' + para('', { after: 100, sz: 8 });
+  }
+
+  /* 구성 요소 */
+  const H = t => para(t, { b: true, sz: 24, color: NAVY, before: 220, after: 100, rule: NAVY, ruleSz: 10 });
+  const B = t => para(t, { sz: 20, ind: 200, after: 40 });
+  const LI = t => para('· ' + t, { sz: 20, ind: 400, hang: 200, after: 30 });
+  const BLOCK = t => table([9360], [[{ t: t, shd: GRAY, o: { sz: 18, after: 0, line: 240 } }]]);
+
+  function body(d) {
+    let s = '';
+    s += para(d.course + ' 결과 제출서',
+      { b: true, sz: 34, color: NAVY, align: 'center', after: 60, line: 300 });
+    s += para('프롬프트 설계 실습 산출물', { sz: 18, color: BLUE, align: 'center', after: 220 });
+
+    s += table([1300, 3380, 1300, 3380], [
+      [{ t: '지자체명', shd: GRAY, o: { b: true }, align: 'center' }, { t: d.org || '' },
+       { t: '소    속', shd: GRAY, o: { b: true }, align: 'center' }, { t: d.dept || '' }],
+      [{ t: '성    명', shd: GRAY, o: { b: true }, align: 'center' }, { t: d.name || '' },
+       { t: '제출일시', shd: GRAY, o: { b: true }, align: 'center' }, { t: d.when || '' }],
+      [{ t: '과 정 명', shd: GRAY, o: { b: true }, align: 'center' }, { t: d.course || '', span: 3 }]
+    ]);
+
+    /* Ⅰ. 실습 과제 */
+    s += H('Ⅰ. 실습 과제');
+    if (d.mission) {
+      s += para('1. 과제명: ' + d.mission.title + '  (' + d.mission.type + '·' + d.mission.level + ')',
+        { sz: 20, b: true, ind: 200, after: 60 });
+      s += para('2. 과제 상황', { sz: 20, b: true, ind: 200, after: 40 });
+      s += B(d.mission.situation);
+      s += para('3. 산출 요구사항: ' + d.mission.deliverable, { sz: 20, b: true, ind: 200, before: 60, after: 40 });
+      if (d.mission.criteria && d.mission.criteria.length) {
+        s += para('4. 충족 기준', { sz: 20, b: true, ind: 200, before: 60, after: 40 });
+        d.mission.criteria.forEach(c => { s += LI(c); });
+      }
+    } else {
+      s += B('지정 과제 없이 담당 업무를 대상으로 실습을 수행하였음.');
+    }
+
+    /* Ⅱ. 사전 맥락 */
+    s += H('Ⅱ. 사전 맥락 설계 (블록 1)');
+    s += para('AI에 업무 상황을 선제적으로 공유하기 위하여 작성한 지시문임.',
+      { sz: 18, color: '5A6B85', ind: 200, after: 80 });
+    s += BLOCK(d.block1);
+
+    /* Ⅲ. 작업 지시 */
+    s += H('Ⅲ. 작업 지시 (블록 2 · PCF)');
+    s += para('페르소나(P) · 과업 지시와 제약 조건(C) · 출력 형식(F)의 3요소로 구성함.',
+      { sz: 18, color: '5A6B85', ind: 200, after: 80 });
+    s += BLOCK(d.block2);
+
+    /* Ⅳ. 자가진단 */
+    s += H('Ⅳ. 자가진단 결과');
+    s += para('1. 항목별 충족도', { sz: 20, b: true, ind: 200, after: 60 });
+    const rows = [[
+      { t: '점검 항목', shd: NAVY, o: { b: true, color: 'FFFFFF' }, align: 'center' },
+      { t: '배점', shd: NAVY, o: { b: true, color: 'FFFFFF' }, align: 'center' },
+      { t: '획득', shd: NAVY, o: { b: true, color: 'FFFFFF' }, align: 'center' },
+      { t: '진단 의견', shd: NAVY, o: { b: true, color: 'FFFFFF' }, align: 'center' }
+    ]];
+    d.diag.items.forEach(i => {
+      rows.push([{ t: i.label }, { t: String(i.max), align: 'center' },
+                 { t: String(i.got), align: 'center' }, { t: i.msg }]);
+    });
+    rows.push([
+      { t: '합    계', shd: GRAY, o: { b: true } },
+      { t: '100', shd: GRAY, o: { b: true }, align: 'center' },
+      { t: String(d.diag.score), shd: GRAY, o: { b: true, color: NAVY }, align: 'center' },
+      { t: '등급: ' + d.diag.grade + '  (모호 표현 감점 ' + d.diag.penalty + '점 반영)', shd: GRAY, o: { b: true } }
+    ]);
+    s += table([2300, 700, 700, 5660], rows);
+
+    s += para('2. 한국어 화행 점검 (9 Case)', { sz: 20, b: true, ind: 200, before: 80, after: 60 });
+    if (d.diag.koine.length) {
+      d.diag.koine.forEach(k => {
+        s += LI('Case ' + k.n + ' ' + k.name + ' — ' + k.why);
+        s += para('   보완: ' + k.fix, { sz: 18, ind: 600, color: '5A6B85', after: 50 });
+      });
+    } else {
+      s += B('해당 사항 없음.');
+    }
+
+    s += para('3. 개인정보 포함 여부', { sz: 20, b: true, ind: 200, before: 80, after: 60 });
+    s += B(d.diag.privacy.length
+      ? '검출됨 — ' + d.diag.privacy.join(', ') + '. 외부 AI 서비스 입력 전 반드시 삭제 또는 익명 처리하여야 함.'
+      : '검출된 개인정보 없음.');
+
+    /* Ⅴ. 산출 결과물 */
+    s += H('Ⅴ. AI 산출 결과물');
+    const res = (d.result || '').trim();
+    if (res) {
+      res.split('\n').forEach(l => {
+        const t = l.trim();
+        if (!t) { s += para('', { after: 40, sz: 12 }); return; }
+        if (/^#{1,6}\s/.test(t)) {
+          s += para(t.replace(/^#{1,6}\s*/, ''), { sz: 21, b: true, color: NAVY, ind: 200, before: 100, after: 50 });
+        } else if (/^[-*·]\s/.test(t)) {
+          s += LI(t.replace(/^[-*·]\s*/, ''));
+        } else {
+          s += para(t, { sz: 20, ind: 200, after: 50 });
+        }
+      });
+    } else {
+      s += B('(미작성)');
+    }
+
+    /* 강사 확인 */
+    s += H('Ⅵ. 강사 확인');
+    s += table([1400, 7960], [
+      { h: 900, c: [{ t: '강사 의견', shd: GRAY, o: { b: true }, align: 'center' }, { t: '' }] },
+      { h: 500, c: [{ t: '확    인', shd: GRAY, o: { b: true }, align: 'center' },
+                    { t: '                    년        월        일          강사             (서명)' }] }
+    ]);
+
+    s += '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/>'
+       + '<w:pgMar w:top="1418" w:right="1191" w:bottom="1134" w:left="1361"'
+       + ' w:header="851" w:footer="992" w:gutter="0"/></w:sectPr>';
+    return s;
+  }
+
+  const XMLHEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+
+  function build(d) {
+    const doc = XMLHEAD
+      + '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+      + '<w:body>' + body(d) + '</w:body></w:document>';
+
+    const styles = XMLHEAD
+      + '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+      + '<w:docDefaults><w:rPrDefault><w:rPr>'
+      + '<w:rFonts w:ascii="' + FONT + '" w:eastAsia="' + FONT + '" w:hAnsi="' + FONT + '" w:cs="' + FONT + '"/>'
+      + '<w:sz w:val="20"/><w:szCs w:val="20"/></w:rPr></w:rPrDefault>'
+      + '<w:pPrDefault><w:pPr><w:spacing w:after="60" w:line="280" w:lineRule="auto"/></w:pPr></w:pPrDefault>'
+      + '</w:docDefaults>'
+      + '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>'
+      + '</w:styles>';
+
+    const ct = XMLHEAD
+      + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+      + '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+      + '<Default Extension="xml" ContentType="application/xml"/>'
+      + '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
+      + '<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'
+      + '</Types>';
+
+    const rels = XMLHEAD
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
+      + '</Relationships>';
+
+    const drels = XMLHEAD
+      + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+      + '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+      + '</Relationships>';
+
+    return zipStore([
+      { name: '[Content_Types].xml', data: ct },
+      { name: '_rels/.rels', data: rels },
+      { name: 'word/document.xml', data: doc },
+      { name: 'word/_rels/document.xml.rels', data: drels },
+      { name: 'word/styles.xml', data: styles }
+    ]);
+  }
+
+  return { build };
+})();
+/* ============================================================
+   간이 마크다운 (입력을 먼저 이스케이프하므로 HTML 주입 불가)
+   ============================================================ */
+function md(src) {
+  const lines = esc(src).split('\n');
+  let out = '', inList = false;
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+  lines.forEach(raw => {
+    const l = raw.trim();
+    if (!l) { if (inList) { out += '</ul>'; inList = false; } return; }
+    let m;
+    if ((m = l.match(/^###\s+(.*)/))) { if (inList) { out += '</ul>'; inList = false; } out += '<h3>' + inline(m[1]) + '</h3>'; return; }
+    if ((m = l.match(/^##\s+(.*)/))) { if (inList) { out += '</ul>'; inList = false; } out += '<h2>' + inline(m[1]) + '</h2>'; return; }
+    if ((m = l.match(/^#\s+(.*)/))) { if (inList) { out += '</ul>'; inList = false; } out += '<h2>' + inline(m[1]) + '</h2>'; return; }
+    if ((m = l.match(/^[-*•]\s+(.*)/)) || (m = l.match(/^\d+[.)]\s+(.*)/))) {
+      if (!inList) { out += '<ul>'; inList = true; }
+      out += '<li>' + inline(m[1]) + '</li>'; return;
+    }
+    if (inList) { out += '</ul>'; inList = false; }
+    out += '<p>' + inline(l) + '</p>';
+  });
+  if (inList) out += '</ul>';
+  return out;
+}
+
+/* ============================================================
+   코칭 — 1층 자가진단 / 2층 코칭 프롬프트 / 3층 AI 코치 호출
+   ============================================================ */
+const Coach = {
+  busy: false,
+
+  coachingPrompt() {
+    const d = Diagnose.run();
+    const weak = d.items.filter(i => i.status !== 'full').map(i => i.label).join(', ') || '없음';
+    const kn = d.koine.length ? d.koine.map(k => `Case ${k.n} ${k.name}`).join(', ') : '없음';
+    return `너는 지방자치단체 공무원의 프롬프트 작성을 지도하는 코치야. 아래는 내가 작성한 프롬프트 초안이야.
+
+${S.mission ? `[실습 미션]\n${S.mission.title}\n상황: ${S.mission.situation}\n만들 것: ${S.mission.deliverable}\n성공 기준: ${(S.mission.criteria || []).join(' / ')}\n\n` : ''}[내 초안]
+${Studio.block1()}
+
+${Studio.block2()}
+
+[자동 진단 결과]
+- 항목 충족도 ${d.score}점 (${d.grade.t})
+- 보강이 필요한 항목: ${weak}
+- 한국어 화행 점검에서 걸린 항목: ${kn}
+
+아래 순서로 코칭해 줘.
+
+## 잘 쓴 점
+내 초안에서 실제로 잘된 부분 2가지를, 원문을 인용하면서 짚어 줘.
+
+## 고쳐야 할 점
+어느 항목의 어떤 표현이 왜 모호한지, 원문을 그대로 인용하면서 지적해 줘. 자동 진단이 놓친 것도 있으면 함께 짚어 줘. 칭찬으로 흐리지 말고 분명하게 말해 줘.
+
+## 다시 쓴 프롬프트
+위 지적을 반영해서, 내가 그대로 복사해 쓸 수 있는 완성된 프롬프트 전문을 블록 1과 블록 2로 나눠 써 줘. 내가 쓰지 않은 사실을 지어내지 말고, 정보가 부족한 자리는 [ ] 로 비워 두고 무엇을 채워야 하는지 표시해 줘.
+
+## 나에게 던지는 질문
+내가 아직 밝히지 않아서 결과 품질을 떨어뜨리고 있는 정보를 묻는 질문 1개.`;
+  },
+
+  render() {
+    const key = Store.get('apikey', '');
+    let h = '';
+
+    /* 1층 */
+    h += `<div class="card">
+      <div class="card-hd"><span class="layer-no">1층</span><h3>자가 진단</h3><span class="sub">항상 작동 · 인터넷 불필요</span></div>
+      <div class="card-bd" id="coach-l1"></div>
+    </div>`;
+
+    /* 2층 */
+    h += `<div class="card">
+      <div class="card-hd"><span class="layer-no">2층</span><h3>코칭 요청 프롬프트</h3><span class="sub">쓰던 AI에 붙여넣기</span></div>
+      <div class="card-bd">
+        <div class="notebox" style="margin-bottom:12px">
+          평소 쓰는 챗GPT·제미나이·클로드 창에 그대로 붙여넣으면 코칭을 받습니다.
+          API 키도, 별도 비용도 필요 없고 기관 업무망에서도 막히지 않습니다. <b>교육장에서는 이 방식을 권합니다.</b>
+        </div>
+        <textarea id="coach-prompt" rows="7" readonly></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn primary" onclick="Coach.copyPrompt(this)">코칭 요청문 복사</button>
+          <a class="btn" href="https://chatgpt.com" target="_blank" rel="noopener">ChatGPT 열기</a>
+          <a class="btn" href="https://gemini.google.com" target="_blank" rel="noopener">Gemini 열기</a>
+          <a class="btn" href="https://claude.ai" target="_blank" rel="noopener">Claude 열기</a>
+        </div>
+      </div>
+    </div>`;
+
+    /* 3층 */
+    h += `<div class="card">
+      <div class="card-hd"><span class="layer-no${key ? '' : ' off'}">3층</span><h3>AI 코치 직접 호출</h3><span class="sub">${key ? '키 등록됨' : '키 미등록'}</span></div>
+      <div class="card-bd" id="coach-l3">`;
+    if (!key) {
+      h += `<div class="empty" style="padding:24px 10px">
+        <b>API 키를 등록하면 여기서 바로 코칭을 받습니다</b>
+        <p>Google AI Studio에서 무료 키를 발급받아 설정에 넣으세요.<br>
+        기관 업무망에서는 외부 API가 차단될 수 있으니, 그때는 2층을 쓰면 됩니다.</p>
+        <button class="btn primary" onclick="UI.openSettings()">설정 열기</button></div>`;
+    } else {
+      h += `<button class="btn primary wide" onclick="Coach.callAI()">AI 코치에게 검토 요청</button>
+            <div id="coach-out" style="margin-top:14px"></div>`;
+    }
+    h += `</div></div>`;
+
+    $('coach-body').innerHTML = h;
+    $('coach-prompt').value = this.coachingPrompt();
+    this.renderLayer1();
+  },
+
+  renderLayer1() {
+    const box = $('coach-l1');
+    if (!box) return;
+    const d = Diagnose.run();
+    const weak = d.items.filter(i => i.status !== 'full');
+    let h = `<p style="margin:0 0 10px;font-size:13.5px">
+      현재 <b style="color:${d.grade.c}">${d.score}점 · ${d.grade.t}</b>. ${esc(d.grade.d)}</p>`;
+    if (!weak.length && !d.koine.length) {
+      h += `<div class="okbox">보강할 항목이 없습니다. 2층으로 넘어가 실제 AI의 검토를 받아 보세요.</div>`;
+    } else {
+      h += `<ul class="crit" style="padding-left:18px">`;
+      weak.slice(0, 4).forEach(i => { h += `<li><b>${esc(i.label)}</b> — ${esc(i.msg)}</li>`; });
+      d.koine.slice(0, 3).forEach(k => { h += `<li><b>Case ${k.n} ${esc(k.name)}</b> — ${esc(k.fix)}</li>`; });
+      h += `</ul><button class="btn" onclick="UI.right('diag')" style="margin-top:8px">진단 전체 보기</button>`;
+    }
+    $('coach-l1').innerHTML = h;
+    const cp = $('coach-prompt');
+    if (cp) cp.value = this.coachingPrompt();
+  },
+
+  copyPrompt(btn) {
+    copyText($('coach-prompt').value).then(ok => ok ? flashBtn(btn, '복사됨 — AI 창에 붙여넣으세요') : toast('복사에 실패했습니다'));
+  },
+
+  async callAI() {
+    if (this.busy) return;
+    const key = Store.get('apikey', '');
+    if (!key) { UI.openSettings(); return; }
+    const model = Store.get('model', 'gemini-2.5-flash');
+    const out = $('coach-out');
+    this.busy = true;
+    out.innerHTML = `<div style="text-align:center;padding:22px 0">
+      <div class="spin"></div><p style="margin:0;font-size:13px;color:var(--ink-soft)">AI 코치가 초안을 읽고 있습니다…</p></div>`;
+
+    try {
+      const text = await geminiCall(key, model,
+        '너는 지방자치단체 공무원의 프롬프트 작성을 지도하는 코치다. 한국어로, 마크다운 제목(##)을 써서 답한다. 사용자가 쓰지 않은 사실을 지어내지 않는다. 지적할 것은 분명히 지적한다.',
+        this.coachingPrompt());
+      out.innerHTML = `<div class="md">${md(text)}</div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn" onclick="Coach.copyResult(this)">코칭 결과 복사</button>
+          <button class="btn" onclick="Coach.callAI()">다시 요청</button>
+        </div>`;
+      out.dataset.raw = text;
+    } catch (err) {
+      out.innerHTML = `<div class="warnbox">
+        <h4>코칭을 받지 못했습니다</h4>
+        <p>${esc(err.message)}</p>
+        <p style="margin-top:8px">2층의 코칭 요청문을 복사해 평소 쓰는 AI에 붙여넣으면 같은 코칭을 받을 수 있습니다.</p>
+      </div>`;
+    } finally {
+      this.busy = false;
+    }
+  },
+  copyResult(btn) {
+    copyText($('coach-out').dataset.raw || '').then(ok => ok ? flashBtn(btn, '복사됨') : toast('복사에 실패했습니다'));
+  }
+};
+
+/* ---------- Gemini 호출: 재시도는 429·5xx에만, 오류 원문 노출 ---------- */
+async function geminiCall(key, model, system, user) {
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/'
+            + encodeURIComponent(model) + ':generateContent?key=' + encodeURIComponent(key);
+  const body = JSON.stringify({
+    systemInstruction: { parts: [{ text: system }] },
+    contents: [{ role: 'user', parts: [{ text: user }] }],
+    generationConfig: { temperature: 0.4, maxOutputTokens: 2400 }
+  });
+
+  const delays = [1500, 4000];
+  for (let i = 0; ; i++) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 60000);
+    let res;
+    try {
+      res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, signal: ctrl.signal });
+    } catch (e) {
+      clearTimeout(timer);
+      if (e.name === 'AbortError') throw new Error('60초 안에 응답이 오지 않았습니다. 다시 시도해 주세요.');
+      throw new Error('네트워크에 연결하지 못했습니다. 기관 업무망에서 외부 AI 서비스가 차단되어 있을 수 있습니다.');
+    }
+    clearTimeout(timer);
+
+    if (res.ok) {
+      const data = await res.json();
+      const cand = data.candidates && data.candidates[0];
+      const txt = cand && cand.content && cand.content.parts
+        ? cand.content.parts.map(p => p.text || '').join('').trim() : '';
+      if (txt) return txt;
+      const reason = cand && cand.finishReason;
+      if (reason === 'SAFETY') throw new Error('AI가 안전 정책을 이유로 답변을 거부했습니다. 개인정보나 민감한 내용이 들어 있는지 확인해 주세요.');
+      throw new Error('응답이 비어 있습니다' + (reason ? ' (' + reason + ')' : '') + '.');
+    }
+
+    let detail = '';
+    try { const j = await res.json(); detail = (j.error && j.error.message) || ''; } catch (e) {}
+    if (res.status === 400) throw new Error('요청이 거부되었습니다(400). API 키가 잘못되었을 가능성이 큽니다. ' + detail);
+    if (res.status === 401 || res.status === 403) throw new Error('키가 유효하지 않거나 권한이 없습니다(' + res.status + '). ' + detail);
+    if (res.status === 404) throw new Error('모델 "' + model + '"을 찾을 수 없습니다(404). 설정에서 다른 모델을 선택해 보세요.');
+    if ((res.status === 429 || res.status >= 500) && i < delays.length) {
+      await new Promise(r => setTimeout(r, delays[i]));
+      continue;
+    }
+    if (res.status === 429) throw new Error('요청 한도를 초과했습니다(429). 잠시 후 다시 시도해 주세요.');
+    throw new Error('서버 오류(' + res.status + '). ' + detail);
+  }
+}
+
+/* ============================================================
+   보관함
+   ============================================================ */
+const Library = {
+  all() { return Store.get('library', []); },
+  set(v) { return Store.set('library', v); },
+
+  saveCurrent() {
+    const d = Diagnose.run();
+    const title = (S.mission ? S.mission.title : (S.ctx.what.trim().split('\n')[0] || '제목 없는 초안')).slice(0, 60);
+    const name = prompt('저장할 이름', title);
+    if (name === null) return;
+    const list = this.all();
+    list.unshift({
+      id: 'L' + Date.now(), name: name.trim() || title, savedAt: stamp(), score: d.score,
+      state: { mission: S.mission, ctx: S.ctx, pcf: S.pcf, result: S.result }
+    });
+    if (!this.set(list.slice(0, 60))) { toast('저장 공간이 부족합니다'); return; }
+    this.render(); toast('보관함에 저장했습니다');
+  },
+  load(id) {
+    const it = this.all().find(x => x.id === id);
+    if (!it) return;
+    S.mission = it.state.mission; S.ctx = Object.assign({ who:'', what:'', why1:'', why2:'' }, it.state.ctx);
+    S.pcf = Object.assign({ p:'', c:'', f:'' }, it.state.pcf); S.result = it.state.result || '';
+    renderFields('ctx'); renderFields('pcf'); Mission.render(); Studio.update();
+    UI.close('m-library'); toast('불러왔습니다 — 지금 점수와 비교해 보세요');
+  },
+  del(id) {
+    if (!confirm('삭제할까요?')) return;
+    this.set(this.all().filter(x => x.id !== id)); this.render();
+  },
+  render() {
+    const list = this.all(), now = Diagnose.run().score;
+    if (!list.length) {
+      $('lib-body').innerHTML = `<div class="empty"><b>저장된 초안이 없습니다</b>
+        <p>같은 미션을 고쳐 쓸 때마다 저장해 두면 점수가 어떻게 올라가는지 보입니다.</p></div>`;
+    } else {
+      $('lib-body').innerHTML = `<p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-soft)">
+        현재 작성본 <b>${now}점</b> · 저장본을 불러오면 그때 점수와 비교할 수 있습니다.</p>` +
+        list.map(it => `<div class="libitem">
+          <span class="sc-pill">${it.score}</span>
+          <span class="li-t"><b>${esc(it.name)}</b><span>${esc(it.savedAt)}</span></span>
+          <button class="btn" onclick="Library.load('${it.id}')">불러오기</button>
+          <button class="btn ghost-red" onclick="Library.del('${it.id}')">삭제</button>
+        </div>`).join('');
+    }
+    if (!Store.ok) {
+      $('lib-body').innerHTML += `<div class="warnbox" style="margin-top:14px"><h4>이 브라우저는 저장을 막고 있습니다</h4>
+        <p>창을 닫으면 사라집니다. 전체 내보내기로 파일을 내려받아 두세요.</p></div>`;
+    }
+  },
+  exportAll() {
+    download('pcf-library-' + fileStamp() + '.json',
+      JSON.stringify({ kind:'pcf-library', savedAt: stamp(), items: this.all() }, null, 2), 'application/json');
+    toast('보관함을 내려받았습니다');
+  },
+  importFile() {
+    pickFile(txt => {
+      try {
+        const d = JSON.parse(txt);
+        const arr = Array.isArray(d) ? d : d.items;
+        if (!Array.isArray(arr)) throw new Error('형식 오류');
+        this.set(arr.concat(this.all()).slice(0, 60));
+        this.render(); toast('불러왔습니다');
+      } catch (e) { toast('보관함 파일 형식이 아닙니다'); }
+    });
+  }
+};
+
+/* ============================================================
+   제출
+   ============================================================ */
+const Submit = {
+  render() {
+    const d = Diagnose.run();
+    $('submit-body').innerHTML = `
+      <div class="notebox">작성한 프롬프트와 AI 결과물을 하나의 파일로 묶어 내려받습니다. 강사에게 파일로 제출하거나 메일에 붙여넣으세요.</div>
+      <div class="card"><div class="card-hd"><h3>제출자 정보</h3></div><div class="card-bd">
+        <div class="grid2">
+          <div class="frow"><label for="sb-org">지자체명</label><input type="text" id="sb-org" placeholder="○○군"></div>
+          <div class="frow"><label for="sb-dept">소속</label><input type="text" id="sb-dept" placeholder="기획감사실"></div>
+        </div>
+        <div class="grid2">
+          <div class="frow"><label for="sb-name">성명</label><input type="text" id="sb-name"></div>
+          <div class="frow"><label for="sb-course">과정명</label><input type="text" id="sb-course"></div>
+        </div>
+      </div></div>
+      <div class="card"><div class="card-hd"><h3>AI가 만들어 준 결과물</h3><span class="sub">붙여넣기</span></div><div class="card-bd">
+        <textarea id="sb-result" rows="9" placeholder="블록 1·2를 AI에 보내 받은 결과물을 여기에 붙여넣으세요. 그대로 쓰지 말고 본인 표현으로 고친 뒤 붙여넣는 것을 권합니다."></textarea>
+      </div></div>
+      <div class="card"><div class="card-hd"><h3>제출물 미리보기</h3>
+        <span class="sub">충족도 ${d.score}점 · ${d.grade.t}</span></div>
+        <div class="card-bd">
+          <p style="margin:0 0 12px;font-size:12.5px;color:var(--ink-soft)">
+            실습 과제 · 사전 맥락 · PCF 지시 · 자가진단 결과 · AI 산출물 · 강사 확인란이
+            A4 행정 서식(맑은 고딕, 개조식)의 워드 문서로 묶입니다. 그대로 인쇄·결재·제출이 가능합니다.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn primary" onclick="Submit.downloadDocx(this)">제출 문서 내려받기 (.docx)</button>
+            <button class="btn" onclick="Submit.copy(this)">본문 복사</button>
+          </div>
+        </div>
+      </div>`;
+    ['org', 'dept', 'name', 'course'].forEach(k => {
+      const el = $('sb-' + k);
+      el.value = S.meta[k] || '';
+      el.addEventListener('input', () => { S.meta[k] = el.value; Store.set('meta', S.meta); });
+    });
+    const r = $('sb-result');
+    r.value = S.result || '';
+    r.addEventListener('input', () => { S.result = r.value; });
+  },
+
+  text() {
+    const d = Diagnose.run(), m = S.meta;
+    let s = `# ${m.course || 'AI 실무활용 역량강화 실습'} 제출물\n\n`;
+    s += `- 지자체: ${m.org || '-'}\n- 소속: ${m.dept || '-'}\n- 성명: ${m.name || '-'}\n- 제출일시: ${stamp()}\n\n`;
+    if (S.mission) {
+      s += `## 실습 미션\n**${S.mission.title}** (${S.mission.type}·${S.mission.level})\n\n${S.mission.situation}\n\n`;
+      s += `만들 것: ${S.mission.deliverable}\n\n`;
+    }
+    s += `## 블록 1 · 사전 맥락\n\n\`\`\`\n${Studio.block1()}\n\`\`\`\n\n`;
+    s += `## 블록 2 · PCF 지시\n\n\`\`\`\n${Studio.block2()}\n\`\`\`\n\n`;
+    s += `## 자가진단\n\n- 항목 충족도: ${d.score}점 (${d.grade.t})\n`;
+    d.items.forEach(i => { s += `- ${i.label}: ${i.got}/${i.max} — ${i.msg}\n`; });
+    s += `- 화행 점검: ${d.koine.length ? d.koine.map(k => 'Case ' + k.n + ' ' + k.name).join(', ') : '해당 없음'}\n`;
+    s += `- 개인정보 검출: ${d.privacy.length ? d.privacy.map(p => p.name).join(', ') : '없음'}\n\n`;
+    s += `## AI 결과물\n\n${S.result || '(미작성)'}\n`;
+    return s;
+  },
+  payload() {
+    const d = Diagnose.run(), m = S.meta;
+    return {
+      course: m.course || 'AI 실무활용 역량강화 실습',
+      org: m.org, dept: m.dept, name: m.name, when: stamp(),
+      mission: S.mission,
+      block1: Studio.block1(),
+      block2: Studio.block2(),
+      diag: {
+        score: d.score, grade: d.grade.t, penalty: d.penalty,
+        items: d.items.map(i => ({ label: i.label, max: i.max, got: i.got, msg: i.msg })),
+        koine: d.koine.map(k => ({ n: k.n, name: k.name, why: k.why, fix: k.fix })),
+        privacy: d.privacy.map(p => p.name + ' ' + p.count + '건')
+      },
+      result: S.result
+    };
+  },
+  downloadDocx(btn) {
+    try {
+      const bytes = Docx.build(this.payload());
+      const tail = (S.meta.name || '').replace(/[^A-Za-z0-9]/g, '');
+      downloadBin('submission-' + fileStamp() + (tail ? '-' + tail : '') + '.docx', bytes,
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      flashBtn(btn, '내려받는 중…');
+    } catch (e) {
+      toast('문서를 만들지 못했습니다: ' + e.message);
+    }
+  },
+  copy(btn) {
+    copyText(this.text()).then(ok => ok ? flashBtn(btn, '복사됨') : toast('복사에 실패했습니다'));
+  }
+};
+
+/* ============================================================
+   설정
+   ============================================================ */
+const Settings = {
+  save() {
+    const k = $('s-key').value.trim();
+    if (k) Store.set('apikey', k); else Store.del('apikey');
+    Store.set('model', $('s-model').value);
+    S.meta.course = $('s-course').value.trim() || 'AI 실무활용 역량강화 실습';
+    Store.set('meta', S.meta);
+    UI.close('m-settings');
+    if ($('p-coach').classList.contains('on')) Coach.render();
+    toast('설정을 저장했습니다');
+  },
+  clearKey() {
+    Store.del('apikey'); $('s-key').value = '';
+    if ($('p-coach').classList.contains('on')) Coach.render();
+    toast('키를 삭제했습니다');
+  }
+};
+
+/* ============================================================
+   시작
+   ============================================================ */
+(function init() {
+  S.meta = Object.assign(S.meta, Store.get('meta', {}));
+  renderFields('ctx');
+  renderFields('pcf');
+  Mission.init();
+  Studio.update();
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') ['m-settings', 'm-library', 'm-mission'].forEach(id => UI.close(id));
+  });
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('mousedown', e => { if (e.target === m) m.hidden = true; });
+  });
+})();
+
+</script>
+
+<!-- 저작권 표시 -->
+<div class="copyright-notice" style="max-width:920px;width:100%;box-sizing:border-box;margin:28px auto 20px;padding:12px 16px 0;border-top:1px solid rgba(100,116,139,.25);text-align:center;font-size:11.5px;line-height:1.7;color:#8B929C;">
+  &copy; 2026 박상득 &middot; (주)한국공공자치연구원 AI행정혁신연구소. 무단 전재&middot;복제 금지.
+</div>
+</body>
+</html>
