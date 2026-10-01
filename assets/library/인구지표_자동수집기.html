@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지방소멸대응기금 여건분석 · 인구지표 자동수집기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700;900&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1F3864; --blue:#2E5FA3; --ink:#1A2233; --paper:#FBFCFD;
+  --line:#D8DEE8; --hairline:#E7EBF2; --gray:#F2F4F7; --muted:#5B6575;
+  --down:#B23A3A; --up:#1E7F6E; --serif:'Noto Serif KR',serif; --sans:'Noto Sans KR',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);line-height:1.6;font-size:15px}
+.wrap{max-width:980px;margin:0 auto;padding:0 20px 80px}
+
+/* ── 관보풍 표지 헤더 ── */
+header{background:var(--navy);color:#fff;padding:34px 0 30px;border-bottom:6px double #8FA6CC}
+header .wrap{padding-bottom:0}
+.eyebrow{font-size:12px;letter-spacing:.28em;color:#A9BBDA;margin-bottom:10px}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(22px,3.6vw,32px);line-height:1.3}
+.subtitle{margin-top:10px;font-size:13.5px;color:#C6D2E8}
+.subtitle b{color:#fff;font-weight:500}
+
+/* ── 단계 카드 ── */
+.step{background:#fff;border:1px solid var(--line);border-top:3px solid var(--navy);margin-top:26px;padding:22px 24px}
+.step h2{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--navy);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.step h2 .n{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border:1.5px solid var(--navy);border-radius:50%;font-family:var(--sans);font-size:13px;font-weight:700;flex:none}
+label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:5px}
+input[type=text],input[type=password],select,textarea{
+  width:100%;padding:9px 12px;border:1px solid var(--line);background:#fff;
+  font-family:var(--sans);font-size:14.5px;color:var(--ink);border-radius:2px}
+input:focus,select:focus,textarea:focus,button:focus{outline:2px solid var(--blue);outline-offset:1px}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.row>div{flex:1;min-width:180px}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+.hint a{color:var(--blue)}
+button{font-family:var(--sans);cursor:pointer;border-radius:2px}
+.btn-main{background:var(--navy);color:#fff;border:none;padding:12px 30px;font-size:15.5px;font-weight:700;letter-spacing:.06em}
+.btn-main:hover{background:var(--blue)}
+.btn-main:disabled{background:#9AA6B8;cursor:wait}
+.btn-sub{background:#fff;color:var(--navy);border:1px solid var(--navy);padding:7px 14px;font-size:13px;font-weight:500}
+.btn-sub:hover{background:var(--gray)}
+details.adv{margin-top:14px;font-size:13px}
+details.adv summary{cursor:pointer;color:var(--muted)}
+details.adv .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+@media(max-width:640px){details.adv .grid{grid-template-columns:1fr}}
+
+/* ── 진행 로그 ── */
+#log{display:none;margin-top:26px;background:#0F1B33;color:#C8D6EF;font-size:13px;padding:16px 20px;border-radius:2px;max-height:220px;overflow-y:auto}
+#log .ok{color:#7FD8C0}#log .err{color:#F2A0A0}#log .warn{color:#F2CF8F}
+#log div{padding:1.5px 0}
+
+/* ── 결과 ── */
+#result{display:none}
+.report-head{margin-top:40px;padding-bottom:12px;border-bottom:3px double var(--navy)}
+.report-head .eyebrow{color:var(--muted)}
+.report-head h2{font-family:var(--serif);font-size:clamp(20px,3vw,26px);font-weight:900;color:var(--navy)}
+.report-head .meta{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(172px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-top:22px}
+.card{background:#fff;padding:16px 16px 14px}
+.card .k{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.05em}
+.card .v{font-family:var(--serif);font-size:26px;font-weight:700;color:var(--navy);margin-top:4px;font-variant-numeric:tabular-nums}
+.card .v small{font-size:13px;font-family:var(--sans);font-weight:400;color:var(--muted)}
+.card .d{font-size:12.5px;margin-top:3px;font-variant-numeric:tabular-nums}
+.d.down{color:var(--down)}.d.up{color:var(--up)}.d.flat{color:var(--muted)}
+
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}
+@media(max-width:720px){.charts{grid-template-columns:1fr}}
+.chart{background:#fff;border:1px solid var(--line);padding:14px 16px 8px}
+.chart h3{font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.chart svg{width:100%;height:auto;display:block}
+.chart text{font-family:var(--sans)}
+
+.tblwrap{overflow-x:auto;margin-top:26px;border:1px solid var(--line);background:#fff}
+table.data{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.data th{background:var(--gray);color:var(--navy);font-weight:700;padding:8px 12px;border-bottom:2px solid var(--navy);text-align:right}
+table.data th:first-child,table.data td:first-child{text-align:center;font-weight:700}
+table.data td{padding:7px 12px;border-bottom:1px solid var(--hairline);text-align:right}
+table.data tr:last-child td{border-bottom:none}
+
+.doc{background:#fff;border:1px solid var(--line);margin-top:26px;padding:26px 30px;font-family:var(--serif);font-size:15px;line-height:1.9;white-space:pre-wrap}
+.sec-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:38px;padding-bottom:8px;border-bottom:2px solid var(--navy);flex-wrap:wrap}
+.sec-title h2{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--navy)}
+.sec-title .btns{display:flex;gap:8px;flex-wrap:wrap}
+.errbox{display:none;margin-top:14px;background:#FBEFEF;border:1px solid #E3BCBC;color:#7A2E2E;padding:12px 16px;font-size:13.5px;border-radius:2px}
+
+/* ── 수동 모드 모달 ── */
+#modal{display:none;position:fixed;inset:0;background:rgba(15,27,51,.55);z-index:50;align-items:center;justify-content:center;padding:20px}
+#modal .box{background:#fff;max-width:640px;width:100%;padding:26px 28px;border-top:4px solid var(--navy);max-height:88vh;overflow-y:auto}
+#modal h3{font-family:var(--serif);color:var(--navy);font-size:17px;margin-bottom:6px}
+#modal p{font-size:13.5px;color:var(--muted);margin-bottom:12px}
+#modal .url{font-size:12px;background:var(--gray);padding:8px 10px;word-break:break-all;border:1px solid var(--line);margin-bottom:10px;max-height:90px;overflow-y:auto}
+#modal textarea{height:130px;font-size:12px;font-family:monospace;margin-top:10px}
+#modal .btns{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+footer{margin-top:60px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="eyebrow">지방소멸대응기금 투자계획서 · 여건분석 참고자료</div>
+    <h1>인구지표 자동수집기</h1>
+    <div class="subtitle">통계청 <b>KOSIS Open API</b>로 주민등록인구 · 인구이동 · 고령화율 · 생산가능인구 비율 · 합계출산율 · 소멸위험지수를 한 번에 수집합니다</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="step">
+    <h2><span class="n">1</span>KOSIS 인증키</h2>
+    <div class="row">
+      <div style="flex:2">
+        <label for="apiKey">Open API 인증키</label>
+        <input type="password" id="apiKey" placeholder="KOSIS에서 발급받은 인증키를 붙여넣으세요" autocomplete="off">
+        <div class="hint">인증키가 없다면 <a href="https://kosis.kr/openapi" target="_blank" rel="noopener">kosis.kr/openapi</a> → 회원가입 → 활용신청(사용자 통계 조회)에서 무료로 즉시 발급됩니다. 입력한 키는 이 브라우저에만 저장됩니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="step">
+    <h2><span class="n">2</span>지자체 · 조회 기간</h2>
+    <div class="row">
+      <div>
+        <label for="sido">시 · 도</label>
+        <select id="sido"></select>
+      </div>
+      <div>
+        <label for="sigungu">시 · 군 · 구 <span style="font-weight:400">(인구감소 89 + 관심 18 내장)</span></label>
+        <select id="sigungu"></select>
+      </div>
+      <div id="customWrap" style="display:none">
+        <label for="customName">시군구명 직접 입력</label>
+        <input type="text" id="customName" placeholder="예: ○○군">
+      </div>
+      <div style="max-width:150px">
+        <label for="years">조회 기간</label>
+        <select id="years">
+          <option value="5">최근 5년</option>
+          <option value="10" selected>최근 10년</option>
+          <option value="15">최근 15년</option>
+        </select>
+      </div>
+    </div>
+    <details class="adv">
+      <summary>고급 설정 — KOSIS 통계표 ID (통계표 개편 시에만 수정)</summary>
+      <div class="grid">
+        <div><label>주민등록인구(시군구)</label><input type="text" id="tblPop" value="DT_1B040A3"></div>
+        <div><label>연령별 주민등록인구(각세)</label><input type="text" id="tblAge" value="DT_1B04005N"></div>
+        <div><label>시군구별 이동자수</label><input type="text" id="tblMove" value="DT_1B26001_A01"></div>
+        <div><label>시군구별 합계출산율</label><input type="text" id="tblTfr" value="DT_1B81A17"></div>
+      </div>
+      <div class="hint">모든 표는 통계청·행정안전부 통계(기관 ID 101) 기준입니다. 표가 개편된 경우 KOSIS에서 통계표 URL의 tblId를 확인해 교체하세요.</div>
+    </details>
+  </section>
+
+  <section class="step" style="text-align:center;border-top-color:var(--blue)">
+    <button class="btn-main" id="runBtn">③ 데이터 수집 시작</button>
+    <div class="hint" id="runHint">KOSIS 서버에서 직접 수집합니다 · 보통 10~20초 소요</div>
+    <div class="errbox" id="errbox"></div>
+  </section>
+
+  <div id="log" role="log" aria-live="polite"></div>
+
+  <div id="result">
+    <div class="report-head">
+      <div class="eyebrow">여건분석 기초 데이터</div>
+      <h2 id="rptTitle"></h2>
+      <div class="meta" id="rptMeta"></div>
+    </div>
+
+    <div class="cards" id="cards"></div>
+    <div class="charts" id="charts"></div>
+
+    <div class="sec-title">
+      <h2>연도별 지표 총괄표</h2>
+      <div class="btns">
+        <button class="btn-sub" id="csvBtn">CSV 다운로드 (Excel)</button>
+      </div>
+    </div>
+    <div class="tblwrap"><table class="data" id="dataTable"></table></div>
+
+    <div class="sec-title">
+      <h2>여건분석 시사점 초안 <span style="font-size:12px;font-family:var(--sans);color:var(--muted);font-weight:400">— 투자계획서 Ⅰ장에 붙여넣기용</span></h2>
+      <div class="btns"><button class="btn-sub" id="copyDocBtn">본문 복사</button></div>
+    </div>
+    <div class="doc" id="docText"></div>
+
+    <div class="sec-title">
+      <h2>AI 참고자료 세트 <span style="font-size:12px;font-family:var(--sans);color:var(--muted);font-weight:400">— 생성형 AI에 그대로 첨부하는 데이터 블록</span></h2>
+      <div class="btns">
+        <button class="btn-sub" id="copyAiBtn">전체 복사</button>
+        <button class="btn-sub" id="mdBtn">Markdown 저장</button>
+      </div>
+    </div>
+    <div class="doc" id="aiText" style="font-family:var(--sans);font-size:13px;line-height:1.7"></div>
+  </div>
+
+  <footer>
+    출처: 행정안전부 「주민등록인구현황」, 통계청 「국내인구이동통계」·「인구동향조사」 — KOSIS 국가통계포털 Open API<br>
+    소멸위험지수 = 20~39세 여성 인구 ÷ 65세 이상 인구 (0.5 미만 소멸위험 진입, 0.2 미만 소멸 고위험) · 본 자료는 투자계획서 작성 참고용이며 제출 전 원자료 확인이 필요합니다.
+  </footer>
+</div>
+
+<div id="modal" role="dialog" aria-modal="true">
+  <div class="box">
+    <h3 id="mTitle">수동 수집 모드</h3>
+    <p>브라우저 보안 정책(CORS)으로 자동 수집이 차단되었습니다. 아래 주소를 새 탭에서 연 뒤, 화면에 표시되는 내용 전체를 복사해 붙여넣으면 수집이 계속됩니다. <b>"데이터가 존재하지 않습니다"(err 30) 응답도 그대로 붙여넣으세요</b> — 자동으로 다음 조건을 시도합니다.</p>
+    <div class="url" id="mUrl"></div>
+    <div class="btns">
+      <button class="btn-sub" id="mOpen">① 새 탭에서 열기</button>
+      <button class="btn-sub" id="mCopy">주소 복사</button>
+    </div>
+    <textarea id="mPaste" placeholder="② 새 탭의 내용을 전체 선택(Ctrl+A) → 복사(Ctrl+C) → 여기에 붙여넣기(Ctrl+V)"></textarea>
+    <div class="btns">
+      <button class="btn-main" style="padding:9px 22px;font-size:14px" id="mSubmit">③ 붙여넣기 완료</button>
+      <button class="btn-sub" id="mSkip">이 지표 건너뛰기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   지방소멸대응기금 인구지표 자동수집기
+   데이터: KOSIS 국가통계포털 Open API (orgId 101)
+   ============================================================ */
+
+/* ── 시도 정보: 행정구역 코드 접두(통계청 구코드 + 행정표준코드 병행) + 명칭 별칭 ── */
+const SIDO = {
+  "서울특별시":{ps:["11"],alias:["서울"]},
+  "부산광역시":{ps:["21","26"],alias:["부산"]},
+  "대구광역시":{ps:["22","27"],alias:["대구"]},
+  "인천광역시":{ps:["23","28"],alias:["인천"]},
+  "광주광역시":{ps:["24","29"],alias:["광주"]},
+  "대전광역시":{ps:["25","30"],alias:["대전"]},
+  "울산광역시":{ps:["26","31"],alias:["울산"]},
+  "세종특별자치시":{ps:["29","36"],alias:["세종"]},
+  "경기도":{ps:["31","41"],alias:["경기"]},
+  "강원특별자치도":{ps:["32","42","51"],alias:["강원도","강원"]},
+  "충청북도":{ps:["33","43"],alias:["충북"]},
+  "충청남도":{ps:["34","44"],alias:["충남"]},
+  "전북특별자치도":{ps:["35","45","52"],alias:["전라북도","전북"]},
+  "전라남도":{ps:["36","46"],alias:["전남"]},
+  "경상북도":{ps:["37","47"],alias:["경북"]},
+  "경상남도":{ps:["38","48"],alias:["경남"]},
+  "제주특별자치도":{ps:["39","50"],alias:["제주"]}
+};
+
+/* ── 2026년 기금 평가대상 107개 프리셋 (인구감소 89 + 관심 18) ── */
+const PRESET = {
+  "부산광역시":["동구","서구","영도구","금정구","중구"],
+  "대구광역시":["남구","서구","군위군"],
+  "인천광역시":["강화군","옹진군","동구"],
+  "광주광역시":["동구"],
+  "대전광역시":["대덕구","동구","중구"],
+  "경기도":["가평군","연천군","동두천시","포천시"],
+  "강원특별자치도":["강릉시","고성군","동해시","삼척시","속초시","양구군","양양군","영월군","인제군","정선군","철원군","태백시","평창군","홍천군","화천군","횡성군"],
+  "충청북도":["괴산군","단양군","보은군","영동군","옥천군","제천시"],
+  "충청남도":["공주시","금산군","논산시","보령시","부여군","서천군","예산군","청양군","태안군"],
+  "전북특별자치도":["고창군","김제시","남원시","무주군","부안군","순창군","익산시","임실군","장수군","정읍시","진안군"],
+  "전라남도":["강진군","고흥군","곡성군","구례군","담양군","보성군","신안군","영광군","영암군","완도군","장성군","장흥군","진도군","함평군","해남군","화순군"],
+  "경상북도":["경주시","고령군","김천시","문경시","봉화군","상주시","성주군","안동시","영덕군","영양군","영주시","영천시","울릉군","울진군","의성군","청도군","청송군"],
+  "경상남도":["거창군","고성군","남해군","밀양시","사천시","산청군","의령군","창녕군","통영시","하동군","함안군","함양군","합천군"]
+};
+
+/* ── 통계표 설정: 레벨 후보(objL 개수)는 앞에서부터 시도 후 실패 시 축소 ── */
+function tableConfigs(){
+  return {
+    POP:{ id:v('tblPop'),  label:'주민등록인구(시군구)',           levelTries:[1,2] },
+    AGE:{ id:v('tblAge'),  label:'연령별 주민등록인구(각세)',       levelTries:[3,2,1] },
+    MOVE:{id:v('tblMove'), label:'시군구별 이동자수(전입·전출)',    levelTries:[1,2] },
+    TFR:{ id:v('tblTfr'),  label:'시군구별 합계출산율',             levelTries:[1,2] }
+  };
+}
+
+const $=id=>document.getElementById(id);
+const v=id=>$(id).value.trim();
+const fmt=n=>n==null||isNaN(n)?'—':Math.round(n).toLocaleString('ko-KR');
+const fmt1=n=>n==null||isNaN(n)?'—':(Math.round(n*10)/10).toLocaleString('ko-KR',{minimumFractionDigits:1});
+const fmt2=n=>n==null||isNaN(n)?'—':(Math.round(n*100)/100).toFixed(2);
+
+/* ── 로그 ── */
+function log(msg,cls){const l=$('log');l.style.display='block';
+  const d=document.createElement('div');if(cls)d.className=cls;d.textContent=msg;
+  l.appendChild(d);l.scrollTop=l.scrollHeight;}
+
+/* ── KOSIS 요청 URL 생성: objSpec=['ALL','48880','ALL'] 형식 ── */
+function buildUrl(tblId,objSpec,startY,endY){
+  const p=new URLSearchParams({
+    method:'getList', apiKey:v('apiKey'), format:'json', jsonVD:'Y',
+    orgId:'101', tblId:tblId, itmId:'ALL', prdSe:'Y',
+    startPrdDe:String(startY), endPrdDe:String(endY)
+  });
+  objSpec.forEach((val,i)=>p.set('objL'+(i+1),val));
+  return 'https://kosis.kr/openapi/Param/statisticsParameterData.do?'+p.toString();
+}
+
+/* ── 통신 계층: 자동(fetch) → 실패 시 수동 모드 전환 ── */
+let manualMode=false;
+
+function manualFetch(url,title){
+  return new Promise(resolve=>{
+    $('mTitle').textContent='수동 수집: '+title;
+    $('mUrl').textContent=url; $('mPaste').value=''; $('modal').style.display='flex';
+    $('mOpen').onclick=()=>window.open(url,'_blank');
+    $('mCopy').onclick=()=>navigator.clipboard&&navigator.clipboard.writeText(url);
+    $('mSubmit').onclick=()=>{
+      const t=$('mPaste').value.trim();
+      if(!t){alert('새 탭의 내용을 붙여넣어 주세요.');return;}
+      $('modal').style.display='none'; resolve(t);
+    };
+    $('mSkip').onclick=()=>{$('modal').style.display='none'; resolve(null);};
+    $('mPaste').focus();
+  });
+}
+
+async function kosisCall(url,title){
+  let text=null;
+  if(!manualMode){
+    try{
+      const r=await fetch(url);
+      text=await r.text();
+    }catch(e){
+      manualMode=true;
+      log('자동 수집이 차단되어(CORS/네트워크) 수동 모드로 전환합니다.','warn');
+    }
+  }
+  if(text==null){
+    text=await manualFetch(url,title);
+    if(text==null)return null; /* 건너뛰기 */
+  }
+  let json;
+  try{json=JSON.parse(text);}catch(e){throw new Error(title+': 응답이 JSON 형식이 아닙니다. 인증키와 통계표 ID를 확인하세요.');}
+  if(json&&json.err){
+    if(String(json.err)==='30'){ /* 데이터 없음 = 정상 응답 → 다음 조건으로 자동 재시도 */
+      log('   ↳ '+title+': 해당 조건 데이터 없음(err 30) — 조건을 바꿔 재시도합니다.','warn');
+      return [];
+    }
+    throw new Error(title+': KOSIS 오류 '+json.err+' — '+(json.errMsg||''));
+  }
+  if(!Array.isArray(json))throw new Error(title+': 예상하지 못한 응답 구조입니다.');
+  return json;
+}
+
+/* ── 1회 조회: rows | [](데이터 없음) | null(건너뜀) | {qerr:msg}(구조 불일치) ── */
+async function kosisTry(cfg,objSpec,startY,endY,tag){
+  const url=buildUrl(cfg.id,objSpec,startY,endY);
+  const title=cfg.label+' ['+tag+']';
+  try{
+    return await kosisCall(url,title);
+  }catch(e){
+    if(/인증키|JSON/.test(e.message))throw e;
+    log('   ↳ '+title+': 구조 불일치 — '+e.message.split('—').pop().trim(),'warn');
+    return {qerr:e.message};
+  }
+}
+
+/* ── 지역명 일치 점수 ── */
+function matchScore(nm,sigungu,sidoName){
+  nm=(nm==null?'':String(nm)).trim();if(!nm)return -1;
+  const names=[sidoName,...SIDO[sidoName].alias];
+  const hit=nm===sigungu||nm.endsWith(' '+sigungu)||(nm.includes(sigungu)&&names.some(a=>nm.includes(a)));
+  if(!hit)return -1;
+  let s=1;
+  if(names.some(a=>nm.includes(a)))s+=2;
+  if(nm===sigungu)s+=1;
+  return s;
+}
+
+/* ── 지역 탐색: 표 구조(축 개수)와 지역 축 위치(C1~C4)를 함께 확정,
+      최근 3개년 소급(발표 시차 대응). 반환 {levels,axis,code} ── */
+async function probeRegion(cfg,sidoName,sigungu,latestY){
+  const prefixes=SIDO[sidoName].ps;
+  let samples=null;
+  for(const lv of cfg.levelTries){
+    for(let y=latestY;y>=latestY-2;y--){
+      const res=await kosisTry(cfg,Array(lv).fill('ALL'),y,y,'지역탐색 '+y+'년·'+lv+'축');
+      if(res===null)return null;            /* 사용자가 건너뛰기 */
+      if(res.qerr)break;                    /* 축 개수 불일치 → 다음 구조 */
+      if(!res.length)continue;              /* 해당 연도 없음 → 이전 연도 */
+      let best=null;
+      for(const r of res){
+        for(let ax=1;ax<=4;ax++){
+          const code=r['C'+ax];if(code==null)continue;
+          let s=matchScore(r['C'+ax+'_NM'],sigungu,sidoName);
+          if(s<0)continue;
+          if(prefixes.some(p=>String(code).startsWith(p)))s+=2;
+          if(!best||s>best.s)best={s,axis:ax,code:String(code),levels:lv};
+        }
+      }
+      if(best){
+        log('   지역 코드 확정: '+best.code+' ('+y+'년 · '+lv+'축 중 '+best.axis+'번 축)','ok');
+        return best;
+      }
+      /* 데이터는 있으나 지역명 불일치 → 축별 분류값 표본을 진단 로그로 남김 */
+      samples={};
+      for(const r of res.slice(0,500)){
+        for(let ax=1;ax<=4;ax++){const nm=r['C'+ax+'_NM'];if(nm==null)continue;
+          (samples[ax]=samples[ax]||new Set()).add(String(nm).trim());}
+      }
+      break;
+    }
+  }
+  if(samples){
+    const diag=Object.entries(samples).map(([ax,st])=>'축'+ax+'={'+[...st].slice(0,6).join(', ')+(st.size>6?' …':'')+'}').join(' · ');
+    log('   ↳ 진단: 표의 분류값 표본 — '+diag,'warn');
+    throw new Error(cfg.label+': 표에서 "'+sigungu+'" 지역 구분을 찾지 못했습니다(위 진단 로그의 분류값 참고). 시군구 단위 통계표가 맞는지 확인하세요.');
+  }
+  throw new Error(cfg.label+': 최근 3개년('+(latestY-2)+'~'+latestY+') 조회 가능한 데이터가 없습니다. 통계표 ID를 확인하세요.');
+}
+
+/* ── 기간 조회: 탐색으로 확정된 구조(축 수·위치·코드)로 실제 시계열 수집 ── */
+async function fetchSeries(cfg,reg,startY,endY){
+  const spec=Array(reg.levels).fill('ALL');spec[reg.axis-1]=reg.code;
+  const res=await kosisTry(cfg,spec,startY,endY,startY+'~'+endY+'년');
+  if(res===null)return null;
+  if(res.qerr)throw new Error(res.qerr);
+  if(!res.length)throw new Error(cfg.label+': '+startY+'~'+endY+'년 데이터가 없습니다.');
+  return res;
+}
+
+/* ── 진단용 표본 로그: 파싱 실패 시 응답 구조를 남겨 원인 파악 ── */
+function logSample(name,rows){
+  const r=rows&&rows[0];if(!r)return;
+  const keys=['ITM_NM','C1_NM','C2_NM','C3_NM','C4_NM','PRD_DE','DT','UNIT_NM'];
+  log('   ↳ ['+name+' 응답 표본] '+keys.filter(k=>r[k]!=null).map(k=>k+'='+r[k]).join(' · '),'warn');
+}
+
+/* ── 파싱 유틸 ── */
+function rowYear(r){return String(r.PRD_DE||'').slice(0,4);}
+function rowVal(r){const x=parseFloat(String(r.DT).replace(/,/g,''));return isNaN(x)?null:x;}
+function rowNames(r){return [r.ITM_NM,r.C2_NM,r.C3_NM,r.C4_NM].filter(x=>x!=null).map(s=>String(s).trim());}
+function extractAgeRange(r){ /* "0세" "0 - 4세" "20~24세" "100세 이상" → {from,to} */
+  for(const nm of rowNames(r)){
+    const m=nm.match(/(\d{1,3})\s*(?:[-~‐–—∼]\s*(\d{1,3}))?\s*세\s*(이상)?/);
+    if(m){
+      const from=parseInt(m[1],10);
+      const to=m[3]?120:(m[2]?parseInt(m[2],10):from);
+      if(from<=to&&from<=120)return {from,to};
+    }
+  }
+  return null;
+}
+function findGender(r){ /* 남/여 표기를 먼저 찾고, 없으면 계 지표 확인 */
+  const nms=rowNames(r).map(nm=>nm.replace(/[\s\[\](){}명:·]/g,''));
+  for(const nm of nms){
+    if(/^남(자)?(인구수?)?$/.test(nm))return '남';
+    if(/^여(자)?(인구수?)?$/.test(nm))return '여';
+  }
+  for(const nm of nms){
+    if(/^(계|전체|합계|총인구수?|인구수)$/.test(nm))return '계';
+  }
+  return null;
+}
+
+/* ── 지표별 파싱 ── */
+function parsePop(rows){ /* 연도→총인구 */
+  const out={};
+  for(const r of rows){
+    const nms=rowNames(r);
+    const isTotal=nms.some(n=>n.includes('총인구'))||(!nms.some(n=>/남|여/.test(n))&&nms.some(n=>n==='계'||n.includes('인구수')));
+    if(!isTotal)continue;
+    const y=rowYear(r),val=rowVal(r);
+    if(val!=null&&(out[y]==null||nms.some(n=>n.includes('총인구'))))out[y]=val;
+  }
+  return out;
+}
+
+function parseMove(rows){ /* 연도→{in,out,net} */
+  const out={};
+  const pick=(nms,exact,loose)=>{
+    if(nms.some(n=>exact.includes(n)))return 2;
+    if(nms.some(n=>loose.some(k=>n===k)))return 1;
+    return 0;
+  };
+  for(const r of rows){
+    const nms=rowNames(r),y=rowYear(r),val=rowVal(r);
+    if(val==null)continue;
+    out[y]=out[y]||{};
+    if(pick(nms,['총전입','총전입[명]'],['전입자수','전입']))setBest(out[y],'in',val,pick(nms,['총전입','총전입[명]'],['전입자수','전입']));
+    if(pick(nms,['총전출','총전출[명]'],['전출자수','전출']))setBest(out[y],'out',val,pick(nms,['총전출','총전출[명]'],['전출자수','전출']));
+    if(nms.some(n=>n.includes('순이동')))setBest(out[y],'net',val,2);
+  }
+  for(const y in out){const o=out[y];
+    if(o.net==null&&o.in!=null&&o.out!=null)o.net=o.in-o.out;}
+  return out;
+}
+function setBest(obj,key,val,score){
+  obj['_s_'+key]=obj['_s_'+key]||0;
+  if(score>=obj['_s_'+key]){obj[key]=val;obj['_s_'+key]=score;}
+}
+
+function coverSum(segs,a,b){ /* [a,b]를 겹침 없이(세밀한 구간 우선) 덮어 합산 */
+  const inside=segs.filter(s=>s.from>=a&&s.to<=b).sort((x,y)=>(x.to-x.from)-(y.to-y.from));
+  const taken=[];let sum=0;
+  for(const s of inside){
+    if(taken.some(t=>!(s.to<t.from||s.from>t.to)))continue;
+    taken.push(s);sum+=s.val;
+  }
+  return taken.length?sum:null;
+}
+
+function parseAge(rows){ /* 연도→{total,y0_14,y15_64,y65,f20_39} — 각세·5세계급 모두 대응 */
+  const byYG={}; /* year → gender → [{from,to,val}] */
+  for(const r of rows){
+    const rng=extractAgeRange(r);if(!rng)continue;
+    const g=findGender(r)||'계';
+    const y=rowYear(r),val=rowVal(r);if(val==null)continue;
+    ((byYG[y]=byYG[y]||{})[g]=byYG[y][g]||[]).push({from:rng.from,to:rng.to,val:val});
+  }
+  const out={};
+  for(const y in byYG){
+    const gs=byYG[y];
+    let segs=gs['계'];
+    if((!segs||!segs.length)&&gs['남']&&gs['여']){ /* 계가 없으면 남+여 합성 */
+      const map={};
+      for(const g of ['남','여'])for(const s of gs[g]){
+        const k=s.from+'_'+s.to;
+        map[k]=map[k]||{from:s.from,to:s.to,val:0};map[k].val+=s.val;
+      }
+      segs=Object.values(map);
+    }
+    if(!segs||!segs.length)continue;
+    const total=coverSum(segs,0,120);
+    if(!total)continue;
+    out[y]={
+      total:total,
+      y0_14:coverSum(segs,0,14), y15_64:coverSum(segs,15,64), y65:coverSum(segs,65,120),
+      f20_39:gs['여']?coverSum(gs['여'],20,39):null
+    };
+  }
+  return out;
+}
+
+function parseTfr(rows){ /* 연도→합계출산율 */
+  const out={};
+  for(const r of rows){
+    const nms=rowNames(r);
+    if(!nms.some(n=>n.includes('합계출산율')))continue;
+    const g=findGender(r);if(g&&g!=='계')continue;
+    const val=rowVal(r);if(val!=null)out[rowYear(r)]=val;
+  }
+  return out;
+}
+
+/* ============================================================
+   수집 파이프라인
+   ============================================================ */
+let DATA=null;
+
+async function run(){
+  $('errbox').style.display='none';$('errbox').textContent='';
+  if(!v('apiKey')){showErr('KOSIS 인증키를 먼저 입력하세요.');return;}
+  const sido=v('sido');
+  const sigungu=($('sigungu').value==='__custom__')?v('customName'):$('sigungu').value;
+  if(!sigungu){showErr('시군구를 선택하거나 직접 입력하세요.');return;}
+  try{localStorage.setItem('kosisKey',v('apiKey'));}catch(e){}
+
+  const nowY=new Date().getFullYear();
+  const endY=nowY-1, startY=endY-parseInt(v('years'),10)+1;
+  const cfg=tableConfigs();
+  manualMode=false;
+  $('runBtn').disabled=true;$('log').innerHTML='';$('result').style.display='none';
+  log('▶ '+sido+' '+sigungu+' · '+startY+'~'+endY+'년 지표 수집을 시작합니다.');
+
+  const D={sido,sigungu,startY,endY,pop:{},move:{},age:{},tfr:{},errors:[]};
+  let popReg=null;
+
+  /* 1) 주민등록인구 — 지역 코드·표 구조 확정 겸용 */
+  try{
+    log('① 주민등록인구: 지역 코드 확인 중…');
+    popReg=await probeRegion(cfg.POP,sido,sigungu,endY);
+    if(popReg){
+      const rows=await fetchSeries(cfg.POP,popReg,startY,endY);
+      if(rows){
+        D.pop=parsePop(rows);
+        const n=Object.keys(D.pop).length;
+        if(n)log('① 주민등록인구 수집 완료 ('+n+'개년)','ok');
+        else{logSample('주민등록인구',rows);throw new Error('주민등록인구: 자료를 받았으나 총인구 항목을 해석하지 못했습니다.');}
+      }
+    }
+  }catch(e){D.errors.push(e.message);log('① '+e.message,'err');}
+
+  /* 2) 연령별 인구 — 축 구조(3→2→1)를 바꿔가며 연령 해석이 되는 구조를 선택 */
+  try{
+    if(popReg){
+      log('② 연령별 인구 수집 중… (데이터가 커서 다소 걸립니다)');
+      let best={},bestRows=null,skipped=false;
+      for(const lv of cfg.AGE.levelTries){
+        const spec=Array(lv).fill('ALL');spec[0]=popReg.code;
+        const res=await kosisTry(cfg.AGE,spec,startY,endY,startY+'~'+endY+'년·'+lv+'축');
+        if(res===null){skipped=true;break;}
+        if(res.qerr||!res.length)continue;
+        const p=parseAge(res);
+        if(Object.keys(p).length>Object.keys(best).length){best=p;bestRows=res;}
+        if(Object.keys(best).length>=endY-startY+1)break; /* 전 기간 해석 성공 */
+      }
+      if(Object.keys(best).length){
+        D.age=best;log('② 연령별 인구 수집 완료 ('+Object.keys(best).length+'개년)','ok');
+      }else if(!skipped){
+        if(bestRows)logSample('연령별 인구',bestRows);
+        throw new Error('연령별 인구: 자료를 받았으나 연령 구분을 해석하지 못했습니다. 위 응답 표본을 알려주시면 보정하겠습니다.');
+      }
+    }else log('② 연령별 인구: 지역 코드가 없어 건너뜁니다.','warn');
+  }catch(e){D.errors.push(e.message);log('② '+e.message,'err');}
+
+  /* 3) 인구이동 — 주민등록 코드 재사용 시도 후 실패 시 자체 탐색 */
+  try{
+    log('③ 인구이동(전출입) 수집 중…');
+    let rows=null;
+    if(popReg){
+      const res=await kosisTry(cfg.MOVE,[popReg.code],startY,endY,'주민등록 코드 재사용');
+      if(res&&!res.qerr&&res.length)rows=res;
+    }
+    if(!rows){
+      log('   이동통계의 지역 축을 별도 탐색합니다…');
+      const reg=await probeRegion(cfg.MOVE,sido,sigungu,endY);
+      if(reg)rows=await fetchSeries(cfg.MOVE,reg,startY,endY);
+    }
+    if(rows){
+      D.move=parseMove(rows);
+      const n=Object.keys(D.move).length;
+      if(n)log('③ 인구이동 수집 완료 ('+n+'개년)','ok');
+      else{logSample('인구이동',rows);throw new Error('인구이동: 자료를 받았으나 전입·전출 항목을 해석하지 못했습니다.');}
+    }
+  }catch(e){D.errors.push(e.message);log('③ '+e.message,'err');}
+
+  /* 4) 합계출산율 — 시군구 표(DT_1B81A17) 우선, 후보 표를 순서대로 자동 시도 */
+  try{
+    log('④ 합계출산율 수집 중…');
+    const cands=[...new Set([cfg.TFR.id,'DT_1B81A17'])];
+    let rows=null,skipped=false;
+    for(const tid of cands){
+      const c={...cfg.TFR,id:tid,label:'시군구별 합계출산율('+tid+')'};
+      if(popReg){
+        const res=await kosisTry(c,[popReg.code],startY,endY,'주민등록 코드 재사용');
+        if(res===null){skipped=true;break;}
+        if(res&&!res.qerr&&res.length&&Object.keys(parseTfr(res)).length){rows=res;break;}
+      }
+      try{
+        log('   출산율 통계('+tid+')의 지역 축을 별도 탐색합니다…');
+        const reg=await probeRegion(c,sido,sigungu,endY);
+        if(reg===null){skipped=true;break;}
+        rows=await fetchSeries(c,reg,startY,endY);
+        if(rows===null){skipped=true;rows=null;break;}
+        if(rows&&Object.keys(parseTfr(rows)).length)break;
+        if(rows){logSample('합계출산율('+tid+')',rows);rows=null;}
+      }catch(e){log('   ↳ '+e.message,'warn');}
+    }
+    if(rows){
+      D.tfr=parseTfr(rows);
+      log('④ 합계출산율 수집 완료 ('+Object.keys(D.tfr).length+'개년)','ok');
+    }else if(skipped){
+      log('④ 합계출산율: 사용자가 건너뛰었습니다.','warn');
+    }else{
+      throw new Error('합계출산율: 시도한 통계표('+cands.join(', ')+')에서 시군구 자료를 해석하지 못했습니다. 위 진단 로그를 알려주세요.');
+    }
+  }catch(e){D.errors.push(e.message);log('④ '+e.message,'err');}
+
+  $('runBtn').disabled=false;
+  const got=[D.pop,D.age,D.move,D.tfr].filter(o=>Object.keys(o).length).length;
+  if(!got){showErr('수집된 지표가 없습니다. 인증키·통계표 ID·지자체명을 확인하세요.'+(D.errors.length?' ('+D.errors[0]+')':''));return;}
+  log('✔ 수집 완료 — 결과를 생성합니다.','ok');
+  DATA=D; render(D);
+}
+
+function showErr(m){const b=$('errbox');b.textContent=m;b.style.display='block';}
+
+/* ============================================================
+   결과 렌더링
+   ============================================================ */
+function buildSeries(D){
+  const ys=new Set([...Object.keys(D.pop),...Object.keys(D.age),...Object.keys(D.move),...Object.keys(D.tfr)]);
+  const years=[...ys].sort();
+  return years.map(y=>{
+    const a=D.age[y]||{},m=D.move[y]||{};
+    const total=D.pop[y]!=null?D.pop[y]:(a.total||null);
+    return {
+      y, total,
+      inflow:m.in??null, outflow:m.out??null, net:m.net??null,
+      y65:a.y65??null, y15_64:a.y15_64??null, y0_14:a.y0_14??null,
+      aging:(a.y65!=null&&total)?a.y65/total*100:null,
+      working:(a.y15_64!=null&&total)?a.y15_64/total*100:null,
+      youth:(a.y0_14!=null&&total)?a.y0_14/total*100:null,
+      extinct:(a.f20_39!=null&&a.y65)?a.f20_39/a.y65:null,
+      tfr:D.tfr[y]??null
+    };
+  });
+}
+const last=(S,k)=>{for(let i=S.length-1;i>=0;i--)if(S[i][k]!=null)return S[i];return null;};
+const prevOf=(S,k,row)=>{const i=S.indexOf(row);for(let j=i-1;j>=0;j--)if(S[j][k]!=null)return S[j];return null;};
+
+function render(D){
+  const S=buildSeries(D);
+  $('result').style.display='block';
+  $('rptTitle').textContent=D.sido+' '+D.sigungu+' 인구지표 ('+D.startY+'–'+D.endY+')';
+  $('rptMeta').textContent='수집일: '+new Date().toLocaleDateString('ko-KR')+' · 출처: KOSIS 국가통계포털(행정안전부 주민등록인구현황, 통계청 국내인구이동통계·인구동향조사)';
+
+  /* 카드 */
+  const cards=[
+    {k:'주민등록인구',key:'total',unit:'명',f:fmt,badDir:'down'},
+    {k:'순이동(전입−전출)',key:'net',unit:'명',f:fmt,badDir:'down',signed:true},
+    {k:'고령화율(65세 이상)',key:'aging',unit:'%',f:fmt1,badDir:'up'},
+    {k:'생산가능인구 비율(15–64세)',key:'working',unit:'%',f:fmt1,badDir:'down'},
+    {k:'합계출산율',key:'tfr',unit:'명',f:fmt2,badDir:'down'},
+    {k:'소멸위험지수',key:'extinct',unit:'',f:fmt2,badDir:'down'}
+  ];
+  $('cards').innerHTML=cards.map(c=>{
+    const cur=last(S,c.key);if(!cur)return '';
+    const prev=prevOf(S,c.key,cur);
+    let dHtml='';
+    if(prev){
+      const d=cur[c.key]-prev[c.key];
+      const cls=d===0?'flat':(d>0?(c.badDir==='up'?'down':'up'):(c.badDir==='down'?'down':'up'));
+      const arrow=d===0?'—':(d>0?'▲':'▼');
+      const dv=c.key==='aging'||c.key==='working'?fmt1(Math.abs(d))+'%p':(c.key==='tfr'||c.key==='extinct'?fmt2(Math.abs(d)):fmt(Math.abs(d)));
+      dHtml='<div class="d '+cls+'">'+arrow+' '+dv+' <span style="color:var(--muted)">('+prev.y+'년 대비)</span></div>';
+    }
+    const val=(c.signed&&cur[c.key]>0?'+':'')+c.f(cur[c.key]);
+    return '<div class="card"><div class="k">'+c.k+'</div><div class="v">'+val+(c.unit?'<small> '+c.unit+' · '+cur.y+'</small>':'<small> · '+cur.y+'</small>')+'</div>'+dHtml+'</div>';
+  }).join('');
+
+  /* 차트 */
+  $('charts').innerHTML='';
+  chart('주민등록인구 추이 (명)',S,[{key:'total',color:'#1F3864',label:'총인구'}]);
+  chart('순이동 추이 (명, 음수=순유출)',S,[{key:'net',color:'#B23A3A',label:'순이동',zero:true}]);
+  chart('인구구조 비율 (%)',S,[{key:'aging',color:'#B23A3A',label:'고령화율'},{key:'working',color:'#2E5FA3',label:'생산가능'},{key:'youth',color:'#1E7F6E',label:'유소년'}]);
+  chart('합계출산율 (명)',S,[{key:'tfr',color:'#1F3864',label:'합계출산율'}]);
+
+  renderTable(S); renderDoc(D,S); renderAi(D,S);
+  $('result').scrollIntoView({behavior:'smooth'});
+}
+
+/* ── SVG 라인 차트 ── */
+function chart(title,S,series){
+  const W=560,H=230,padL=58,padR=14,padT=14,padB=30;
+  const pts=series.flatMap(s=>S.filter(r=>r[s.key]!=null).map(r=>r[s.key]));
+  if(!pts.length)return;
+  let min=Math.min(...pts),max=Math.max(...pts);
+  if(series.some(s=>s.zero)){min=Math.min(min,0);max=Math.max(max,0);}
+  if(min===max){min-=1;max+=1;}
+  const pad=(max-min)*0.08;min-=pad;max+=pad;
+  const years=S.map(r=>r.y);
+  const X=i=>padL+(years.length===1?0:(W-padL-padR)*i/(years.length-1));
+  const Y=val=>padT+(H-padT-padB)*(1-(val-min)/(max-min));
+  let g='';
+  /* 눈금 */
+  for(let t=0;t<=3;t++){
+    const val=min+(max-min)*t/3,y=Y(val);
+    g+='<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="#E7EBF2"/>';
+    g+='<text x="'+(padL-8)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="#5B6575">'+shortNum(val)+'</text>';
+  }
+  if(series.some(s=>s.zero)&&min<0&&max>0)
+    g+='<line x1="'+padL+'" y1="'+Y(0)+'" x2="'+(W-padR)+'" y2="'+Y(0)+'" stroke="#8B95A5" stroke-dasharray="3 3"/>';
+  /* 연도 라벨 */
+  const step=Math.max(1,Math.ceil(years.length/6));
+  years.forEach((y,i)=>{if(i%step===0||i===years.length-1)
+    g+='<text x="'+X(i)+'" y="'+(H-8)+'" text-anchor="middle" font-size="10" fill="#5B6575">'+y+'</text>';});
+  /* 선·점 */
+  series.forEach(s=>{
+    const segs=[];let cur=[];
+    S.forEach((r,i)=>{if(r[s.key]!=null)cur.push([X(i),Y(r[s.key])]);else if(cur.length){segs.push(cur);cur=[];}});
+    if(cur.length)segs.push(cur);
+    segs.forEach(seg=>{
+      g+='<polyline points="'+seg.map(p=>p.join(',')).join(' ')+'" fill="none" stroke="'+s.color+'" stroke-width="2"/>';
+      seg.forEach(p=>{g+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="2.6" fill="'+s.color+'"/>';});
+    });
+  });
+  const legend=series.length>1?'<div class="hint" style="margin-top:2px">'+series.map(s=>'<span style="color:'+s.color+';font-weight:700">●</span> '+s.label).join(' &nbsp; ')+'</div>':'';
+  const div=document.createElement('div');div.className='chart';
+  div.innerHTML='<h3>'+title+'</h3><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+title+'">'+g+'</svg>'+legend;
+  $('charts').appendChild(div);
+}
+function shortNum(n){
+  if(Math.abs(n)>=10000)return (n/10000).toFixed(1).replace(/\.0$/,'')+'만';
+  if(Math.abs(n)>=1000)return Math.round(n).toLocaleString();
+  return Math.abs(n)<10?n.toFixed(2).replace(/\.?0+$/,''):Math.round(n).toLocaleString();
+}
+
+/* ── 총괄표 ── */
+const COLS=[
+  ['y','연도'],['total','총인구(명)'],['inflow','전입(명)'],['outflow','전출(명)'],['net','순이동(명)'],
+  ['y65','65세 이상(명)'],['aging','고령화율(%)'],['working','생산가능비율(%)'],['youth','유소년비율(%)'],
+  ['extinct','소멸위험지수'],['tfr','합계출산율']
+];
+function cellFmt(k,v){
+  if(v==null)return '—';
+  if(k==='y')return v;
+  if(k==='aging'||k==='working'||k==='youth')return fmt1(v);
+  if(k==='extinct'||k==='tfr')return fmt2(v);
+  return fmt(v);
+}
+function renderTable(S){
+  let h='<thead><tr>'+COLS.map(c=>'<th>'+c[1]+'</th>').join('')+'</tr></thead><tbody>';
+  S.forEach(r=>{h+='<tr>'+COLS.map(c=>'<td>'+cellFmt(c[0],r[c[0]])+'</td>').join('')+'</tr>';});
+  $('dataTable').innerHTML=h+'</tbody>';
+}
+
+/* ── 시사점 초안 (공문서체) ── */
+function renderDoc(D,S){
+  const L=[];const name=D.sigungu;
+  const f=last(S,'total'),f0=S.find(r=>r.total!=null);
+  L.push('□ (인구 총괄) '+name+' 주민등록인구 현황');
+  if(f&&f0&&f!==f0){
+    const yrs=+f.y-+f0.y, chg=f.total-f0.total, rate=chg/f0.total*100;
+    const cagr=(Math.pow(f.total/f0.total,1/yrs)-1)*100;
+    L.push(' ○ '+f0.y+'년 '+fmt(f0.total)+'명 → '+f.y+'년 '+fmt(f.total)+'명으로 '+yrs+'년간 '+fmt(Math.abs(chg))+'명('+fmt1(Math.abs(rate))+'%) '+(chg<0?'감소':'증가'));
+    L.push('  - 연평균 '+fmt1(Math.abs(cagr))+'%씩 '+(cagr<0?'감소하는 추세로, 인구 하방 압력이 지속':'증가'));
+  }else if(f){L.push(' ○ '+f.y+'년 기준 '+fmt(f.total)+'명');}
+  const nets=S.filter(r=>r.net!=null);
+  if(nets.length){
+    const recent=nets.slice(-5),sum=recent.reduce((a,r)=>a+r.net,0);
+    L.push('');L.push('□ (인구이동) 전출입 동향');
+    L.push(' ○ 최근 '+recent.length+'년('+recent[0].y+'~'+recent[recent.length-1].y+') 누적 순이동 '+(sum>0?'+':'')+fmt(sum)+'명'+(sum<0?' — 연평균 '+fmt(Math.abs(sum/recent.length))+'명 순유출':''));
+    const lastN=nets[nets.length-1];
+    L.push(' ○ '+lastN.y+'년 전입 '+fmt(lastN.inflow)+'명, 전출 '+fmt(lastN.outflow)+'명, 순이동 '+(lastN.net>0?'+':'')+fmt(lastN.net)+'명');
+    if(sum<0)L.push('  - 청년층 유출이 주된 요인일 개연성이 높아 일자리·주거·정착 여건 개선 투자 필요');
+  }
+  const ag=last(S,'aging'),ag0=S.find(r=>r.aging!=null);
+  if(ag){
+    L.push('');L.push('□ (인구구조) 고령화 및 생산가능인구');
+    let s=' ○ '+ag.y+'년 고령화율 '+fmt1(ag.aging)+'%';
+    if(ag0&&ag0!==ag)s+=' ('+ag0.y+'년 '+fmt1(ag0.aging)+'% 대비 +'+fmt1(ag.aging-ag0.aging)+'%p)';
+    s+=ag.aging>=20?' — 초고령사회 기준(20%)을 크게 상회':'';
+    L.push(s);
+    const wk=last(S,'working');
+    if(wk)L.push(' ○ 생산가능인구 비율 '+fmt1(wk.working)+'%'+(ag0&&ag0.working!=null?' ('+ag0.y+'년 '+fmt1(ag0.working)+'% → 지속 하락)':'')+' — 지역 경제활력 기반 약화');
+    const ex=last(S,'extinct');
+    if(ex)L.push(' ○ 소멸위험지수 '+fmt2(ex.extinct)+' ('+ex.y+'년) — '+(ex.extinct<0.2?'소멸 고위험 단계':ex.extinct<0.5?'소멸위험 진입 단계':'주의 단계'));
+  }
+  const tf=last(S,'tfr');
+  if(tf){
+    L.push('');L.push('□ (출산) 합계출산율');
+    L.push(' ○ '+tf.y+'년 합계출산율 '+fmt2(tf.tfr)+'명 — 인구 자연감소 구조 고착화 우려');
+  }
+  L.push('');L.push('□ (시사점) 여건분석 종합');
+  L.push(' ○ 인구 유출·고령화·저출산이 복합 작용하는 구조로, 개별 분산 투자보다 거점 중심의 집중 투자 필요');
+  L.push(' ○ 청년층 정착 여건(주거·일자리·보육) 개선과 생활인구 확보를 병행하는 투자전략 수립이 관건');
+  $('docText').textContent=L.join('\n');
+}
+
+/* ── AI 참고자료 세트 (Markdown) ── */
+function aiMarkdown(D,S){
+  const L=[];
+  L.push('# '+D.sido+' '+D.sigungu+' 인구지표 데이터셋 ('+D.startY+'–'+D.endY+')');
+  L.push('- 용도: 지방소멸대응기금 투자계획서 「Ⅰ. 지역 여건분석 및 전망」 작성 참고자료');
+  L.push('- 출처: KOSIS 국가통계포털 (행정안전부 주민등록인구현황, 통계청 국내인구이동통계·인구동향조사)');
+  L.push('- 수집일: '+new Date().toISOString().slice(0,10));
+  L.push('');
+  L.push('| '+COLS.map(c=>c[1]).join(' | ')+' |');
+  L.push('|'+COLS.map(()=> '---').join('|')+'|');
+  S.forEach(r=>L.push('| '+COLS.map(c=>cellFmt(c[0],r[c[0]]).replace(/,/g,'')).join(' | ')+' |'));
+  L.push('');
+  L.push('※ 고령화율=65세 이상/총인구, 생산가능비율=15~64세/총인구, 소멸위험지수=20~39세 여성/65세 이상 인구');
+  if(D.errors.length){L.push('');L.push('※ 수집 실패 항목: '+D.errors.join(' / '));}
+  return L.join('\n');
+}
+function renderAi(D,S){$('aiText').textContent=aiMarkdown(D,S);}
+
+/* ── 다운로드·복사 ── */
+function download(name,content,type){
+  const b=new Blob([content],{type:type});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function copyText(el,btn){
+  const t=el.textContent;
+  const done=()=>{const o=btn.textContent;btn.textContent='복사됨 ✓';setTimeout(()=>btn.textContent=o,1500);};
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(done);
+  else{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();done();}
+}
+$('csvBtn').onclick=()=>{
+  if(!DATA)return;const S=buildSeries(DATA);
+  const rows=[COLS.map(c=>c[1]).join(',')];
+  S.forEach(r=>rows.push(COLS.map(c=>{const x=r[c[0]];return x==null?'':x;}).join(',')));
+  download(DATA.sido+'_'+DATA.sigungu+'_인구지표_'+DATA.startY+'-'+DATA.endY+'.csv','\uFEFF'+rows.join('\r\n'),'text/csv;charset=utf-8');
+};
+$('mdBtn').onclick=()=>{if(DATA)download(DATA.sido+'_'+DATA.sigungu+'_인구지표.md',aiMarkdown(DATA,buildSeries(DATA)),'text/markdown;charset=utf-8');};
+$('copyDocBtn').onclick=e=>copyText($('docText'),e.target);
+$('copyAiBtn').onclick=e=>copyText($('aiText'),e.target);
+
+/* ── 초기화 ── */
+(function init(){
+  const sd=$('sido');
+  Object.keys(SIDO).forEach(n=>{const o=document.createElement('option');o.value=o.textContent=n;sd.appendChild(o);});
+  sd.value='경상남도';
+  function fillSigungu(){
+    const sg=$('sigungu');sg.innerHTML='';
+    (PRESET[sd.value]||[]).forEach(n=>{const o=document.createElement('option');o.value=o.textContent=n;sg.appendChild(o);});
+    const c=document.createElement('option');c.value='__custom__';c.textContent='직접 입력…';sg.appendChild(c);
+    if(sd.value==='경상남도')sg.value='의령군';
+    toggleCustom();
+  }
+  function toggleCustom(){$('customWrap').style.display=$('sigungu').value==='__custom__'?'block':'none';}
+  sd.onchange=fillSigungu;$('sigungu').onchange=toggleCustom;
+  fillSigungu();
+  try{const k=localStorage.getItem('kosisKey');if(k)$('apiKey').value=k;}catch(e){}
+  $('runBtn').onclick=run;
+})();
+</script>
+</body>
+</html>

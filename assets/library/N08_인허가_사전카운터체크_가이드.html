@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인허가 민원 '3분 사전 카운터 체크' 가이드</title>
+<style>
+  :root{
+    --navy:#1a3a6b; --navy-d:#122b50; --blue:#2f6fd1; --blue-l:#eaf1fb;
+    --gray:#f5f6f8; --line:#d9dee6; --text:#222; --sub:#6b7684;
+    --green:#1f8a4c; --green-l:#e8f6ee; --amber:#d68910; --amber-l:#fdf3e3; --red:#c0392b; --red-l:#fdecea;
+    --purple:#6a3fc0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Malgun Gothic','맑은 고딕',Apple SD Gothic Neo,sans-serif; background:var(--gray); color:var(--text);}
+  header{background:var(--navy); color:#fff; padding:18px 28px; display:flex; align-items:center; gap:14px;}
+  header .badge{background:var(--purple); font-size:12px; padding:4px 10px; border-radius:20px; font-weight:700;}
+  header h1{font-size:20px; font-weight:700;}
+  header p{font-size:12px; opacity:.75; margin-top:3px;}
+  .notice{background:var(--amber-l); border-bottom:1px solid #f0dcb4; padding:9px 28px; font-size:12px; color:#7a5b13; line-height:1.6;}
+  .top-bar{background:#fff; border-bottom:1px solid var(--line); padding:10px 28px; display:flex; gap:10px; align-items:center; font-size:13px; flex-wrap:wrap;}
+  .top-bar label{font-weight:700; color:var(--navy); font-size:12.5px;}
+  .top-bar input{padding:7px 11px; border:1px solid var(--line); border-radius:6px; font-size:13px; font-family:inherit; width:170px;}
+  .container{max-width:1150px; margin:0 auto; padding:22px 28px 60px;}
+  /* 업종 대형 버튼 */
+  .biz-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px;}
+  .biz{background:#fff; border:2px solid var(--line); border-radius:16px; padding:20px 10px; text-align:center; cursor:pointer; transition:.15s;}
+  .biz:hover{border-color:var(--blue); transform:translateY(-2px); box-shadow:0 6px 16px rgba(26,58,107,.10);}
+  .biz.on{border-color:var(--navy); background:var(--blue-l); box-shadow:0 6px 16px rgba(26,58,107,.14);}
+  .biz .ic{font-size:36px;}
+  .biz .nm{font-size:15px; font-weight:900; color:var(--navy); margin-top:8px; word-break:keep-all;}
+  .biz .lw{font-size:10.5px; color:var(--sub); margin-top:3px;}
+  /* 결과 */
+  .result{display:none;}
+  .head-strip{background:var(--navy); color:#fff; border-radius:14px; padding:16px 22px; display:flex; align-items:center; gap:14px; margin-bottom:16px; flex-wrap:wrap;}
+  .head-strip .ic{font-size:32px;}
+  .head-strip h2{font-size:18px;}
+  .head-strip .law{font-size:11.5px; opacity:.8; margin-top:3px;}
+  .head-strip .period{margin-left:auto; background:rgba(255,255,255,.15); border-radius:10px; padding:8px 16px; font-size:12.5px; font-weight:700; text-align:center;}
+  .cols{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .card{background:#fff; border:1px solid var(--line); border-radius:12px; overflow:hidden;}
+  .card-h{padding:11px 16px; font-size:14px; font-weight:900; display:flex; justify-content:space-between; align-items:center;}
+  .ch-stop{background:var(--red-l); color:var(--red);}
+  .ch-doc{background:var(--blue-l); color:var(--navy);}
+  .ch-warn{background:var(--amber-l); color:var(--amber);}
+  .card-b{padding:12px 16px;}
+  .chk{display:flex; gap:10px; align-items:flex-start; padding:8px 4px; font-size:14px; line-height:1.6; cursor:pointer; border-radius:7px;}
+  .chk:hover{background:var(--blue-l);}
+  .chk input{margin-top:4px; width:17px; height:17px; accent-color:var(--green); flex-shrink:0;}
+  .chk.done span{color:var(--sub); text-decoration:line-through;}
+  .chk .why{display:block; font-size:11.5px; color:var(--sub); margin-top:2px;}
+  .prog{font-size:12px; font-weight:800;}
+  .rej{padding:8px 4px; font-size:13.2px; line-height:1.65; word-break:keep-all;}
+  .rej b{color:var(--red);}
+  .stop-note{font-size:11.5px; color:var(--red); font-weight:700; padding:6px 16px 12px;}
+  /* 액션 버튼 */
+  .actions{display:flex; gap:10px; margin-top:16px;}
+  .abtn{flex:1; border:none; border-radius:10px; padding:15px 0; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; color:#fff;}
+  .a-kakao{background:#fee500; color:#3c1e1e;}
+  .a-kakao:hover{background:#f5d900;}
+  .a-print{background:var(--navy);}
+  .a-print:hover{background:var(--navy-d);}
+  .a-back{background:#fff; color:var(--sub); border:1px solid var(--line); flex:0 0 130px;}
+  /* 인쇄용 안내장 */
+  #printDoc{display:none;}
+  @media print{
+    header,.notice,.top-bar,.container>.biz-grid,.result,#toast{display:none!important;}
+    #printDoc{display:block; font-size:13.5px; line-height:1.9; padding:10px;}
+    #printDoc .pd-title{text-align:center; font-size:20px; font-weight:900; letter-spacing:3px; margin-bottom:6px;}
+    #printDoc .pd-sub{text-align:center; font-size:12px; color:#555; margin-bottom:18px;}
+    #printDoc h3{font-size:14.5px; margin:16px 0 8px; padding-left:8px; border-left:4px solid #1a3a6b;}
+    #printDoc li{margin-left:22px; margin-bottom:4px;}
+    #printDoc .pd-foot{margin-top:22px; padding-top:10px; border-top:1px dashed #999; font-size:12.5px; color:#444;}
+    body{background:#fff;}
+  }
+  #toast{position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:11px 22px; border-radius:30px; font-size:13.5px; opacity:0; transition:.3s; pointer-events:none; z-index:99;}
+  #toast.show{opacity:1;}
+  @media (max-width:900px){ .biz-grid{grid-template-columns:1fr 1fr;} .cols{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="badge">신개념 No.8</span>
+  <div>
+    <h1>인허가 민원 '3분 사전 카운터 체크' 가이드</h1>
+    <p>"서류 다 가져왔는데 왜 안 돼요?"를 없애는 창구용 대형 버튼 가이드 — 업종 터치 → 함께 체크 → 안내문 전송</p>
+  </div>
+</header>
+<div class="notice">⚠️ 구비 서류·제한 기준은 <b>일반적인 기준의 교육용 예시</b>입니다. 지역 조례·건축물 상황에 따라 달라질 수 있으므로, 안내 전 소관 법령·부서 지침으로 확인하세요. (정부24·인허가 자가진단 병행 권장)</div>
+<div class="top-bar">
+  <label>기관</label><input id="org" value="○○시청" >
+  <label>담당 부서</label><input id="dept" placeholder="예: 위생과">
+  <label>문의 전화</label><input id="tel" placeholder="예: 055-000-0000">
+  <span style="font-size:11.5px; color:var(--sub);">← 안내문에 자동으로 들어갑니다</span>
+</div>
+
+<div class="container">
+  <div class="biz-grid" id="bizGrid"></div>
+
+  <div class="result" id="result"></div>
+</div>
+
+<div id="printDoc"></div>
+<div id="toast"></div>
+
+<script>
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ============================================================
+   업종 데이터 (교육용 예시 — 지역 조례에 따라 상이)
+============================================================ */
+const BIZ={
+ rest:{ic:'🍚', name:'일반음식점', law:'식품위생법 제37조 (영업신고)', period:'신고 즉시~3일',
+  stop:[
+   ['건축물 용도가 근린생활시설(음식점 가능 용도)인가?','건축물대장 확인 — 주택·창고 용도면 용도변경부터 필요'],
+   ['위반건축물(무단 증축) 표기가 없는가?','건축물대장에 위반 표기 시 해소 전 신고 불가'],
+   ['정화조 용량이 업종 기준을 충족하는가?','좌석 수 대비 용량 부족 시 증설 필요 — 환경부서 확인'],
+   ['LPG 사용 시 가스 완성검사를 받았는가?','가스 사용 시설은 완성검사필증 필요']
+  ],
+  docs:['영업신고서 (창구 비치·정부24)','식품위생교육 수료증 (한국외식업중앙회 등, 온라인 6시간)','건강진단결과서(보건증) — 종사자 전원','임대차계약서 (본인 소유 시 등기부)','신분증','(해당 시) 가스 완성검사필증'],
+  reject:[['위반건축물 미해소','건축물대장을 먼저 떼 보면 헛걸음을 막을 수 있습니다'],['위생교육 미이수','교육은 온라인으로 미리 — 당일 이수 불가'],['정화조 용량 부족','증설 공사에 수 주 소요, 가장 늦게 발견되는 함정']]},
+ cafe:{ic:'☕', name:'휴게음식점 · 카페', law:'식품위생법 제37조 (영업신고)', period:'신고 즉시~3일',
+  stop:[
+   ['건축물 용도가 근린생활시설인가?','건축물대장 확인'],
+   ['위반건축물 표기가 없는가?','위반 표기 시 신고 불가'],
+   ['주류 판매 계획이 없는가?','휴게음식점은 주류 판매 불가 — 판매하려면 일반음식점으로']
+  ],
+  docs:['영업신고서','식품위생교육 수료증','건강진단결과서(보건증)','임대차계약서','신분증'],
+  reject:[['주류 판매 적발','휴게음식점 주류 판매는 영업정지 사유 — 처음부터 업종을 바르게'],['위생교육 미이수','온라인 사전 이수 필수'],['용도 불일치','1층 상가라도 용도 확인은 필수']]},
+ stay:{ic:'🏨', name:'숙박업', law:'공중위생관리법 제3조 (영업신고)', period:'약 3~7일',
+  stop:[
+   ['건축물 용도가 숙박시설인가?','근생·주택 용도로는 불가 — 용도변경 선행'],
+   ['교육환경보호구역(학교 주변)에 해당하지 않는가?','학교 인근은 교육청 심의 대상 — 사전 확인 필수'],
+   ['소방시설을 갖추었는가?','소방시설 등 완비 확인 필요'],
+   ['농어촌민박과 혼동하지 않았는가?','주택에서 소규모로 하려면 농어촌민박(농어촌정비법) 별도 제도']
+  ],
+  docs:['영업신고서','위생교육 수료증','건축물대장','소방 관련 증빙(완비 확인)','임대차계약서·신분증'],
+  reject:[['교육환경보호구역 심의 탈락','계약 전에 위치부터 확인해야 하는 대표 사례'],['건축물 용도 불일치','용도변경은 수개월 걸릴 수 있음'],['소방시설 미비','스프링클러 등 보완 공사 부담 큼']]},
+ beauty:{ic:'💇', name:'이 · 미용업', law:'공중위생관리법 제3조 (영업신고)', period:'신고 즉시~3일',
+  stop:[
+   ['이용사·미용사 면허가 있는가?','면허 소지자만 영업 신고 가능 — 무면허는 불가'],
+   ['건축물 용도가 근린생활시설인가?','건축물대장 확인'],
+   ['위반건축물 표기가 없는가?','위반 표기 시 신고 불가']
+  ],
+  docs:['영업신고서','이용사 또는 미용사 면허증','위생교육 수료증','임대차계약서','신분증'],
+  reject:[['면허 없이 신고 시도','면허 취득이 선행 조건'],['위생교육 미이수','사전 온라인 이수'],['미신고 셰어숍 운영','1개 영업장 내 별도 영업은 각자 신고 필요']]},
+ academy:{ic:'📚', name:'학원 · 교습소', law:'학원법 제6조 (등록)', period:'약 7~15일',
+  stop:[
+   ['같은 건물에 유해업소(단란주점 등)가 없는가?','동일 건축물 내 유해업소 있으면 등록 불가'],
+   ['시설 면적이 기준(단위 면적)을 충족하는가?','교습 인원 대비 면적 기준 — 교육지원청 기준 확인'],
+   ['소방·안전 기준을 충족하는가?','일정 규모 이상은 소방시설 완비 필요']
+  ],
+  docs:['학원 등록신청서 (교육지원청)','운영계획서·원칙(규정)','강사 자격 증빙 서류','시설 평면도','임대차계약서','건축물대장'],
+  reject:[['동일 건물 유해업소','계약 전 건물 전체 입점 현황 확인 필수'],['면적 기준 미달','교습 과정별 기준이 다름'],['접수 기관 혼동','학원은 시청이 아니라 교육지원청 소관']]},
+ gym:{ic:'🏋️', name:'체육시설 (헬스장)', law:'체육시설법 제20조 (신고)', period:'신고 즉시~5일',
+  stop:[
+   ['건축물 용도가 운동시설(또는 근생)인가?','규모에 따라 용도 기준 상이'],
+   ['위반건축물 표기가 없는가?','건축물대장 확인'],
+   ['소방·피난 시설이 확보되었는가?','지하층·대형 시설은 특히 확인']
+  ],
+  docs:['체육시설업 신고서','시설 평면도(운동 공간·부대시설)','임대차계약서','신분증','(수영장 등 일부 업종) 별도 안전 요건 증빙'],
+  reject:[['용도 불일치','대형 평수는 용도변경 필요 사례 많음'],['피난 통로 미확보','기구 배치로 통로 막힘 지적 빈발'],['환불 규정 미게시','소비자 분쟁 다발 — 게시 의무 안내']]},
+ karaoke:{ic:'🎤', name:'노래연습장', law:'음악산업진흥법 제18조 (등록)', period:'약 7일',
+  stop:[
+   ['교육환경보호구역에 해당하지 않는가?','학교 출입문 50m 이내 절대보호구역은 불가, 200m 이내는 심의'],
+   ['소방시설 등 완비증명을 받을 수 있는 구조인가?','소방서 완비증명 필수 — 구조 변경 부담 확인'],
+   ['건축물 용도·위반 여부 확인했는가?','건축물대장 확인']
+  ],
+  docs:['등록신청서','소방시설 등 완비증명서','건축물대장','임대차계약서','신분증'],
+  reject:[['교육환경보호구역','계약 전 학교 거리부터 — 가장 흔한 낭패'],['소방 완비증명 미비','방음 공사 전에 소방 협의 먼저'],['청소년 출입시간 위반 운영','등록 후 단속 다발 사항 사전 안내']]},
+ factory:{ic:'🏭', name:'소규모 제조공장', law:'산업집적법 제13조 (공장설립 승인)', period:'약 20일 이상',
+  stop:[
+   ['용도지역이 공장 설립 가능 지역인가?','전용주거·녹지 등은 불가 — 토지이용계획확인원 확인'],
+   ['환경 배출시설(대기·폐수) 신고 대상인가?','배출시설은 별도 인허가 선행·병행 필요'],
+   ['진입 도로·상하수 등 기반시설이 있는가?','맹지·기반 미비 시 사실상 불가']
+  ],
+  docs:['공장설립 승인신청서','사업계획서','토지·건물 소유(사용) 증빙','배치도·평면도','(해당 시) 환경 배출시설 신고 서류'],
+  reject:[['용도지역 불허','토지 계약 전 토지이용계획확인원이 필수 0순위'],['환경 인허가 누락','공장 승인과 별개로 배출시설 신고 필요'],['처리 기간 오해','타 인허가 의제 협의로 기간이 길어질 수 있음 사전 안내']]}
+};
+
+/* ---------- 업종 버튼 ---------- */
+document.getElementById('bizGrid').innerHTML=Object.entries(BIZ).map(([k,b])=>`
+ <div class="biz" id="biz-${k}" onclick="pick('${k}')">
+   <div class="ic">${b.ic}</div>
+   <div class="nm">${b.name}</div>
+   <div class="lw">${b.law.split(' ')[0]}</div>
+ </div>`).join('');
+
+let CUR=null;
+function pick(k){
+  CUR=k;
+  document.querySelectorAll('.biz').forEach(el=>el.classList.remove('on'));
+  document.getElementById('biz-'+k).classList.add('on');
+  const b=BIZ[k];
+  const r=document.getElementById('result');
+  r.style.display='block';
+  r.innerHTML=`
+  <div class="head-strip">
+    <span class="ic">${b.ic}</span>
+    <div><h2>${b.name}</h2><div class="law">⚖️ ${b.law}</div></div>
+    <div class="period">표준 처리<br>${b.period}</div>
+  </div>
+  <div class="cols">
+    <div class="card">
+      <div class="card-h ch-stop">🚫 STOP! 입지·건물 먼저 확인 <span class="prog" id="stopProg">0/${b.stop.length}</span></div>
+      <div class="card-b">
+        ${b.stop.map((s,i)=>`<label class="chk" id="st-${i}"><input type="checkbox" onchange="tick('st',${i},${b.stop.length},'stopProg')"><span><b>${esc(s[0])}</b><span class="why">${esc(s[1])}</span></span></label>`).join('')}
+      </div>
+      <div class="stop-note">※ 위 항목에서 하나라도 "아니오"면 서류 접수 전에 해결이 필요합니다 — 여기서 걸러야 재방문 민원이 없습니다.</div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-h ch-doc">📄 필수 구비 서류 <span class="prog" id="docProg">0/${b.docs.length}</span></div>
+        <div class="card-b">
+          ${b.docs.map((d,i)=>`<label class="chk" id="dc-${i}"><input type="checkbox" onchange="tick('dc',${i},${b.docs.length},'docProg')"><span>${esc(d)}</span></label>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h ch-warn">⚠️ 자주 반려되는 사유 TOP ${b.reject.length}</div>
+        <div class="card-b">
+          ${b.reject.map((rj,i)=>`<div class="rej">${i+1}. <b>${esc(rj[0])}</b> — ${esc(rj[1])}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="abtn a-back" onclick="back()">← 업종 다시</button>
+    <button class="abtn a-kakao" onclick="copyKakao()">💬 민원인 카톡용 안내문 복사</button>
+    <button class="abtn a-print" onclick="printDoc()">🖨 안내장 인쇄</button>
+  </div>`;
+  r.scrollIntoView({behavior:'smooth'});
+  toast(`${b.name} 체크 가이드가 열렸습니다. 민원인과 함께 STOP 항목부터 확인하세요.`);
+}
+
+function tick(prefix,i,total,progId){
+  const el=document.getElementById(prefix+'-'+i);
+  el.classList.toggle('done', el.querySelector('input').checked);
+  const done=[...document.querySelectorAll(`[id^="${prefix}-"] input`)].filter(c=>c.checked).length;
+  document.getElementById(progId).textContent=`${done}/${total}`;
+  if(prefix==='dc'&&done===total) toast('🎉 서류가 모두 준비되었습니다 — 접수 가능!');
+}
+
+function back(){
+  document.getElementById('result').style.display='none';
+  document.querySelectorAll('.biz').forEach(el=>el.classList.remove('on'));
+  CUR=null;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---------- 카톡 안내문 ---------- */
+function contact(){
+  const org=document.getElementById('org').value.trim()||'○○시청';
+  const dept=document.getElementById('dept').value.trim();
+  const tel=document.getElementById('tel').value.trim();
+  return {org, line:`${org}${dept?' '+dept:''}${tel?' ☎ '+tel:''}`};
+}
+function copyKakao(){
+  if(!CUR) return;
+  const b=BIZ[CUR], c=contact();
+  const txt=`[${c.org}] ${b.name} 인허가 준비 안내
+
+안녕하세요! 방문 전 아래 내용을 확인하시면 한 번에 처리하실 수 있습니다.
+
+🚫 계약·방문 전 꼭 확인하세요
+${b.stop.map(s=>`· ${s[0]}\n  (${s[1]})`).join('\n')}
+
+📄 가져오실 서류
+${b.docs.map(d=>`□ ${d}`).join('\n')}
+
+⚠️ 이런 경우 반려될 수 있어요
+${b.reject.map(r=>`· ${r[0]} — ${r[1]}`).join('\n')}
+
+⏱ 표준 처리 기간: ${b.period}
+⚖️ 근거: ${b.law}
+
+궁금하신 점은 ${c.line}으로 문의해 주세요.
+※ 건물·지역 상황에 따라 추가 서류가 필요할 수 있습니다.`;
+  navigator.clipboard.writeText(txt).then(()=>toast('💬 안내문이 복사되었습니다 — 카카오톡·문자로 붙여넣어 전송하세요.')).catch(()=>toast('⚠️ 복사 실패'));
+}
+
+/* ---------- 인쇄 안내장 ---------- */
+function printDoc(){
+  if(!CUR) return;
+  const b=BIZ[CUR], c=contact();
+  const today=new Date();
+  document.getElementById('printDoc').innerHTML=`
+  <div class="pd-title">${esc(b.name)} 인허가 준비 안내</div>
+  <div class="pd-sub">${esc(c.org)} · 발급일 ${today.getFullYear()}. ${today.getMonth()+1}. ${today.getDate()}.</div>
+  <h3>🚫 계약·공사 전 반드시 확인할 사항</h3>
+  <ul>${b.stop.map(s=>`<li><b>${esc(s[0])}</b><br><span style="color:#555; font-size:12px;">${esc(s[1])}</span></li>`).join('')}</ul>
+  <h3>📄 준비 서류 체크리스트</h3>
+  <ul>${b.docs.map(d=>`<li>☐ ${esc(d)}</li>`).join('')}</ul>
+  <h3>⚠️ 자주 반려되는 사유</h3>
+  <ul>${b.reject.map(r=>`<li><b>${esc(r[0])}</b> — ${esc(r[1])}</li>`).join('')}</ul>
+  <div class="pd-foot">
+    ⚖️ 근거: ${esc(b.law)} &nbsp;|&nbsp; ⏱ 표준 처리 기간: ${esc(b.period)}<br>
+    문의: ${esc(c.line)}<br>
+    ※ 본 안내는 일반 기준이며, 건물·지역 상황에 따라 추가 서류·절차가 필요할 수 있습니다.
+  </div>`;
+  window.print();
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm=setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+</body>
+</html>
