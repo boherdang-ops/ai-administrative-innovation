@@ -7,6 +7,7 @@
 <title>박상득 | AI 시대, 지방정부의 일하는 방식을 설계합니다</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="stylesheet" href="style.css?v=20260920-clean-v21">
+<link rel="stylesheet" href="js/asset-library.css">
 </head>
 <body>
 <div class="print-toolbar" aria-label="포트폴리오 출력 도구">
@@ -78,10 +79,10 @@
 <div>01<h3>개인별 도구 활용</h3></div><div>02<h3>부서 전원 활용</h3></div><div>03<h3>행정 업무 표준화</h3></div><div>04<h3>조직 내 지식 자산화</h3></div><div>05<h3>선제적 정책 활용</h3></div>
 </div><p class="note">단순한 AI 교육 횟수가 아니라 실제 업무 처리 방식이 어떻게 변화했는가를 기준으로 조직의 AI 활용 수준을 바라봅니다.</p></div></section>
 
-<section id="works" class="section tint"><div class="wrap"><div class="section-bridge"><span>METHOD → WORKS</span><p>문제해결의 관점이 실제 모델과 도구로 구현됩니다.</p></div><div class="head"><p class="eyebrow">05 / WHAT HAVE I CREATED?</p><h2>개발 성과 및 인프라 구축</h2><p>단순한 구상을 넘어, 현업 실무에 즉시 적용 가능한 도구와 콘텐츠로 구현했습니다.</p></div>
+<section id="works" class="section tint"><div class="wrap"><div class="section-bridge"><span>METHOD → WORKS</span><p>문제해결의 관점이 실제 모델과 도구로 구현됩니다.</p></div><div class="head"><p class="eyebrow">05 / WHAT HAVE I CREATED?</p><h2>개발 성과 및 인프라 구축</h2><p id="asset-message">교육과정을 설계하고, 현장에서 사용하는 교재와 실습도구를 직접 개발하며, 실제 행정업무를 지원하는 도구로 확장합니다. 검증된 결과는 지식자산으로 축적합니다.</p></div>
 <div class="kaim dark"><p class="eyebrow">KAIM · SIGNATURE OUTPUT</p><h3>한국형 지자체 AI 행정 5단계 모형</h3><p>앞서 제시한 5단계의 사고체계를 바탕으로, 지자체의 AI 행정 도입 및 활용 수준을 바라보는 성숙도 모형입니다.</p><div class="ladder">개인 → 부서 → 업무 → 조직 → 정책</div></div>
 <div class="portfolio-strip">
-  <div class="portfolio-lead"><span>FROM THE EXISTING PORTFOLIO</span><h3>현장에 적용해 온 교육과 개발 자산</h3><p>기존 포트폴리오에 수록된 교육과정·교재·실습도구·진단모형의 내용을 V12의 서사에 맞춰 재배치했습니다.</p></div>
+  <div class="portfolio-lead"><span>FROM EXPERIENCE TO INTELLECTUAL ASSETS</span><h3>현장에 적용해 온 교육과 개발 자산</h3><p>교육과정 · 교재 · 실습도구 · 행정지원도구 · 진단·콘텐츠 도구</p></div>
   <div class="portfolio-meta"><b>교육과정</b><strong>6개 프로그램</strong><small>기존 포트폴리오에 명시된 과정군</small></div>
   <div class="portfolio-meta"><b>저작</b><strong>「출근길 3분 AI」</strong><small>기존 사이트 아카이브 항목</small></div>
 </div>
@@ -93,12 +94,12 @@
   <div><span>05</span><b>지역맞춤형 정책개발 역량강화 워크숍</b><em>정책개발</em><small>과정별 운영</small></div>
   <div><span>06</span><b>문제해결형 혁신리더 양성과정</b><em>핵심 인력</em><small>49H</small></div>
 </div>
-<div class="grid2 works">
+<div id="asset-categories" class="asset-categories"></div><p class="eyebrow">SELECTED ASSETS</p><div class="grid2 works">
 <article><b>01</b><h3>교육과정</h3><p>행정 현장 중심의 실무 맞춤형 AI 행정혁신 교육 프로그램</p><ul><li>AI 행정혁신 최고위 정책 워크숍</li><li>AI 기반 행정실무 역량강화 워크숍</li><li>AI 기반 행정실무 및 정책기획 워크숍</li><li>제로빌드 정책기획 심화 워크숍</li><li>지역맞춤형 정책개발 역량강화 워크숍</li><li>문제해결형 혁신리더 양성과정</li></ul></article>
 <article><b>02</b><h3>교재</h3><p>행정 현장의 언어와 직무를 반영한 실무 중심형 교재</p></article>
 <article><b>03</b><h3>실습도구</h3><p>교육 성과가 현업 업무로 직결되는 AI 실습형 솔루션</p></article>
 <article><b>04</b><h3>AI 역량 진단 및 사전진단</h3><p>개인·조직의 AI 활용 역량 및 교육 수요 분석을 위한 진단 체계</p></article>
-</div></div></section>
+</div><button id="view-all-assets" class="asset-button" aria-expanded="false" aria-controls="all-assets">VIEW ALL ASSETS</button><div id="all-assets" hidden><label for="asset-filter">자산 유형</label><select id="asset-filter"></select><p id="asset-count" aria-live="polite"></p><div class="grid2 asset-all-list"></div></div><div id="intellectual-assets" class="intellectual-assets"></div></div></section>
 
 <section id="experience" class="section"><div class="wrap"><div class="transition"><span>FROM OUTPUT TO EXPERIENCE</span><p>방법론은 현장의 경험에서 만들어지고, 현장의 경험은 다시 새로운 방법론으로 이어집니다.</p></div><div class="head"><p class="eyebrow">06 / WHAT EXPERIENCES DO I HAVE?</p><h2>전문성과 현장 경험</h2><p>현장 중심의 문제 인식을 바탕으로, 지방자치단체의 교육·연구·정책 개발을 수행하며 실효성 있는 현장 문제 해결 역량을 다져왔습니다.</p></div>
 <div class="grid3">
@@ -125,9 +126,11 @@
 <div class="contact">ai.happybrain@gmail.com · 010-9145-1318</div></div></section>
 <footer><div class="wrap">PARK SANG-DEUK <span>AI 행정혁신 · 정책개발 · 공공 AX</span></div></footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/assets-default.js"></script>
+<script src="js/asset-library.js"></script>
 <script src="js/supabase-config.js?v=20260920-3"></script>
 <script src="js/cloud-cms.js?v=20260920-3"></script>
-<script src="js/site-data-v12.js?v=20260920-clean-v2"></script>
+<script src="js/site-data-v12.js?v=20261001-assets1"></script>
 <script src="script.js?v=20260920-clean-v2"></script>
 <script>
 (function(){
