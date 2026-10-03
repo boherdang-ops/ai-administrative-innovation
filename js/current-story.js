@@ -1,0 +1,17 @@
+(()=>{
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const safe=v=>{try{return ['http:','https:'].includes(new URL(v,location.href).protocol)?v:''}catch{return ''}};
+const set=(id,v)=>document.getElementById(id).innerHTML=v;
+function render(d){
+PS_CURRENT.ensure(d); const p=d.presentation;for(const [id,s]of Object.entries(p.sections)){const root=document.getElementById(id);root.querySelector('.eyebrow').textContent=s.label;if(s.title!==undefined)root.querySelector('.head h2').innerHTML=esc(s.title).replace(/\n/g,'<br>');}
+set('identity-facts','<div class="problem-statement"><p>'+esc(p.identity.problem)+'</p><p>'+esc(p.identity.solution)+'</p></div>');
+set('records-intro',esc(p.sections.records.intro));set('hub-intro',esc(p.hub.intro));set('hub-guide',esc(p.hub.guide));set('hub-current-links',p.hub.links.map(l=>safe(l.url)?'<a class="asset-link" href="'+esc(l.url)+'">'+esc(l.label)+' ↗</a>':'').join(''));set('footer-brand',esc(p.footer.brand));set('footer-tagline',esc(p.footer.tagline));
+const x=d.experience||PS_STORY_DEFAULTS.experience;set('expertise-content','<p class="section-intro">'+esc(x.lead||'국가 정책 연구와 대외 협력, 지방자치단체 교육·연구·정책개발 경험을 바탕으로 공공부문의 AI 활용과 업무 재설계를 지원합니다.')+'</p><div class="experience-columns">'+[[p.experienceHeadings.professional,x.professional],[p.experienceHeadings.expertise,x.expertise],[p.experienceHeadings.field,x.field]].map(([title,text])=>'<article><h3>'+title+'</h3><ul>'+String(text||'').split(/\n/).filter(Boolean).map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul></article>').join('')+'</div>');
+set('records-content',(d.records||[]).map(r=>'<div class="year">'+esc(r.year)+'<br><small>'+esc(r.theme)+'</small></div><div>'+r.items.map(t=>'<p>'+esc(t)+'</p>').join('')+'</div>').join(''));
+set('perspective-content',(d.problems||[]).map((p,i)=>'<article><b>'+String(i+1).padStart(2,'0')+'</b><h3>'+esc(p.title)+'</h3><p>'+esc(p.desc)+'</p></article>').join(''));
+set('assets-intro',esc(d.portfolio?.leadDesc||'교육과정을 설계하고 현장에서 사용하는 교재와 실습도구를 개발합니다. 행정업무를 지원하는 도구와 검증된 결과를 지식자산으로 축적합니다.'));
+const book=d.book||{},meta=PS_STORY_DEFAULTS.book;const visible=(d.assets||[]).filter(a=>a.public!==false);set('asset-summary','<article class="book-summary"><h3>'+esc(book.title||'개인 저서 1권')+'</h3><p>'+esc(book.publisher??meta.publisher)+' · '+esc(book.publicationDate??meta.publicationDate)+' · ISBN '+esc(book.isbn??meta.isbn)+'</p></article><h3>'+esc(p.sections.assets.courseHeading)+'</h3><ul class="plain-list">'+(d.courses||[]).map(c=>'<li><strong>'+esc(c.name)+'</strong><span>'+esc(c.target)+' · '+esc(c.hours)+'</span></li>').join('')+'</ul><h3>'+esc(p.sections.assets.assetHeading)+'</h3><ul class="plain-list">'+visible.filter(a=>a.category!=='Education Programs').map(a=>'<li><strong>'+esc(a.title)+'</strong><span>'+esc(a.category)+(a.registered&&a.registrationNumber?' · '+esc(a.registrationNumber):'')+'</span></li>').join('')+'</ul>');
+set('footer-channels',(d.story?.channels||PS_STORY_DEFAULTS.story.channels).map(c=>safe(c.url)?'<a href="'+esc(c.url)+'" target="_blank" rel="noopener">'+esc(c.name)+' ↗</a>':'').join(''));
+}
+const original=V12_ASSETS.render;V12_ASSETS.render=d=>{original(d);render(d)};
+})();

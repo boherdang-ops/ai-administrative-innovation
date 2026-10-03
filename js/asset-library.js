@@ -46,7 +46,7 @@ function validate(d){
   }
  }
  const n=d.assets.filter(a=>a.public!==false&&a.featured===true).length;
- if(n<6||n>8)throw Error('공개 대표 자산은 6~8개로 선택해 주세요.');
+ if(!d.presentation?.version&&(n<6||n>8))throw Error('공개 대표 자산은 6~8개로 선택해 주세요.');
 }
 function select(k,v,choices){return `<select data-k="${k}">${choices.map(([value,label])=>`<option value="${esc(value)}" ${v===value?'selected':''}>${esc(label)}</option>`).join('')}</select>`}
 function check(k,v,label){return `<label class="asset-check"><input type="checkbox" data-k="${k}" ${v?'checked':''}>${label}</label>`}
