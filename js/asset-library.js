@@ -32,7 +32,7 @@ function render(d){
  update();filter.onchange=update;
  button.onclick=()=>{all.hidden=!all.hidden;button.setAttribute('aria-expanded',String(!all.hidden));button.textContent=all.hidden?'VIEW ALL ASSETS':'CLOSE ALL ASSETS';};
  const registered=visible.filter(isRegistered);
- section.querySelector('#intellectual-assets').innerHTML=`<p class="eyebrow">INTELLECTUAL ASSETS</p><h3>${registered.length} REGISTERED WORKS</h3><p>교육과정 기획안 · 교육교재 · 실습 앱을 등록 지식자산으로 축적합니다.</p><div class="asset-register-list">${registered.map(a=>`<details><summary>${esc(a.title)} <span class="asset-badge">REGISTERED</span></summary><dl><dt>등록 저작물명</dt><dd>${esc(a.registeredTitle||a.title)}</dd><dt>등록번호</dt><dd>${esc(a.registrationNumber)}</dd><dt>등록일</dt><dd>${esc(a.registrationDate)}</dd></dl></details>`).join('')}</div>`;
+ document.querySelector('#intellectual-assets').innerHTML=`<p class="eyebrow">INTELLECTUAL ASSETS</p><h3>${registered.length} REGISTERED WORKS</h3><p>교육과정 기획안 · 교육교재 · 실습 앱을 등록 지식자산으로 축적합니다.</p><div class="asset-register-list">${registered.map(a=>`<details><summary>${esc(a.title)} <span class="asset-badge">REGISTERED</span></summary><dl><dt>등록 저작물명</dt><dd>${esc(a.registeredTitle||a.title)}</dd><dt>등록번호</dt><dd>${esc(a.registrationNumber)}</dd><dt>등록일</dt><dd>${esc(a.registrationDate)}</dd></dl></details>`).join('')}</div>`;
 }
 function validate(d){
  const ids=new Set();for(const a of d.assets){
