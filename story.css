@@ -52,3 +52,21 @@ footer .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)
 .proof-row{display:flex;align-items:center;justify-content:space-between;gap:28px;padding:22px 0}.proof-row>div{flex:1;min-width:0}.proof-row h3{margin-top:0}.proof-image{display:block;flex:0 0 140px}.proof-image img{display:block;max-width:140px;max-height:190px;object-fit:contain;border:1px solid #ccd4ce;background:white}.certificate-row+.certificate-row{border-top:1px solid #ccd4ce}#hub>#hub-materials{background:none;color:var(--ink);border:0;border-radius:0;padding:24px 0 0;box-shadow:none}#hub-materials .plain-list li{display:flex;align-items:center;justify-content:space-between;gap:24px}#hub-materials .plain-list li>div{flex:1}#hub-materials .asset-link{color:#173b3a;white-space:nowrap;font-weight:700}.material-pending{font-size:14px;color:#65748b}#hub-materials summary{color:#192e35}
 #hub-materials .plain-list li>div>span{display:block;margin-top:4px} .proof-row p{overflow-wrap:anywhere}
 @media(max-width:600px){.proof-row{gap:16px}.proof-image{flex-basis:90px}.proof-image img{max-width:90px;max-height:130px}#hub-materials .plain-list li{align-items:flex-start;flex-direction:column;gap:8px}#hub-materials .asset-link{width:auto}}
+
+/* Readable identity and continuous printing for the current six sections. */
+.hero .career{opacity:1;color:#cbd5e1}.problem-statement p{font-size:14px;font-weight:400;line-height:1.85}
+#profile-photo{overflow:hidden}#profile-photo img{object-position:center top}
+@media screen and (max-width:760px){.problem-statement p{font-size:12px}}
+@media print{
+ main>section,main>section:first-child,main>section:last-child{break-before:auto!important;break-after:auto!important;page-break-before:auto!important;page-break-after:auto!important;break-inside:auto!important;padding:5mm 0!important;min-height:0!important}
+ body[data-print-mode="summary"] main>section:not(#about):not(#expertise):not(#records){display:none!important}
+ #about .career{opacity:1!important;color:#334155!important;font-size:8.7pt!important}
+ #about .problem-statement p{font-size:9.5pt!important;font-weight:400!important;line-height:1.6!important}
+ #profile-photo img{object-position:center top!important}
+ .asset-toggle,.experience-toggle,#hub>.wrap{break-inside:auto!important}
+ .head{break-inside:avoid!important;break-after:avoid!important;margin-bottom:3mm!important}.head h2,summary{break-inside:avoid!important;break-after:avoid!important}
+ .section-intro{margin-bottom:3mm!important}.experience-columns li{margin:2mm 0!important}
+ .proof-row,#hub-materials .plain-list li{break-inside:avoid!important;padding:3mm 0!important}
+ #hub .hub-links{margin-top:3mm!important}#hub-materials{padding-top:3mm!important}#hub-materials .plain-list{margin:3mm 0!important}
+ #hub-materials .plain-list li,#hub-materials .plain-list span{font-size:8.8pt!important;line-height:1.5!important}
+}
