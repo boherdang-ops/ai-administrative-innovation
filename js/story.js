@@ -1,23 +1,15 @@
 (()=>{
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const safe=v=>{try{return ['http:','https:'].includes(new URL(v,location.href).protocol)?v:''}catch{return ''}};
-function preview(a){const image=safe(a.image)||(/^data:image\//.test(a.image||'')?a.image:'');return image?`<img src="${esc(image)}" alt="${esc(a.title)}" loading="lazy">`:`<img src="assets/previews/${esc(a.id)}.png" alt="${esc(a.title)} 실제 화면" loading="lazy">`;}
-function render(d){
 const set=(id,v)=>document.getElementById(id).innerHTML=v;
-const registered=d.assets.filter(a=>a.public!==false&&V12_STORY_REGISTERED(a));
-set('identity-facts',`<div class="facts"><div><strong>2024–2026</strong><span>교육·워크숍 기록</span></div><div><strong>${esc(d.recordCount)}</strong><span>교육·워크숍 회차</span></div><div><strong>${registered.length}</strong><span>등록 지식자산</span></div><div><strong>1</strong><span>개인 저서</span></div></div>`);
-const first=(d.records||[]).find(r=>r.year==='2024');set('early-records',first?`<div class="year">${esc(first.year)}</div><div>${first.items.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:'<p>CMS에 2024년 실적을 등록해 주세요.</p>');
-set('evolution-records',(d.records||[]).map(r=>`<article><b>${esc(r.year)}</b><h3>${esc(r.theme)}</h3><p>${r.items.map(esc).join('<br>')}</p></article>`).join(''));
-set('build-showcase',['BOOK01','APP05','TOOL01'].map(id=>d.assets.find(a=>a.id===id&&a.public!==false)).filter(Boolean).map(a=>`<article class="showcase">${preview(a)}<div><p class="eyebrow">${esc(a.category)}</p><h3>${esc(a.title)}</h3><p>${esc(a.desc)}</p>${safe(a.url)?`<a class="asset-link" href="${esc(a.url)}" target="_blank" rel="noopener">실제 자료 열기 ↗</a>`:''}</div></article>`).join(''));
-set('book-evidence',`<article class="book-evidence"><b>1 BOOK / 개인 저서</b><h3>${esc(d.book?.title||'개인 저서 1권')}</h3>${d.book?.image?`<img src="${esc(d.book.image)}" alt="저서 표지">`:''}<p>${esc(d.book?.publisher ?? PS_STORY_DEFAULTS.book.publisher)} · ${esc(d.book?.publicationDate ?? PS_STORY_DEFAULTS.book.publicationDate)}<br>ISBN ${esc(d.book?.isbn ?? PS_STORY_DEFAULTS.book.isbn)}</p></article>`);
-const channels=d.story?.channels||PS_STORY_DEFAULTS.story.channels;
-set('share-channels','<div class="channel-grid">'+channels.map(x=>`<article><b>${esc(x.name)}</b>${safe(x.url)?`<a class="asset-link" href="${esc(x.url)}" target="_blank" rel="noopener">콘텐츠 보기 ↗</a>`:'<p>채널 주소 준비 중</p>'}</article>`).join('')+'</div>');
-// Existing CMS archive controls the public Share heading and descriptions through its original fields.
-document.querySelector('#thinking .head h2').textContent=d.story?.shareTitle||'글과 영상으로 경험을 나눕니다.';
-set('hub-showcase',`<a class="hub-visual" href="learning/"><img src="assets/previews/HUB.png" alt="Learning Hub 실제 학습 화면" loading="lazy"></a><div class="hub-links"><a class="asset-link" href="learning/">Learning Hub 시작하기 ↗</a><a class="asset-link" href="learning/library.html">자료 라이브러리 ↗</a><a class="asset-link" href="courses/">교육과정 보기 ↗</a></div><p>${esc(d.story?.hubDesc||'학습 트랙, 실습 템플릿, 워크북을 연결합니다. 교육 이후에도 실제 업무에 적용할 수 있는 자료를 제공합니다.')}</p>`);
-// Move the existing registered-assets view without changing its rendering or data.
-document.getElementById('book-evidence').before(document.getElementById('intellectual-assets'));
+function render(d){
+set('identity-facts','<div class="problem-statement"><p>정책의 출발점은 현장의 문제를 객관적이고 입체적으로 정의하는 데 있습니다. 그러나 민원 대응과 반복적인 문서 업무에 쫓기는 행정 현장에서는 현상을 분석하고 근본 원인을 살필 시간이 부족합니다.</p><p>AI는 이러한 부담을 줄이고, 문제 발견과 데이터에 기반한 원인 분석을 돕는 도구입니다. 이를 실제 행정업무에 연결해 현장에 맞는 정책을 개발하고, 일하는 방식을 개선하는 방법을 찾습니다.</p></div>');
+const x=d.experience||PS_STORY_DEFAULTS.experience;set('expertise-content','<p class="section-intro">'+esc(x.lead||'국가 정책 연구와 대외 협력, 지방자치단체 교육·연구·정책개발 경험을 바탕으로 공공부문의 AI 활용과 업무 재설계를 지원합니다.')+'</p><div class="experience-columns">'+[['주요 경력',x.professional],['핵심 전문 영역',x.expertise],['현장 수행 경험',x.field]].map(([title,text])=>'<article><h3>'+title+'</h3><ul>'+String(text||'').split(/\n/).filter(Boolean).map(t=>'<li>'+esc(t)+'</li>').join('')+'</ul></article>').join('')+'</div>');
+set('records-content',(d.records||[]).map(r=>'<div class="year">'+esc(r.year)+'<br><small>'+esc(r.theme)+'</small></div><div>'+r.items.map(t=>'<p>'+esc(t)+'</p>').join('')+'</div>').join(''));
+set('perspective-content',(d.problems||[]).map((p,i)=>'<article><b>'+String(i+1).padStart(2,'0')+'</b><h3>'+esc(p.title)+'</h3><p>'+esc(p.desc)+'</p></article>').join(''));
+set('assets-intro',esc(d.portfolio?.leadDesc||'교육과정을 설계하고 현장에서 사용하는 교재와 실습도구를 개발합니다. 행정업무를 지원하는 도구와 검증된 결과를 지식자산으로 축적합니다.'));
+const book=d.book||{},meta=PS_STORY_DEFAULTS.book;const visible=(d.assets||[]).filter(a=>a.public!==false&&a.id!=='BOOK01');set('asset-summary','<article class="book-summary"><h3>'+esc(book.title||'개인 저서 1권')+'</h3><p>'+esc(book.publisher??meta.publisher)+' · '+esc(book.publicationDate??meta.publicationDate)+' · ISBN '+esc(book.isbn??meta.isbn)+'</p></article><h3>교육과정</h3><ul class="plain-list">'+(d.courses||[]).map(c=>'<li><strong>'+esc(c.name)+'</strong><span>'+esc(c.target)+' · '+esc(c.hours)+'</span></li>').join('')+'</ul><h3>교재·도구·지식자산</h3><ul class="plain-list">'+visible.filter(a=>a.category!=='Education Programs').map(a=>'<li><strong>'+esc(a.title)+'</strong><span>'+esc(a.category)+(a.registered&&a.registrationNumber?' · '+esc(a.registrationNumber):'')+'</span></li>').join('')+'</ul>');
+set('footer-channels',(d.story?.channels||PS_STORY_DEFAULTS.story.channels).map(c=>safe(c.url)?'<a href="'+esc(c.url)+'" target="_blank" rel="noopener">'+esc(c.name)+' ↗</a>':'').join(''));
 }
-function V12_STORY_REGISTERED(a){return a.registered===true&&a.registrationNumber&&a.registrationDate&&(a.kind!=='app'||['APP05','APP06'].includes(a.id));}
 const original=V12_ASSETS.render;V12_ASSETS.render=d=>{original(d);render(d)};
 })();
