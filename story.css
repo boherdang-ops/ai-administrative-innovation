@@ -35,3 +35,10 @@ main>section .eyebrow{display:none}.experience-columns article:first-child{grid-
 @media print{.asset-toggle>summary{font-size:12pt}.asset-toggle .plain-list{display:block!important}.asset-toggle{margin:2mm 0;padding:2mm 0}}
 
 @media screen and (max-width:760px){.head{margin-bottom:30px}}
+
+/* Section boundaries and footer corrected to the requested layout. */
+@media screen{main>section:not(.hero){padding:25px 0;background:var(--story-paper)}#perspective .grid2 article{padding-bottom:16px}#assets{background:var(--story-paper)}}
+footer .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:24px;text-align:initial}#footer-brand{grid-column:1;grid-row:1;justify-self:start}#footer-channels{grid-column:2;grid-row:1;justify-self:center;gap:20px}#footer-tagline{grid-column:3;grid-row:1;justify-self:end;text-align:right;margin:0}
+@media screen and (max-width:760px){main>section:not(.hero){padding:16.25px 0}footer .wrap{grid-template-columns:1fr;gap:14px}#footer-brand{grid-column:1;grid-row:1;justify-self:start}#footer-tagline{grid-column:1;grid-row:1;justify-self:end;font-size:10px}#footer-channels{grid-column:1;grid-row:2;gap:16px}}
+@media screen and (max-width:420px){#footer-brand{font-size:10px}#footer-tagline{font-size:9px;letter-spacing:0}#footer-channels a{font-size:12px}}
+
