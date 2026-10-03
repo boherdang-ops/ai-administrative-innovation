@@ -130,7 +130,10 @@
   ],
   "book": {
     "title": "출근길 3분 AI",
-    "image": ""
+    "image": "",
+    "publisher": "비전부스팅",
+    "publicationDate": "2026-08-25",
+    "isbn": "9791199969407"
   },
   "archive": [
     "「출근길 3분 AI」",
@@ -450,5 +453,27 @@
     }
   ],
   "assetMessage": "교육과정을 설계하고, 현장에서 사용하는 교재와 실습도구를 직접 개발하며, 실제 행정업무를 지원하는 도구로 확장합니다. 검증된 결과는 지식자산으로 축적합니다.",
-  "assetSchemaVersion": 1
+  "assetSchemaVersion": 1,
+  "story": {
+    "shareTitle": "글과 영상으로 경험을 나눕니다.",
+    "hubDesc": "학습 트랙, 실습 템플릿, 워크북을 연결합니다. 교육 이후에도 실제 업무에 적용할 수 있는 자료를 제공합니다.",
+    "channels": [
+      {
+        "name": "YouTube",
+        "url": "https://www.youtube.com/@%ED%95%B4%ED%94%BC%EB%B8%8C%EB%A0%88%EC%9D%B8-q7l"
+      },
+      {
+        "name": "Blog",
+        "url": "https://blog.naver.com/happybrain_ai"
+      },
+      {
+        "name": "Brunch",
+        "url": "https://brunch.co.kr/@happybrain"
+      },
+      {
+        "name": "Facebook",
+        "url": "https://www.facebook.com/beacon.korea"
+      }
+    ]
+  }
 }
