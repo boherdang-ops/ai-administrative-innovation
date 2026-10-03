@@ -1,5 +1,5 @@
 const KEY='psV12CMS',DRAFT='psV12CMSDraft',PUB='psV12CMSPublished';let data,current='dashboard';
-const tabs=[['story','7페이지 / 채널'],['dashboard','대시보드'],['profile','프로필/사진'],['problems','문제인식'],['records','주요실적'],['method','방법론/KAIM'],['courses','교육과정'],['works','개발성과/이미지'],['experience','전문성/현장경험'],['thinking','생각/철학'],['connect','협력/연결'],['portfolio','포트폴리오 정보'],['archive','아카이브'],['contact','연락처'],['revisions','버전관리']];
+const tabs=[['story','공개 구성 / 채널'],['dashboard','대시보드'],['profile','프로필/사진'],['problems','문제인식'],['records','주요실적'],['method','방법론/KAIM'],['courses','교육과정'],['works','개발성과/이미지'],['experience','전문성/현장경험'],['thinking','생각/철학'],['connect','협력/연결'],['portfolio','포트폴리오 정보'],['archive','아카이브'],['contact','연락처'],['revisions','버전관리']];
 
 const EXTRA_DEFAULTS={story:PS_STORY_DEFAULTS.story,
 experience:{lead:'현장 중심의 문제 인식을 바탕으로, 지방자치단체의 교육·연구·정책 개발을 수행하며 실효성 있는 현장 문제 해결 역량을 다져왔습니다.',professional:'한국공공자치연구원\n국가안보전략연구원\n한국능률협회 등',field:'지방자치단체 공무원 역량 강화 교육 및 특강\n지자체 경영평가 및 지방공기업·지방자치 경영활동 진단\n정책 연구 용역 및 지자체 발전 과제 수립\nAI 행정혁신 컨설팅 및 실무 시스템 구축\n지역 맞춤형 정책 개발 및 자문·심의 활동',expertise:'AI 기반 행정혁신 및 공공 AX(인공지능전환)\n지역 맞춤형 정책 기획 및 과제 발굴\n지능형 업무 프로세스 자동화(IPA) 및 실무 혁신\n공공기관 AI 활용 체계 구축 및 BPR(업무재설계)'},
