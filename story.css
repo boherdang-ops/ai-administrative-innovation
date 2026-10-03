@@ -18,3 +18,6 @@ body{background:var(--story-paper);color:var(--story-ink)}
  #projects .timeline>div{padding:3mm 0!important}#projects .timeline p{font-size:8pt!important;line-height:1.4!important;margin:1mm 0!important}#projects .year{font-size:17pt!important}#projects .count{margin-top:3mm!important}#projects .count strong{font-size:24pt!important}#projects .intellectual-assets{margin:4mm 0!important}#projects .asset-register-list{font-size:8pt!important}#projects details{padding:1mm!important}#projects .book-evidence{margin-top:3mm!important;padding:3mm!important}#projects .book-evidence h3{margin:2mm 0!important;font-size:13pt!important}#projects .book-evidence p{font-size:7pt!important}
  #evolution .grid3{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:4mm!important}#evolution .grid3 p{font-size:8pt!important}#thinking .channel-grid{grid-template-columns:repeat(4,1fr)!important}.channel-grid article{padding:3mm!important}.channel-grid b{font-size:12pt!important}footer{display:none!important}
 }
+/* Keep an existing CMS portrait in the secondary column at every breakpoint. */
+#profile-photo{order:0;margin:0;grid-column:2;max-width:26vw;justify-self:end;transform:none}.hero-grid>div{min-width:0}
+@media print{#profile-photo{max-width:52mm!important}}
