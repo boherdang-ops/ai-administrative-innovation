@@ -17,3 +17,4 @@
 .brand-symbol{width:39.6px;height:39.6px}.brand{gap:10.8px}.brand .brand-wordmark{font-size:24.3px}@media(max-width:760px){.brand-symbol{width:33.3px;height:33.3px}.brand{gap:8.1px}.brand .brand-wordmark{font-size:19.8px}}@media(max-width:420px){.brand-symbol{width:30.6px;height:30.6px}.brand{gap:7.2px}.brand .brand-wordmark{font-size:17.1px}}@media(max-width:350px){.brand-symbol{width:27px;height:27px}.brand .brand-wordmark{font-size:15.3px}}
 /* Align the brand to the right edge of the content column. */
 .masthead{justify-content:flex-end}
+[data-home]{white-space:pre-line}.hero-copy h1[data-home]{white-space:normal;overflow-wrap:anywhere}.track h3{overflow-wrap:anywhere}
