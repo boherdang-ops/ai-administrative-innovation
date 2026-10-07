@@ -40,10 +40,20 @@ async function boot(){
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function setState(t,ok=true){const a=$('stateText'),b=$('stateDot');if(a)a.textContent=t;if(b)b.style.background=ok?'#22c55e':'#f59e0b'}
 function recount(){$('contentCount').textContent=`${db.tracks.length} TRACKS · ${db.contents.length} CONTENTS`}
-function drawNav(q=''){recount();$('nav').innerHTML=db.tracks.map(t=>{const a=db.contents.filter(x=>x.track===t.num&&(!q||x.title.toLowerCase().includes(q.toLowerCase())));return `<div class="track-group"><h3>${esc(t.num)} · ${esc(t.name)} (${a.length})</h3>${a.map(x=>`<button class="nav-item ${selected&&selected.id===x.id?'active':''}" data-id="${x.id}">${esc(x.id)} ${esc(x.title)}</button>`).join('')}</div>`}).join('')}
+let expandedTracks=null;
+function drawNav(q=''){
+ recount();if(!expandedTracks)expandedTracks=new Set(selected?[selected.track]:[]);
+ const query=q.trim().toLowerCase();
+ $('nav').innerHTML=db.tracks.map(t=>{
+ const a=db.contents.filter(x=>x.track===t.num&&(!query||(x.id+' '+x.title+' '+t.name).toLowerCase().includes(query)));
+ if(query&&!a.length)return '';
+ return `<details class="track-group" data-track="${esc(t.num)}" ${(query||expandedTracks.has(t.num))?'open':''}><summary class="track-toggle">${esc(t.num)} · ${esc(t.name)} <span class="track-total">(${a.length})</span></summary><div class="track-contents">${a.map(x=>`<button class="nav-item ${selected&&selected.id===x.id?'active':''}" ${selected&&selected.id===x.id?'aria-current="page"':''} data-id="${esc(x.id)}">${esc(x.id)} ${esc(x.title)}</button>`).join('')}</div></details>`;
+ }).join('')||'<p class="nav-empty">검색 결과가 없습니다.</p>';
+ $('nav').querySelectorAll('details').forEach(el=>el.addEventListener('toggle',()=>{if($('search').value.trim())return;if(el.open)expandedTracks.add(el.dataset.track);else expandedTracks.delete(el.dataset.track)}));
+}
 function opts(sel){return '<option value="">— 없음 —</option>'+db.contents.map(x=>`<option value="${x.id}" ${x.id===sel?'selected':''}>${esc(x.id)} ${esc(x.title)}</option>`).join('')}
 function empty(){$('titleHead').textContent='콘텐츠가 없습니다.';$('crumb').textContent='LEARNING HUB'}
-function load(id){if(dirty&&!confirm('저장하지 않은 변경사항이 있습니다. 이동하시겠습니까?'))return;selected=db.contents.find(x=>x.id===id)||selected;if(!selected)return;dirty=false;if($('dirtyWarning'))$('dirtyWarning').hidden=true;
+function load(id){if(dirty&&!confirm('저장하지 않은 변경사항이 있습니다. 이동하시겠습니까?'))return;selected=db.contents.find(x=>x.id===id)||selected;if(!selected)return;if(expandedTracks)expandedTracks.add(selected.track);dirty=false;if($('dirtyWarning'))$('dirtyWarning').hidden=true;
  $('crumb').textContent=`TRACK ${selected.track} · ${selected.trackName}`;$('titleHead').textContent=selected.title;$('track').value=`${selected.track} · ${selected.trackName}`;$('cid').value=selected.id;
  $('title').value=selected.title||'';$('summary').value=selected.summary||'';$('level').value=selected.level||'기본';$('time').value=selected.time||'';$('status').value=selected.status||'draft';
  $('learn').value=selected.learning?.learn||'';$('example').value=selected.learning?.example||'';$('check').value=selected.learning?.check||'';
