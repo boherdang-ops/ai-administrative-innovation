@@ -53,9 +53,11 @@ function blockHtml(raw){
  if(['LINK','FILE','APP'].includes(type)){if(!url)return '';return `<a class="published-link flex-link" target="_blank" rel="noopener" href="${url}"><span>${type}</span>${title||esc(b.url)} →${caption?`<small>${caption}</small>`:''}</a>`}
  return '';
 }
+function isMission(b){return b.section==='mission'||String(b.id||'').startsWith('production-mission-');}
+function missionHtml(x){const blocks=(x.assets?.blocks||[]).filter(isMission);if(blocks.length)return blocks.map(blockHtml).join('');return blockHtml({type:'TEXT',title:'내 업무에 적용하기',body:'이 학습의 실습 방법을 자신의 업무 한 가지에 적용해 보세요.\n\n1. '+x.title+'에 적용할 업무와 원하는 산출물을 정합니다.\n2. 공개 자료 또는 개인정보 없는 합성 자료로 PRACTICE의 방법을 수행합니다.\n3. 원본과 결과를 비교하고, 수정한 내용과 아직 확인이 필요한 사항을 기록합니다.\n4. 아래 REVIEW 기준으로 최종 산출물을 점검합니다.'});}
 function sectionBlocks(x,section){
  const blocks=Array.isArray(x.assets?.blocks)?x.assets.blocks:[];
- return blocks.map(normalizeBlock).filter(b=>b.section===section).sort((a,b)=>a.order-b.order).map(blockHtml).filter(Boolean).join('');
+ return blocks.map(normalizeBlock).filter((b,i)=>b.section===section&&!isMission(blocks[i])).sort((a,b)=>a.order-b.order).map(blockHtml).filter(Boolean).join('');
 }
 function showResources(id,html){const el=document.getElementById(id);if(!el)return;el.innerHTML=html||'';el.hidden=!html;}
 
@@ -109,9 +111,10 @@ async function render(){
    showResources('learnAsset',sectionBlocks(x,'learn'));
    showResources('exampleAsset',sectionBlocks(x,'understand'));
    showResources('practiceAsset',[legacyAssetHtml(x),sectionBlocks(x,'practice')].filter(Boolean).join(''));
+   showResources('missionAsset',missionHtml(x));
    showResources('reviewAsset',[linksHtml(x),sectionBlocks(x,'review')].filter(Boolean).join(''));
   } else {
-   showResources('learnAsset','');showResources('exampleAsset','');showResources('practiceAsset','');showResources('reviewAsset','');
+   showResources('learnAsset','');showResources('exampleAsset','');showResources('practiceAsset','');showResources('reviewAsset','');showResources('missionAsset','');
   }
   const same=D.contents.filter(c=>c.track===x.track), idx=same.findIndex(c=>c.id===x.id);
   const flowNext=x.published&&x.flow?.next?D.contents.find(c=>c.id===x.flow.next):null;
@@ -121,3 +124,4 @@ async function render(){
 }
 render();
 })();
+
