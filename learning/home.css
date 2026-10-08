@@ -19,11 +19,8 @@
 .masthead{justify-content:flex-end}
 [data-home]{white-space:pre-line}.hero-copy h1[data-home]{white-space:normal;overflow-wrap:anywhere}.track h3{overflow-wrap:anywhere}
 
-/* Learning-to-work bridge */
-.practice-entry{display:flex;align-items:center;justify-content:space-between;gap:24px;padding-top:36px;padding-bottom:36px}
-.practice-entry h2{font-size:25px;line-height:1.45;margin:0 0 12px;letter-spacing:-.7px}
-.practice-entry p{line-height:1.8;color:#52627a}
-.practice-entry .practice-scope{font-size:12px}
-.practice-cta{display:inline-flex;align-items:center;justify-content:center;gap:20px;background:#245bea;color:#fff;padding:15px 22px;border-radius:8px;font-weight:700;white-space:nowrap}
-.practice-cta:hover{background:#1744be}.practice-cta:focus-visible{outline:3px solid #102039;outline-offset:4px}
-@media(max-width:760px){.practice-entry{align-items:flex-start;flex-direction:column}.practice-entry h2{font-size:22px}.practice-cta{white-space:normal}}
+
+.hub-switch{display:flex;gap:26px;border-bottom:1px solid #dbe2ec;padding-top:0;padding-bottom:0}
+.hub-switch a{display:block;padding:14px 4px;color:#52627a;font-weight:700;font-size:15px;border-bottom:3px solid transparent}
+.hub-switch a[aria-current="page"]{color:#245bea;border-bottom-color:#245bea}
+.hub-switch a:hover{color:#245bea}.hub-switch a:focus-visible{outline:2px solid #245bea;outline-offset:3px}
