@@ -25,3 +25,10 @@
 .track-hero>:last-child,.lesson-template-hero>:last-child{margin-bottom:0}
 @media(max-width:800px){.track-hero,.lesson-template-hero{min-height:0;padding-top:26px;padding-bottom:26px}.track-hero h1,.lesson-template-hero h1{font-size:32px;line-height:1.25}.track-hero>p:not(.eyebrow),.lesson-template-hero>p:not(.eyebrow){font-size:14px}}
 
+
+
+/* Half the vertical spacing between learning sections. */
+.template-section{padding-top:39px;padding-bottom:39px}
+.next-frame{padding-top:32.5px;padding-bottom:32.5px}
+.template-note{margin-top:20px}
+@media(max-width:800px){.template-section{padding-top:29px;padding-bottom:29px}.next-frame{padding-top:25px;padding-bottom:25px}}
