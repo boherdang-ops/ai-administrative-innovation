@@ -67,3 +67,14 @@ thead{display:table-header-group}tr{break-inside:avoid}h2,h3,h4{break-after:avoi
 @media print{.curriculum-table{table-layout:auto}.curriculum-table td:nth-child(1){width:1%;white-space:nowrap}.curriculum-table td:nth-child(2){width:23%}.curriculum-table td:nth-child(3){width:auto}.curriculum-table td:nth-child(4){width:1%;white-space:nowrap}}
 
 .session-table{table-layout:auto}.session-table td{vertical-align:middle!important}.session-table tr:first-child td{text-align:center}.session-table .session-cell,.session-table .session-col-0,.session-table .session-col-1,.session-table .session-col-3{width:1%;white-space:nowrap;text-align:center}.session-table .session-col-2{width:auto}
+
+
+/* Operational plans and editable record forms */
+.plan-curriculum-table,.activity-table,.record-form-table{table-layout:auto}
+.plan-curriculum-table td,.activity-table td,.record-form-table td{vertical-align:middle!important}
+.plan-curriculum-table tr:first-child td,.activity-table tr:first-child td,.record-form-table tr:first-child td{text-align:center}
+.plan-curriculum-table .session-cell,.plan-curriculum-table .plan-col-0{width:1%;white-space:nowrap;text-align:center}
+.plan-curriculum-table .plan-col-1{width:30%}.plan-curriculum-table .plan-col-2{width:38%}.plan-curriculum-table .plan-col-3{width:auto}
+.activity-table td:nth-child(1),.activity-table td:nth-child(2){width:1%;white-space:nowrap;text-align:center}.activity-table td:nth-child(3){width:auto}
+.record-form-table td:first-child{width:42%;text-align:center}.record-form-table td:last-child{width:58%;min-height:2em}.record-form-table td:empty{height:2.5em}
+@media print{.plan-curriculum-table td,.activity-table td,.record-form-table td{min-width:0}.record-form-table td:empty{height:18pt}}
