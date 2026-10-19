@@ -78,3 +78,6 @@ thead{display:table-header-group}tr{break-inside:avoid}h2,h3,h4{break-after:avoi
 .activity-table td:nth-child(1),.activity-table td:nth-child(2){width:1%;white-space:nowrap;text-align:center}.activity-table td:nth-child(3){width:auto}
 .record-form-table td:first-child{width:42%;text-align:center}.record-form-table td:last-child{width:58%;min-height:2em}.record-form-table td:empty{height:2.5em}
 @media print{.plan-curriculum-table td,.activity-table td,.record-form-table td{min-width:0}.record-form-table td:empty{height:18pt}}
+
+/* Keep overview labels readable on screen and in print. */
+.overview-table{table-layout:auto}.overview-table td:first-child{width:14%;min-width:7em;white-space:nowrap;text-align:center;vertical-align:middle}.overview-table td:last-child{width:auto}@media print{.overview-table td:first-child{width:14%;min-width:5.8em;white-space:nowrap}}
