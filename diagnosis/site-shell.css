@@ -30,6 +30,7 @@ body{font-family:Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Malgun G
 .home-content{max-width:1160px;margin:auto;padding:40px 24px 64px}
 .home-content .note{background:#f2eee4;border-left-color:#b8863b}
 .report-summary{background:#f2eee4;border-left-color:#b8863b}.diagnosis-report section[id],.domain-interpretation{scroll-margin-top:110px}
+body.print-preview .report-summary{background:white}
 @media(max-width:1020px){.site-header-inner{align-items:flex-start;flex-direction:column;padding:16px 24px;gap:14px}.site-header nav{gap:12px 22px}.site-footer-inner{align-items:flex-start;flex-direction:column;gap:14px;padding:24px}.hero-inner{gap:32px}}
 @media(max-width:720px){.site-header-inner{padding:16px 20px}.site-brand strong{font-size:18px}.site-header nav{font-size:12px;gap:10px 16px}.site-header .site-contact{padding:5px 10px}.site-footer-inner{padding:22px 20px}.hero-inner{grid-template-columns:1fr;padding:40px 20px;gap:24px}.home-content{padding:28px 20px 44px}.is-home .hero-aside{padding-left:20px}.diagnosis-report section[id],.domain-interpretation{scroll-margin-top:170px}}
 @media print{.site-header,.site-footer{display:none!important}.report-summary{background:white}}
