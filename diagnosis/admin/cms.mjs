@@ -1,6 +1,6 @@
 import {confirmAction} from './confirm.mjs';
 import * as api from './api.mjs';
-import {DEFAULT_CONTENT,validateContent} from '../cms-content.mjs?v=review1';
+import {DEFAULT_CONTENT,validateContent} from '../cms-content.mjs?v=review2';
 import {COPY_CATALOG} from '../data/copy-catalog.mjs?v=review1';
 const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let content,draftVersion,publishedVersion,dirty=false,section='site',selected=0,busy=false;

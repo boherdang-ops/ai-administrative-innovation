@@ -5,7 +5,7 @@ function element(id){if(!elements.has(id))elements.set(id,{innerHTML:'',textCont
 let draft={content:structuredClone(model.DEFAULT_CONTENT),version:1},published={version:1};const calls=[];
 const api={restoreAuth:async()=>true,readState:async()=>({draft:structuredClone(draft),published}),revisions:async()=>[],saveDraft:async(payload,expected)=>{assert.equal(expected,draft.version);draft={content:payload,version:draft.version+1};calls.push('save');return {version:draft.version};},publish:async(d,p)=>{assert.equal(d,draft.version);assert.equal(p,published.version);calls.push('publish');return {version:++published.version};},logout:async()=>{},login:async()=>true};
 const context=vm.createContext({document:{querySelector:element,addEventListener:(type,fn)=>(events[type]??=[]).push(fn)},window:{addEventListener(){}},crypto:webcrypto,structuredClone,console,confirm:()=>true,setTimeout,clearTimeout,Date,location:{origin:'https://example.org'}});
-const modules={'./confirm.mjs':{confirmAction:async()=>true},'./api.mjs':api,'../cms-content.mjs?v=review1':model,'../data/copy-catalog.mjs?v=review1':catalog};
+const modules={'./confirm.mjs':{confirmAction:async()=>true},'./api.mjs':api,'../cms-content.mjs?v=review2':model,'../data/copy-catalog.mjs?v=review1':catalog};
 const module=new vm.SourceTextModule(fs.readFileSync('diagnosis/admin/cms.mjs','utf8'),{context});
 await module.link(async name=>{const data=modules[name];return new vm.SyntheticModule(Object.keys(data),function(){for(const [k,v]of Object.entries(data))this.setExport(k,v);},{context});});await module.evaluate();
 async function click(dataset={},id=''){for(const fn of events.click)fn({target:{closest:()=>({dataset,id})}});await new Promise(setImmediate);}

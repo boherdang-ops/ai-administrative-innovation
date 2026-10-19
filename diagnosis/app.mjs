@@ -1,9 +1,9 @@
-import {DEFAULT_CONTENT,translateDOM,translateText,applySite,loadContent,connectPreview} from './cms-public.mjs?v=review1';
+import {DEFAULT_CONTENT,translateDOM,translateText,applySite,loadContent,connectPreview} from './cms-public.mjs?v=review2';
 import {setupDefaults,beginOrResume,REVIEW_VERSION} from './review-session.mjs?v=review1';
-import {questionGuidance} from './question-guidance.mjs?v=review1';
+import {questionGuidance} from './question-guidance.mjs?v=review2';
 import {DEFAULT_DEFINITION,LINKS,validateDefinition} from './data/definition.mjs?v=cms1';
 import {evaluate} from './engine.mjs?v=20261019-3';
-import {reportHTML} from './review-report.mjs?v=review1';
+import {reportHTML} from './review-report.mjs?v=review2';
 let content=structuredClone(DEFAULT_CONTENT),renderContent=content;
 const root=document.querySelector('main');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

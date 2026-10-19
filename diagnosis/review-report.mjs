@@ -1,7 +1,7 @@
 import {category} from './analysis.mjs?v=cms1';
 import {analyze,PERSONAL_KEYS,ORG_KEYS} from './review-analysis.mjs?v=review1';
 import {reportHTML as legacyReportHTML} from './report-view.mjs?v=cms1';
-import {questionRationale} from './question-guidance.mjs?v=review1';
+import {questionRationale} from './question-guidance.mjs?v=review2';
 import {REVIEW_VERSION} from './review-session.mjs?v=review1';
 import {INTENTS} from './data/question-intents.mjs';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
