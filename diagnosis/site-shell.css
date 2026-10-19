@@ -7,11 +7,10 @@ body{font-family:Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Malgun G
 .site-brand img{width:44px;height:44px;object-fit:contain;background:#132c3a;border-radius:50%;padding:3px}
 .site-brand small{display:block;font-size:10px;font-weight:500;letter-spacing:.06em;color:#6b7385;line-height:1.5}
 .site-brand strong{display:block;font-size:18px;letter-spacing:-.04em;line-height:1.5;color:#1b2a4a}
-.site-header nav{align-items:center;flex-wrap:wrap;gap:23px;font-size:14px;font-weight:700}
+.site-header nav{align-items:center;flex-wrap:wrap;gap:28px;font-size:14px;font-weight:700}
 .site-header nav a{white-space:nowrap;color:#1b2a4a}
 .site-header nav a:hover{color:#b8863b}
-.site-header .site-contact{border:1px solid #1b2a4a;border-radius:3px;padding:9px 15px;background:transparent}
-.site-header .site-contact:hover{background:#f2eee4;color:#1b2a4a}
+.site-header .site-contact{border:0;padding:0;background:transparent}
 .site-footer{display:block;padding:0;background:#132c3a;color:#c3d0d6;border-top:1px solid #29424f;font-size:12px}
 .site-footer-inner{max-width:1248px;margin:auto;padding:25px 48px;display:flex;align-items:center;justify-content:space-between;gap:20px}
 .site-footer strong{color:#fff;font-size:14px}.site-footer p{margin:5px 0 0;font-size:12px}.site-footer-meta{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
@@ -21,16 +20,15 @@ body{font-family:Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Malgun G
 .choice:has(input:checked){border-color:#2e5fa3;background:#f1f4f7}
 .is-home main{max-width:none;padding:0;min-height:0}
 .is-home .hero{display:block;margin:0;background:#132c3a;color:#fff}
-.hero-inner{max-width:1160px;margin:auto;padding:70px 24px;display:grid;grid-template-columns:1.5fr 1fr;gap:64px;align-items:center}
-.is-home .hero h1{color:#fff;font-size:clamp(32px,4vw,48px);line-height:1.35}
-.is-home .hero p{color:#d1dce0}.is-home .hero .eyebrow{color:#d6c19a}
-.is-home .hero .badge{background:#ffffff0d;color:#e7c791;border:1px solid #ffffff24}
+.hero-inner{max-width:1160px;margin:auto;padding:38px 24px;display:grid;grid-template-columns:1.5fr 1fr;gap:64px;align-items:center}
+.is-home .hero h1{color:#fff;font-size:clamp(32px,4vw,48px);line-height:1.28;margin-bottom:12px}
+.is-home .hero p{color:#d1dce0;margin-bottom:0}.is-home .hero .eyebrow{color:#d6c19a;margin-bottom:8px}
 .is-home .hero-aside{border-left:1px solid #e7c791;padding:10px 0 10px 28px}
 .is-home .hero-aside ol,.is-home .hero-aside small{color:#c3d0d6}
 .home-content{max-width:1160px;margin:auto;padding:40px 24px 64px}
 .home-content .note{background:#f2eee4;border-left-color:#b8863b}
 .report-summary{background:#f2eee4;border-left-color:#b8863b}.diagnosis-report section[id],.domain-interpretation{scroll-margin-top:110px}
 body.print-preview .report-summary{background:white}
-@media(max-width:1020px){.site-header-inner{align-items:flex-start;flex-direction:column;padding:16px 24px;gap:14px}.site-header nav{gap:12px 22px}.site-footer-inner{align-items:flex-start;flex-direction:column;gap:14px;padding:24px}.hero-inner{gap:32px}}
-@media(max-width:720px){.site-header-inner{padding:16px 20px}.site-brand strong{font-size:18px}.site-header nav{font-size:12px;gap:10px 16px}.site-header .site-contact{padding:5px 10px}.site-footer-inner{padding:22px 20px}.hero-inner{grid-template-columns:1fr;padding:40px 20px;gap:24px}.home-content{padding:28px 20px 44px}.is-home .hero-aside{padding-left:20px}.diagnosis-report section[id],.domain-interpretation{scroll-margin-top:170px}}
+@media(max-width:1020px){.site-header-inner{align-items:flex-start;flex-direction:column;padding:16px 24px;gap:14px}.site-header nav{gap:12px 20px}.site-footer-inner{align-items:flex-start;flex-direction:column;gap:14px;padding:24px}.hero-inner{gap:32px}}
+@media(max-width:720px){.site-header-inner{padding:16px 20px}.site-brand strong{font-size:18px}.site-header nav{font-size:12px;gap:10px 18px}.site-footer-inner{padding:22px 20px}.hero-inner{grid-template-columns:1fr;padding:28px 20px;gap:18px}.home-content{padding:28px 20px 44px}.is-home .hero-aside{padding-left:20px}.diagnosis-report section[id],.domain-interpretation{scroll-margin-top:170px}}
 @media print{.site-header,.site-footer{display:none!important}.report-summary{background:white}}
