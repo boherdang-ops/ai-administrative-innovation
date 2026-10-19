@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+test('응답·인증·추적 외부 전송 코드 없음',()=>{const app=fs.readFileSync(new URL('../app.mjs',import.meta.url),'utf8');assert.doesNotMatch(app,/\bfetch\s*\(|XMLHttpRequest|sendBeacon|localStorage/);assert.match(app,/sessionStorage/);});
+test('인쇄에서 결과·표를 숨기지 않고 전체 흐름 유지',()=>{const css=fs.readFileSync(new URL('../style.css',import.meta.url),'utf8');const print=css.slice(css.indexOf('@media print'));assert.doesNotMatch(print,/(?:\.result-head|\.domains|table)\{[^}]*display:none/);assert.match(print,/\.table-wrap\{overflow:visible/);});

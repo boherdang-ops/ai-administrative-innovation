@@ -1,0 +1,45 @@
+// 문항·규칙 초안 v0.1.0. 검증된 표준이 아니며 실제 응답은 이 파일에 저장하지 않습니다.
+export const VERSION='draft-2026-10-19.1';
+export const LINKS={home:'https://happybrain.ai.kr/',courses:'https://boherdang-ops.github.io/ai-administrative-innovation/courses/',learning:'https://boherdang-ops.github.io/ai-administrative-innovation/learning/',practice:'https://boherdang-ops.github.io/ai-administrative-innovation/practice/'};
+const scale=[['consistent','독립적으로 반복 수행','여러 사례에서 직접 수행하고 수정한 경험이 있음'],['supported','도움을 받아 수행','예시나 동료의 도움을 받아 수행함'],['notyet','아직 수행하지 못함','이해하거나 직접 수행한 경험이 부족함'],['unknown','모름·미확인','현재 수준을 판단할 근거가 부족함'],['na','해당 없음','업무상 해당하지 않음. 숙련으로 간주하지 않음']];
+const condition=[['evidenced','준비됨 · 확인자료 있음','기관이 허용한 자료로 담당자가 확인함. 전문가 검증을 뜻하지 않음'],['reported','준비됐다고 알고 있음','확인자료나 담당자 확인은 아직 없음'],['no','준비되지 않음','필요 조건이 부족함을 확인함'],['unknown','모름·미확인','확인할 담당자·자료를 찾아야 함'],['na','해당 없음','필수 요건이면 제외할 수 없으며 추가 확인으로 처리'],['conflict','응답이 서로 다름','담당자 간 답변이 달라 근거 대조가 필요함']];
+const q=(id,domain,text,kind='scale',extra={})=>({id,version:VERSION,target:id[0]==='P'?'personal':id[0]==='O'?'organization':'course',domain,text,kind,options:kind==='scale'?scale:condition,required:false,branch:'선택한 대상·과정',courseIds:[],evidence:'비공개 원문 제출 없이 수행 경험·확인자료 존재 여부만 응답',effect:kind==='scale'?'영역별 학습 출발점':'필수 요건별 독립 판단',unknown:'추가 확인 목록에 표시. 긍정 응답으로 대체하지 않음',operatorNote:'시범 운영 전 문항의 명확성과 판정 타당성 검토 필요',...extra});
+export const PERSONAL=[
+q('P01','AI 이해와 한계 인식','AI가 그럴듯한 답을 제시해도 사실과 다를 수 있는 이유를 설명할 수 있나요?'),
+q('P02','AI 이해와 한계 인식','실제 업무에서 AI가 만든 근거·인용을 원문과 대조해 오류를 발견하거나 확인한 경험이 있나요?'),
+q('P03','AI 이해와 한계 인식','AI가 출처가 불분명한 조례 조항을 제시했습니다. 먼저 할 일은 무엇인가요?','scenario',{options:[['correct','현행 원문·시행일을 확인하고 근거가 없으면 사용을 보류함',''],['incorrect','자연스러운 문장이므로 보고서에 바로 사용함',''],['unknown','판단하기 어려움','']],correct:'correct'}),
+q('P04','업무 문제 정의','업무의 목적·입력·제약·완료 기준을 AI에 구체적으로 설명할 수 있나요?'),
+q('P05','업무 문제 정의','반복업무를 AI가 보조할 작업과 사람이 판단할 작업으로 나누어 본 적이 있나요?'),
+q('P06','업무 문제 정의','일주일 걸리던 업무를 줄이고 싶습니다. 가장 먼저 할 일은 무엇인가요?','scenario',{options:[['incorrect','가장 비싼 AI 도구를 구입함',''],['correct','현재 절차·대기·검토 시간을 나누고 바꿀 작업을 정함',''],['unknown','판단하기 어려움','']],correct:'correct'}),
+q('P07','요청과 자료 구성','목적에 맞는 공개·사용 허용 자료만 골라 구조화해 요청할 수 있나요?'),
+q('P08','요청과 자료 구성','AI 결과가 기대와 다를 때 입력·기준·지시문을 구분해 수정하고 다시 시험해 본 적이 있나요?'),
+q('P09','요청과 자료 구성','주민 이름·연락처가 담긴 내부 민원 자료로 외부 AI를 쓰려 합니다. 어떻게 하나요?','scenario',{options:[['correct','원문 입력을 멈추고 승인 범위·자료 처리 기준을 확인하며 가상 자료로 연습함',''],['incorrect','이름만 지우면 충분하므로 바로 업로드함',''],['unknown','판단하기 어려움','']],correct:'correct'}),
+q('P10','결과 검증과 책임','결과의 수치·사실·출처를 원자료와 대조하고 최종 판단을 직접 할 수 있나요?'),
+q('P11','결과 검증과 책임','수정한 결과를 같은 사례와 새 사례로 재시험하고 확인 기록을 남긴 경험이 있나요?'),
+q('P12','결과 검증과 책임','AI의 자체 검토가 “문제없음”이라고 합니다. 적절한 확인 방법은 무엇인가요?','scenario',{options:[['incorrect','같은 AI가 두 번 확인했으므로 검증 완료로 표시함',''],['correct','사람이 원문·검산·별도 시험으로 확인하고 한계를 기록함',''],['unknown','판단하기 어려움','']],correct:'correct'}),
+q('P13','업무 적용과 공유','검증한 방법을 업무 절차에 연결하고 동료가 재현하도록 설명할 수 있나요?'),
+q('P14','업무 적용과 공유','준비·검토·수정 시간을 포함해 적용 전후를 비교한 경험이 있나요?'),
+q('P15','업무 적용과 공유','AI 사용 후 초안 작성만 빨라졌습니다. 무엇을 공유하나요?','scenario',{options:[['correct','확인·수정·유지관리 시간까지 포함해 비교하고 측정 범위를 설명함',''],['incorrect','초안 작성 시간이 줄어든 비율을 기관 전체의 예산 절감률로 제시함',''],['unknown','판단하기 어려움','']],correct:'correct'})];
+export const ORGANIZATION=[
+q('O01','전략과 리더십','AI 활용으로 개선할 문제와 우선순위가 구체적으로 정해져 있나요?','condition'),
+q('O02','전략과 리더십','추진 책임자와 업무 승인권자가 지정되어 있나요?','condition'),
+q('O03','이용 환경과 인프라','기관이 허용한 AI 도구·계정·장비를 실제로 사용할 수 있나요?','condition'),
+q('O04','이용 환경과 인프라','망 구분·자료전송·프로그램 실행에 관한 담당 부서 확인이 있나요?','condition'),
+q('O05','데이터와 보안','사용 가능한 자료의 범위·접근 권한·외부 입력 기준이 정해져 있나요?','condition'),
+q('O06','데이터와 보안','자료의 최신성·품질을 확인하고 갱신할 책임자가 있나요?','condition'),
+q('O07','인력과 교육','참여자가 요청 작성·원문 대조·수정·재시험의 기초 실습을 할 수 있나요?','condition',{foundation:true}),
+q('O08','인력과 교육','현업 담당자·대체 담당자와 지원 담당자가 참여할 수 있나요?','condition'),
+q('O09','업무와 적용 과제','입력·산출·담당자 확인 지점이 구체적인 대상 업무가 있나요?','condition'),
+q('O10','업무와 적용 과제','현재 처리시간·오류 등 적용 전 기준선 확보 계획이 있나요?','condition'),
+q('O11','운영과 성과 관리','도구 비용·업무 시간·유지관리 책임을 협의했나요?','condition'),
+q('O12','운영과 성과 관리','오류 시 중단·복귀, 변경 시 재시험, 효과 확인 계획이 있나요?','condition')];
+const specifics={
+C06:[['과제와 절차','반복업무 1건과 현재 흐름·서식·기준 문서를 준비했나요?','업무 책임자','흐름도·과제 정의서'],['시험 자료','비식별·가상 입력 예시 20건과 별도 확인용 사례를 준비할 계획이 있나요?','자료·검증 담당','시험 사례 목록'],['책임과 참여','팀·업무 책임자·대체 담당자 및 4주 적용·온라인 점검 참여가 협의됐나요?','업무 책임자','역할표·참여 일정'],['실행과 복귀','허용 구현 단계·망간 반입·재실행·중단 및 기존 절차 복귀를 확인할 수 있나요?','정보화·현업 담당','환경 점검표·복귀 절차']],
+C07:[['문서와 근거','업무 범위 1개·핵심 문서 10~20건과 쪽·조항의 원문 일치를 준비했나요?','자료 책임자','문서 목록·버전'],['등록 환경','허용 AI 도구·계정·문서 등록 가능 등급과 등록 동작을 사전 점검했나요?','정보화·보안 담당','등록 사전 점검 기록'],['인수인계','개인 이름을 제외한 문서 등록대장 목록·인수인계서 서식 또는 가상 자료가 있나요?','인수인계 담당','허용된 목록·서식'],['지속 운영','근거 갱신·권한·오답 보류·대체 담당과 2주 현업 검증을 협의했나요?','업무 책임자','갱신·검증 계획']],
+C08:[['보고 기준','정기보고서 1종·지난 2개 주기 결과물·기존 산식·지표 정의가 있나요?','보고 담당','보고서·지표 목록'],['자료와 연계','사용 허용 원자료·공공데이터 출처와 수집·전송 가능 범위를 확인했나요?','자료·정보화 담당','출처·갱신·허용 범위'],['기초 수행','참여자가 AI 요청·검증과 엑셀 기본 함수 사용을 수행할 수 있나요?','교육 담당','가상 자료 기초 실습 확인'],['주기 검증','실제 보고 주기 1회에 대해 검산·형식 변경·중요 수치 오류 대응을 협의했나요?','보고 책임자','주기별 검증·중단 계획']],
+C09:[['대상 서비스','서비스 1종의 현행 절차·안내문·공개 근거를 준비했나요?','서비스 담당','절차·공개 근거 목록'],['자료 보호','개인정보·정보화 담당과 자료 최소화·재식별 위험·허용 환경을 사전 협의했나요?','개인정보·정보화 담당','협의·승인 범위'],['안내 책임','요건·금액·기한의 사람 확인과 보류·이관·최종 안내 책임이 정해져 있나요?','업무 책임자','검토·이관 기준'],['현업 검증','가상 사례 실습과 승인된 범위의 4주 현업 적용·오안내 정정 계획이 있나요?','현업 담당','실습·적용·정정 계획']],
+C10:[['도입 과제','도입 검토 과제 1건·현재 업무·기준선·기존 시스템 현황이 있나요?','현업 책임자','과제 정의·현황'],['검토 체계','현업 책임자와 정보화·예산·계약·개인정보 검토위원 또는 서면 검토 부서가 정해졌나요?','교육 주관·현업 책임자','참여·서면 검토 계획'],['모의 검수','허용 AI 도구·대리 시험 환경·가상 자료로 검수와 공급자 수정·재검수를 할 수 있나요?','강사·정보화 담당','대리 시험 사전 실행'],['실행 계획','기관 검토 절차 자료·비용 확인·30일 실행과 종료 후 점검을 협의했나요?','현업 책임자','기관 절차·30일 실행표']]};
+const names=['AI 기반 부서 업무 재설계·자동화 실증 과정','근거 기반 부서 지식비서·업무 인수인계 구축 과정','AI 활용 공공데이터 연계·정기보고 자동화 과정','AI 기반 민원·주민서비스 개선 실증 과정','공공 AI 도입·검수·운영관리 실무 과정'];
+export const COURSES=Object.entries(specifics).map(([id,rows],i)=>({id,title:names[i],url:LINKS.courses+'#'+id,sourceCommit:'fe350ba6032b006ebd695cf3087ce9f328e03ab9',reviewState:'교육 원본 대조 · 진단 요건 초안',alternative:id==='C10'?'가상 자료와 대리 시험으로 모의 검수 가능. 실제 제품 성능·구매·계약 승인은 별도 확인.':'공개·가상 자료와 허용된 교육장 환경으로 실습 가능. 현업 검증과 운영 배포는 별도 승인·시험 필요.',requirements:rows.map((r,j)=>q(id+'-'+(j+1),r[0],r[1],'condition',{courseIds:[id],mandatory:true,foundation:id==='C08'&&j===2,owner:r[2],evidence:r[3],action:r[3]+'을 담당자와 확인하고 준비 여부를 다시 점검',source:'교육 안내 원본의 사전 준비·운영 체계',effect:'과정별 필수 선행 요건(진단 초안). 총점으로 상쇄하지 않음'}))}));
+export const DEFAULT_DEFINITION={version:VERSION,ruleVersion:VERSION,reportVersion:VERSION,linkVersion:VERSION,status:'draft',intro:'점수보다 먼저, 실행의 출발점을 확인합니다.',personal:PERSONAL,organization:ORGANIZATION,courses:COURSES};
+export function validateDefinition(d){if(!d||typeof d.version!=='string'||!/^draft-[a-zA-Z0-9.-]{1,70}$/.test(d.version))throw Error('초안 버전은 draft-로 시작하는 영문·숫자·점·하이픈으로 지정하세요.');if(d.status!=='draft')throw Error('시제품에서는 초안만 사용할 수 있습니다.');if(typeof d.intro!=='string'||!d.intro.trim()||d.intro.length>500)throw Error('소개 문구를 500자 이내로 입력하세요.');for(const k of ['ruleVersion','reportVersion','linkVersion'])if(typeof d[k]!=='string'||d[k].length>100)throw Error('규칙·보고서·연결 버전이 필요합니다.');const ids=new Set();for(const group of [d.personal,d.organization])if(!Array.isArray(group)||!group.length||group.length>100)throw Error('기본 문항 구성이 필요합니다.');if(!Array.isArray(d.courses)||d.courses.length!==5||d.courses.map(c=>c.id).join(',')!=='C06,C07,C08,C09,C10')throw Error('정식 과정 C06~C10을 유지하세요.');for(const c of d.courses){if(c.url!==LINKS.courses+'#'+c.id||!Array.isArray(c.requirements)||!c.requirements.length)throw Error('과정 주소와 준비 문항을 확인하세요.');}for(const item of [...d.personal,...d.organization,...d.courses.flatMap(c=>c.requirements)]){if(!/^[A-Z0-9-]{2,30}$/.test(item.id)||ids.has(item.id))throw Error('문항 ID가 중복되거나 잘못됐습니다.');ids.add(item.id);if(typeof item.text!=='string'||!item.text.trim()||item.text.length>1000||typeof item.domain!=='string')throw Error('질문·영역을 확인하세요.');if(!['scale','condition','scenario'].includes(item.kind)||!Array.isArray(item.options)||item.options.length<2||item.options.length>8)throw Error('응답 형식을 확인하세요.');const allowed=item.kind==='scale'?scale.map(x=>x[0]):item.kind==='condition'?condition.map(x=>x[0]):['correct','incorrect','unknown'];const vals=new Set();for(const o of item.options){if(!Array.isArray(o)||!allowed.includes(o[0])||vals.has(o[0])||typeof o[1]!=='string'||typeof o[2]!=='string')throw Error('선택지 의미와 중복을 확인하세요.');vals.add(o[0]);}if(item.kind==='scenario'&&!vals.has(item.correct))throw Error('상황판단 정답이 필요합니다.');}return structuredClone(d);}
