@@ -1,5 +1,7 @@
 # 공공 AI 역량진단 시제품
 
+현재 개발 중이며 운영 완료 상태가 아닙니다. 2026-10-19 질문·답변 불일치 수정: 신규 문항 버전은 `draft-2026-10-19.2`입니다. 질문별 선택지를 `data/question-answers.mjs`에서 관리하고 전체 대응 내용은 `QUESTION-REVIEW.md`에서 확인합니다. 이전 버전 정의는 `data/definitions/`에 보존합니다.
+
 ## 실행
 
 Node.js 24 환경에서 `npm start` 또는 `node tools/serve.mjs` 실행 후 `http://127.0.0.1:4319/` 접속. 의존성 설치와 API 키 불필요. HTML 파일을 직접 여는 file:// 방식은 모듈 제한 때문에 권장하지 않음.
