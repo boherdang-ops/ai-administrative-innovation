@@ -10,3 +10,4 @@ body.print-preview>header,body.print-preview>.prototype,body.print-preview>foote
 @media screen and (max-width:800px){body.print-preview main{width:calc(100% - 24px);padding:18px;margin:12px auto}body.print-preview .domain-bar-row{grid-template-columns:1fr}body.print-preview .course-matrix{min-width:520px}}
 
 .domain-insight{margin:18px 0}.domain-insight h4,.evidence-heading{font-size:13px;color:#365672;margin:0 0 7px}.domain-insight p{margin:0;line-height:1.85}.domain-interpretation .evidence-heading{border-top:1px solid #dce3eb;padding-top:18px;margin-top:22px}
+.report-jump{display:flex;flex-wrap:wrap;gap:10px 20px;margin:0 0 24px;padding:12px 16px;border:1px solid var(--line);border-radius:6px;background:white;font-size:13px}.report-jump a{text-decoration:none}.diagnosis-report section[id],.domain-interpretation{scroll-margin-top:20px}body.print-preview .report-jump{display:none}
