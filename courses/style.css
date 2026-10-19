@@ -81,3 +81,16 @@ thead{display:table-header-group}tr{break-inside:avoid}h2,h3,h4{break-after:avoi
 
 /* Keep overview labels readable on screen and in print. */
 .overview-table{table-layout:auto}.overview-table td:first-child{width:14%;min-width:7em;white-space:nowrap;text-align:center;vertical-align:middle}.overview-table td:last-child{width:auto}@media print{.overview-table td:first-child{width:14%;min-width:5.8em;white-space:nowrap}}
+
+/* Match the institute homepage's teal and warm accent palette. */
+@media screen{
+ .intro{background:#142f3b;color:#fff;padding:48px 40px;margin-bottom:24px;align-items:center}
+ .intro .eyebrow{color:#e9c88e}
+ .intro p:last-child{color:#c3d1d6}
+ .intro-note{border-left-color:#e9c88e;color:#c3d1d6}
+ .intro-note strong{color:#fff}
+ .detail-head{background:#142f3b}
+ .detail-head .eyebrow{color:#e9c88e}
+ .detail-head p:last-child{color:#c3d1d6}
+}
+@media screen and (max-width:800px){.intro{padding:32px 24px}}
