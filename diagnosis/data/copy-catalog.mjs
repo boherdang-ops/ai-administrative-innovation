@@ -12,30 +12,6 @@ export const COPY_CATALOG={
     "text": "예비 결과",
     "source": "app.mjs"
   },
-  "개인 진단 시작 →": {
-    "text": "개인 진단 시작 →",
-    "source": "app.mjs"
-  },
-  "기관 진단 시작 →": {
-    "text": "기관 진단 시작 →",
-    "source": "app.mjs"
-  },
-  "연락처·이름·기관명 없이 이용할 수 있습니다. 응답은 기본적으로 현재 화면 메모리에만 유지되며, 서버에 전송되지 않습니다. 비공개 업무 원문과 개인정보를 입력하지 마세요. 결과는 인사평가·채용·승진·인증용이 아닙니다.": {
-    "text": "연락처·이름·기관명 없이 이용할 수 있습니다. 응답은 기본적으로 현재 화면 메모리에만 유지되며, 서버에 전송되지 않습니다. 비공개 업무 원문과 개인정보를 입력하지 마세요. 결과는 인사평가·채용·승진·인증용이 아닙니다.",
-    "source": "app.mjs"
-  },
-  "진단 결과로 돌아가기": {
-    "text": "진단 결과로 돌아가기",
-    "source": "app.mjs"
-  },
-  "진행 중 진단으로 돌아가기": {
-    "text": "진행 중 진단으로 돌아가기",
-    "source": "app.mjs"
-  },
-  "임시저장 진단 복구": {
-    "text": "임시저장 진단 복구",
-    "source": "app.mjs"
-  },
   "개인의 활용 역량과 기관의 실행 여건을 살펴보고,": {
     "text": "개인의 활용 역량과 기관의 실행 여건을 살펴보고,",
     "source": "app.mjs"
@@ -104,6 +80,74 @@ export const COPY_CATALOG={
     "text": "· 6개 영역",
     "source": "app.mjs"
   },
+  "개인 진단 시작 →": {
+    "text": "개인 진단 시작 →",
+    "source": "app.mjs"
+  },
+  "기관 진단 시작 →": {
+    "text": "기관 진단 시작 →",
+    "source": "app.mjs"
+  },
+  "연락처·이름·기관명 없이 이용할 수 있습니다. 응답은 기본적으로 현재 화면 메모리에만 유지되며, 서버에 전송되지 않습니다. 비공개 업무 원문과 개인정보를 입력하지 마세요. 결과는 인사평가·채용·승진·인증용이 아닙니다.": {
+    "text": "연락처·이름·기관명 없이 이용할 수 있습니다. 응답은 기본적으로 현재 화면 메모리에만 유지되며, 서버에 전송되지 않습니다. 비공개 업무 원문과 개인정보를 입력하지 마세요. 결과는 인사평가·채용·승진·인증용이 아닙니다.",
+    "source": "app.mjs"
+  },
+  "진단 결과로 돌아가기": {
+    "text": "진단 결과로 돌아가기",
+    "source": "app.mjs"
+  },
+  "진행 중 진단으로 돌아가기": {
+    "text": "진행 중 진단으로 돌아가기",
+    "source": "app.mjs"
+  },
+  "임시저장 진단 복구": {
+    "text": "임시저장 진단 복구",
+    "source": "app.mjs"
+  },
+  "기관의 이용 제한과 개인 역량은 별도로 기록합니다. 기관 진단은 담당자 한 명의 응답에 따른 예비 결과입니다.": {
+    "text": "기관의 이용 제한과 개인 역량은 별도로 기록합니다. 기관 진단은 담당자 한 명의 응답에 따른 예비 결과입니다.",
+    "source": "app.mjs"
+  },
+  "응답자의 역할": {
+    "text": "응답자의 역할",
+    "source": "app.mjs"
+  },
+  "응답 범위": {
+    "text": "응답 범위",
+    "source": "app.mjs"
+  },
+  "승인된 AI 이용 환경": {
+    "text": "승인된 AI 이용 환경",
+    "source": "app.mjs"
+  },
+  "모름·미확인": {
+    "text": "모름·미확인",
+    "source": "app.mjs"
+  },
+  "승인된 환경 이용 가능": {
+    "text": "승인된 환경 이용 가능",
+    "source": "app.mjs"
+  },
+  "이용 제한·환경 없음": {
+    "text": "이용 제한·환경 없음",
+    "source": "app.mjs"
+  },
+  "이 항목은 개인 역량 판정에 포함하지 않습니다.": {
+    "text": "이 항목은 개인 역량 판정에 포함하지 않습니다.",
+    "source": "app.mjs"
+  },
+  "이 탭에서 임시저장 사용": {
+    "text": "이 탭에서 임시저장 사용",
+    "source": "app.mjs"
+  },
+  "선택한 경우에만 탭 세션에 보관합니다. 공용 PC에서는 사용 후 ‘임시저장 지우기’를 누르세요. 탭 종료 시 복구는 보장하지 않습니다.": {
+    "text": "선택한 경우에만 탭 세션에 보관합니다. 공용 PC에서는 사용 후 ‘임시저장 지우기’를 누르세요. 탭 종료 시 복구는 보장하지 않습니다.",
+    "source": "app.mjs"
+  },
+  "안내 확인 · 진단 시작 →": {
+    "text": "안내 확인 · 진단 시작 →",
+    "source": "app.mjs"
+  },
   "나의 역할과 이용 환경": {
     "text": "나의 역할과 이용 환경",
     "source": "app.mjs"
@@ -140,14 +184,6 @@ export const COPY_CATALOG={
     "text": "기관 전체",
     "source": "app.mjs"
   },
-  "과정 원본": {
-    "text": "과정 원본",
-    "source": "app.mjs"
-  },
-  "추가 4문항 ·": {
-    "text": "추가 4문항 ·",
-    "source": "app.mjs"
-  },
   "착수 준비도를 확인할 과정": {
     "text": "착수 준비도를 확인할 과정",
     "source": "app.mjs"
@@ -156,44 +192,20 @@ export const COPY_CATALOG={
     "text": "여러 개 선택 가능 · 선택하지 않으면 기본 진단만 진행",
     "source": "app.mjs"
   },
+  "과정 원본": {
+    "text": "과정 원본",
+    "source": "app.mjs"
+  },
+  "추가 4문항 ·": {
+    "text": "추가 4문항 ·",
+    "source": "app.mjs"
+  },
   "← 돌아가기": {
     "text": "← 돌아가기",
     "source": "app.mjs"
   },
   "/ 시작 안내": {
     "text": "/ 시작 안내",
-    "source": "app.mjs"
-  },
-  "기관의 이용 제한과 개인 역량은 별도로 기록합니다. 기관 진단은 담당자 한 명의 응답에 따른 예비 결과입니다.": {
-    "text": "기관의 이용 제한과 개인 역량은 별도로 기록합니다. 기관 진단은 담당자 한 명의 응답에 따른 예비 결과입니다.",
-    "source": "app.mjs"
-  },
-  "응답자의 역할": {
-    "text": "응답자의 역할",
-    "source": "app.mjs"
-  },
-  "응답 범위": {
-    "text": "응답 범위",
-    "source": "app.mjs"
-  },
-  "승인된 AI 이용 환경": {
-    "text": "승인된 AI 이용 환경",
-    "source": "app.mjs"
-  },
-  "이 항목은 개인 역량 판정에 포함하지 않습니다.": {
-    "text": "이 항목은 개인 역량 판정에 포함하지 않습니다.",
-    "source": "app.mjs"
-  },
-  "이 탭에서 임시저장 사용": {
-    "text": "이 탭에서 임시저장 사용",
-    "source": "app.mjs"
-  },
-  "선택한 경우에만 탭 세션에 보관합니다. 공용 PC에서는 사용 후 ‘임시저장 지우기’를 누르세요. 탭 종료 시 복구는 보장하지 않습니다.": {
-    "text": "선택한 경우에만 탭 세션에 보관합니다. 공용 PC에서는 사용 후 ‘임시저장 지우기’를 누르세요. 탭 종료 시 복구는 보장하지 않습니다.",
-    "source": "app.mjs"
-  },
-  "안내 확인 · 진단 시작 →": {
-    "text": "안내 확인 · 진단 시작 →",
     "source": "app.mjs"
   },
   "임시저장 실패: 이 탭에서 계속 진행할 수 있지만 새로고침 후 복구되지 않습니다.": {
@@ -308,6 +320,74 @@ export const COPY_CATALOG={
     "text": "확인",
     "source": "report-view.mjs"
   },
+  "종합 해석": {
+    "text": "종합 해석",
+    "source": "report-view.mjs"
+  },
+  "영역별 분포": {
+    "text": "영역별 분포",
+    "source": "report-view.mjs"
+  },
+  "우선 행동": {
+    "text": "우선 행동",
+    "source": "report-view.mjs"
+  },
+  "영역별 상세 해석": {
+    "text": "영역별 상세 해석",
+    "source": "report-view.mjs"
+  },
+  "01 · 종합 해석": {
+    "text": "01 · 종합 해석",
+    "source": "report-view.mjs"
+  },
+  "02 · 영역별 응답 분포": {
+    "text": "02 · 영역별 응답 분포",
+    "source": "report-view.mjs"
+  },
+  "이어갈 강점": {
+    "text": "이어갈 강점",
+    "source": "report-view.mjs"
+  },
+  "03 · 우선 행동": {
+    "text": "03 · 우선 행동",
+    "source": "report-view.mjs"
+  },
+  "내 업무에 대입해 볼 질문": {
+    "text": "내 업무에 대입해 볼 질문",
+    "source": "report-view.mjs"
+  },
+  "우선 행동을 수행한 뒤 같은 기준으로 다시 진단하고, 달라진 답변과 실제 수행 기록을 함께 비교해 보세요.": {
+    "text": "우선 행동을 수행한 뒤 같은 기준으로 다시 진단하고, 달라진 답변과 실제 수행 기록을 함께 비교해 보세요.",
+    "source": "report-view.mjs"
+  },
+  "상세 해석 · 화면에서 확인": {
+    "text": "상세 해석 · 화면에서 확인",
+    "source": "report-view.mjs"
+  },
+  "영역별 해석과 응답 근거": {
+    "text": "영역별 해석과 응답 근거",
+    "source": "report-view.mjs"
+  },
+  "이 결과는 자가응답에 따른 예비 해석이며, 실제 수행·기관 상태의 인증이 아닙니다.": {
+    "text": "이 결과는 자가응답에 따른 예비 해석이며, 실제 수행·기관 상태의 인증이 아닙니다.",
+    "source": "report-view.mjs"
+  },
+  "결과 인쇄 / PDF 저장": {
+    "text": "결과 인쇄 / PDF 저장",
+    "source": "report-view.mjs"
+  },
+  "응답 수정": {
+    "text": "응답 수정",
+    "source": "report-view.mjs"
+  },
+  "새 진단 시작": {
+    "text": "새 진단 시작",
+    "source": "report-view.mjs"
+  },
+  "인쇄에는 종합 해석·응답 분포·강점·우선 행동·선택 과정 준비도만 포함합니다. 상세 응답과 메뉴·버튼·홍보 링크는 제외합니다.": {
+    "text": "인쇄에는 종합 해석·응답 분포·강점·우선 행동·선택 과정 준비도만 포함합니다. 상세 응답과 메뉴·버튼·홍보 링크는 제외합니다.",
+    "source": "report-view.mjs"
+  },
   "개인 AI 활용": {
     "text": "개인 AI 활용",
     "source": "report-view.mjs"
@@ -368,14 +448,6 @@ export const COPY_CATALOG={
     "text": "자료·책임·실행 환경·운영",
     "source": "report-view.mjs"
   },
-  "해볼 일": {
-    "text": "해볼 일",
-    "source": "report-view.mjs"
-  },
-  "담당": {
-    "text": "담당",
-    "source": "report-view.mjs"
-  },
   "왜 먼저인가요?": {
     "text": "왜 먼저인가요?",
     "source": "report-view.mjs"
@@ -388,12 +460,16 @@ export const COPY_CATALOG={
     "text": "완료 확인",
     "source": "report-view.mjs"
   },
-  "· 시점:": {
-    "text": "· 시점:",
+  "해볼 일": {
+    "text": "해볼 일",
     "source": "report-view.mjs"
   },
-  "응답상 선행 조건 갖춤. 실제 착수 전 현재 상태 재확인": {
-    "text": "응답상 선행 조건 갖춤. 실제 착수 전 현재 상태 재확인",
+  "담당": {
+    "text": "담당",
+    "source": "report-view.mjs"
+  },
+  "· 시점:": {
+    "text": "· 시점:",
     "source": "report-view.mjs"
   },
   "04 · 선택 과정별 준비도": {
@@ -424,6 +500,10 @@ export const COPY_CATALOG={
     "text": "먼저 확인·보완할 항목",
     "source": "report-view.mjs"
   },
+  "응답상 선행 조건 갖춤. 실제 착수 전 현재 상태 재확인": {
+    "text": "응답상 선행 조건 갖춤. 실제 착수 전 현재 상태 재확인",
+    "source": "report-view.mjs"
+  },
   "교육 참여 가능·현업 실증 착수·운영 배포 승인은 별도 판단입니다. 이 결과는": {
     "text": "교육 참여 가능·현업 실증 착수·운영 배포 승인은 별도 판단입니다. 이 결과는",
     "source": "report-view.mjs"
@@ -432,16 +512,8 @@ export const COPY_CATALOG={
     "text": "응답에 따른 예비 상태입니다.",
     "source": "report-view.mjs"
   },
-  "미응답": {
-    "text": "미응답",
-    "source": "report-view.mjs"
-  },
-  "착수 전 유효성 재확인": {
-    "text": "착수 전 유효성 재확인",
-    "source": "report-view.mjs"
-  },
-  "· 세부 근거": {
-    "text": "· 세부 근거",
+  "과정별 세부 확인 내역": {
+    "text": "과정별 세부 확인 내역",
     "source": "report-view.mjs"
   },
   "확인 대상": {
@@ -456,8 +528,16 @@ export const COPY_CATALOG={
     "text": "상태·다음 확인",
     "source": "report-view.mjs"
   },
-  "과정별 세부 확인 내역": {
-    "text": "과정별 세부 확인 내역",
+  "미응답": {
+    "text": "미응답",
+    "source": "report-view.mjs"
+  },
+  "착수 전 유효성 재확인": {
+    "text": "착수 전 유효성 재확인",
+    "source": "report-view.mjs"
+  },
+  "· 세부 근거": {
+    "text": "· 세부 근거",
     "source": "report-view.mjs"
   },
   "보완 학습": {
@@ -474,26 +554,6 @@ export const COPY_CATALOG={
   },
   "예비진단 결과": {
     "text": "예비진단 결과",
-    "source": "report-view.mjs"
-  },
-  "종합 해석": {
-    "text": "종합 해석",
-    "source": "report-view.mjs"
-  },
-  "영역별 분포": {
-    "text": "영역별 분포",
-    "source": "report-view.mjs"
-  },
-  "우선 행동": {
-    "text": "우선 행동",
-    "source": "report-view.mjs"
-  },
-  "영역별 상세 해석": {
-    "text": "영역별 상세 해석",
-    "source": "report-view.mjs"
-  },
-  "01 · 종합 해석": {
-    "text": "01 · 종합 해석",
     "source": "report-view.mjs"
   },
   "해석 범위: 전체": {
@@ -516,24 +576,12 @@ export const COPY_CATALOG={
     "text": "· 미응답",
     "source": "report-view.mjs"
   },
-  "02 · 영역별 응답 분포": {
-    "text": "02 · 영역별 응답 분포",
-    "source": "report-view.mjs"
-  },
   "막대는": {
     "text": "막대는",
     "source": "report-view.mjs"
   },
   "문항의 응답 구성을 나타냅니다. 역량 점수·백분위·기관 순위가 아닙니다. ‘확인 필요’와 ‘미응답’은 부족으로 계산하지 않았습니다.": {
     "text": "문항의 응답 구성을 나타냅니다. 역량 점수·백분위·기관 순위가 아닙니다. ‘확인 필요’와 ‘미응답’은 부족으로 계산하지 않았습니다.",
-    "source": "report-view.mjs"
-  },
-  "이어갈 강점": {
-    "text": "이어갈 강점",
-    "source": "report-view.mjs"
-  },
-  "03 · 우선 행동": {
-    "text": "03 · 우선 행동",
     "source": "report-view.mjs"
   },
   "다음 행동": {
@@ -550,42 +598,6 @@ export const COPY_CATALOG={
   },
   "의 영향을 고려한 제안입니다. 능력 순위가 아니며 실제 여건에 맞춰 조정하세요.": {
     "text": "의 영향을 고려한 제안입니다. 능력 순위가 아니며 실제 여건에 맞춰 조정하세요.",
-    "source": "report-view.mjs"
-  },
-  "내 업무에 대입해 볼 질문": {
-    "text": "내 업무에 대입해 볼 질문",
-    "source": "report-view.mjs"
-  },
-  "우선 행동을 수행한 뒤 같은 기준으로 다시 진단하고, 달라진 답변과 실제 수행 기록을 함께 비교해 보세요.": {
-    "text": "우선 행동을 수행한 뒤 같은 기준으로 다시 진단하고, 달라진 답변과 실제 수행 기록을 함께 비교해 보세요.",
-    "source": "report-view.mjs"
-  },
-  "상세 해석 · 화면에서 확인": {
-    "text": "상세 해석 · 화면에서 확인",
-    "source": "report-view.mjs"
-  },
-  "영역별 해석과 응답 근거": {
-    "text": "영역별 해석과 응답 근거",
-    "source": "report-view.mjs"
-  },
-  "이 결과는 자가응답에 따른 예비 해석이며, 실제 수행·기관 상태의 인증이 아닙니다.": {
-    "text": "이 결과는 자가응답에 따른 예비 해석이며, 실제 수행·기관 상태의 인증이 아닙니다.",
-    "source": "report-view.mjs"
-  },
-  "결과 인쇄 / PDF 저장": {
-    "text": "결과 인쇄 / PDF 저장",
-    "source": "report-view.mjs"
-  },
-  "응답 수정": {
-    "text": "응답 수정",
-    "source": "report-view.mjs"
-  },
-  "새 진단 시작": {
-    "text": "새 진단 시작",
-    "source": "report-view.mjs"
-  },
-  "인쇄에는 종합 해석·응답 분포·강점·우선 행동·선택 과정 준비도만 포함합니다. 상세 응답과 메뉴·버튼·홍보 링크는 제외합니다.": {
-    "text": "인쇄에는 종합 해석·응답 분포·강점·우선 행동·선택 과정 준비도만 포함합니다. 상세 응답과 메뉴·버튼·홍보 링크는 제외합니다.",
     "source": "report-view.mjs"
   },
   "AI 이해와 한계 인식": {
@@ -848,16 +860,16 @@ export const COPY_CATALOG={
     "text": "에게 확인을 요청하세요.",
     "source": "action-advice.mjs"
   },
+  "공공 AI 역량진단": {
+    "text": "공공 AI 역량진단",
+    "source": "site-shell.mjs"
+  },
   "홈페이지": {
     "text": "홈페이지",
     "source": "site-shell.mjs"
   },
   "사업 문의": {
     "text": "사업 문의",
-    "source": "site-shell.mjs"
-  },
-  "공공 AI 역량진단": {
-    "text": "공공 AI 역량진단",
     "source": "site-shell.mjs"
   },
   "나의 활용 역량과 우리의 실행 준비를 확인합니다.": {

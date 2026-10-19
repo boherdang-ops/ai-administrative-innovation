@@ -1,6 +1,6 @@
 import * as api from './api.mjs';
-import {DEFAULT_CONTENT,validateContent} from '../cms-content.mjs';
-import {COPY_CATALOG} from '../data/copy-catalog.mjs';
+import {DEFAULT_CONTENT,validateContent} from '../cms-content.mjs?v=cms2';
+import {COPY_CATALOG} from '../data/copy-catalog.mjs?v=cms2';
 const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let content,draftVersion,publishedVersion,dirty=false,section='site',selected=0,busy=false;
 const labels={site:'사이트 기본 정보',title:'제목 / 이름',eyebrow:'영문 표기',description:'소개 / 검색 설명',logoUrl:'로고 이미지 주소',nav:'상단 메뉴',label:'메뉴 이름',url:'연결 주소',visible:'표시',footerTitle:'푸터 사이트명',footerDescription:'푸터 설명',footerMeta:'푸터 안내',intro:'첫 화면 제목',text:'질문',purpose:'질문의 의도',criteria:'판단할 항목',hint:'응답 안내',topic:'결과의 핵심 주제',task:'권장 행동',doneWhen:'완료 확인 기준',evidence:'확인할 근거',owner:'담당',options:'답변 선택지',alternative:'대안 / 주의 안내',requirements:'과정 준비 문항',principle:'영역의 핵심 의미',risks:'문항별 보완 해석',next:'문항별 다음 행동',check:'개선 확인 기준',meaning:'영역에서 살피는 것',reasons:'행동을 권하는 이유',owners:'함께 확인할 담당',requests:'실무자가 먼저 할 일',source:'출처 설명',effect:'결과 반영 안내',unknown:'미확인 안내',operatorNote:'운영 검토 메모',sourceCommit:'교육 원본 기준 커밋',reviewState:'교육 원본 검토 상태',personal:'개인',organization:'기관·부서',courses:'교육 안내',home:'홈페이지',learning:'Learning Hub',practice:'실무지원'};
@@ -41,7 +41,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('button,a');if(!
  if(action==='save')task(async()=>{const next=structuredClone(content);next.definition.version='draft-cms-'+crypto.randomUUID();const valid=validateContent(next);const r=await api.saveDraft(valid,draftVersion);content=valid;draftVersion=r.version;dirty=false;message('초안을 저장했습니다. 공개 화면에는 아직 반영되지 않았습니다.');});
  else if(action==='publish')task(async()=>{if(dirty)throw Error('먼저 초안을 저장하세요.');validateContent(content);if(!confirm('저장된 초안을 공개 사이트에 게시할까요? 새로 시작하는 진단부터 적용됩니다.'))return;const r=await api.publish(draftVersion,publishedVersion);publishedVersion=r.version;message('공개 게시를 완료했습니다. 공개 사이트에서 새로고침하여 확인하세요.');});
  else if(action==='reload')task(async()=>{if(dirty&&!confirm('저장 전 변경을 버리고 서버의 최신 초안을 불러올까요?'))return;await reload();message('서버의 최신 초안을 불러왔습니다.');});
- else if(action==='logout')task(async()=>{if(dirty&&!confirm('저장하지 않은 변경이 있습니다. 로그아웃할까요?'))return;await api.logout();dirty=false;content=null;$('#workspace').hidden=true;$('#login-screen').hidden=false;$('#login-error').textContent='로그아웃했습니다.';$('#preview-dialog').close();});
+ else if(action==='logout')task(async()=>{if(dirty&&!confirm('저장하지 않은 변경이 있습니다. 로그아웃할까요?'))return;await api.logout();dirty=false;content=null;$('#workspace').hidden=true;$('#editor').replaceChildren();$('#sections').replaceChildren();$('#preview-frame').src='about:blank';$('#login-screen').hidden=false;$('#login-error').textContent='로그아웃했습니다.';$('#preview-dialog').close();});
  else if(action==='preview'){try{validateContent(content);$('#preview-dialog').showModal();$('#preview-frame').src='../?cms-preview=1&v='+Date.now();}catch(err){message(err.message,true);}}
  else if(action==='close-preview')$('#preview-dialog').close();
  else if(action==='refresh-preview')pushPreview();
