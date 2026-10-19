@@ -1,1 +1,35 @@
-.site-header{display:block;padding:0;min-height:94px;background:linear-gradient(110deg,#102e48 0%,#164b62 100%);border-bottom:3px solid #51d9c3}.site-header-inner{max-width:1208px;padding:20px 24px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:28px}.site-brand{display:flex;align-items:center;gap:13px;text-decoration:none;color:#fff;flex-shrink:0}.site-brand img{width:50px;height:50px;object-fit:contain}.site-brand small{display:block;font-size:10px;font-weight:700;letter-spacing:.12em;color:#8be8d8;line-height:1.6}.site-brand strong{display:block;font-size:22px;letter-spacing:-.04em;line-height:1.5;color:#fff}.site-header nav{align-items:center;flex-wrap:wrap;gap:23px;font-size:13px;font-weight:700}.site-header nav a{white-space:nowrap;color:#f2f7fc}.site-header nav a:hover{color:#8be8d8}.site-header .site-contact{border:1px solid #a9c7d3;border-radius:5px;padding:9px 16px;background:#ffffff08}.site-header .site-contact:hover{border-color:#8be8d8;background:#ffffff12}.site-footer{display:block;padding:0;background:#eaf0f6;color:#53667b;border-top:1px solid #d8e2ed;font-size:12px}.site-footer-inner{max-width:1208px;margin:auto;padding:25px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}.site-footer strong{color:#29465e;font-size:14px}.site-footer p{margin:5px 0 0;font-size:12px}.site-footer-meta{display:flex;align-items:center;gap:22px;flex-wrap:wrap}.site-footer a{color:#38556e;text-decoration:none}.site-footer a:hover{text-decoration:underline}.site-header a:focus-visible,.site-footer a:focus-visible{outline-offset:5px}@media(max-width:920px){.site-header-inner{align-items:flex-start;flex-direction:column;gap:14px}.site-header nav{gap:12px 22px}.site-footer-inner{align-items:flex-start;flex-direction:column;gap:14px}}@media(max-width:720px){.site-header-inner{padding:17px 20px}.site-brand img{width:44px;height:44px}.site-brand strong{font-size:20px}.site-brand small{font-size:9px}.site-header nav{font-size:12px;gap:10px 16px}.site-header .site-contact{padding:5px 10px}.site-footer-inner{padding:22px 20px}.site-footer-meta{gap:8px 18px}}@media print{.site-header,.site-footer{display:none!important}}
+/* happybrain.ai.kr 공개 화면 대조: 흰색 헤더, #132c3a 소개 영역, 금색 강조. */
+:root{--ink:#1b2a4a;--muted:#6b7385;--blue:#2e5fa3;--line:#e5ddce;--paper:#faf9f6;--pale:#f2eee4}
+body{font-family:Pretendard,-apple-system,BlinkMacSystemFont,system-ui,"Malgun Gothic",sans-serif}
+.site-header{display:block;position:sticky;top:0;z-index:30;padding:0;min-height:88px;background:#fff;border-bottom:1px solid #e5ddce}
+.site-header-inner{max-width:1248px;min-height:88px;padding:0 48px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:28px}
+.site-brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:#1b2a4a;flex-shrink:0}
+.site-brand img{width:44px;height:44px;object-fit:contain;background:#132c3a;border-radius:50%;padding:3px}
+.site-brand small{display:block;font-size:10px;font-weight:500;letter-spacing:.06em;color:#6b7385;line-height:1.5}
+.site-brand strong{display:block;font-size:18px;letter-spacing:-.04em;line-height:1.5;color:#1b2a4a}
+.site-header nav{align-items:center;flex-wrap:wrap;gap:23px;font-size:14px;font-weight:700}
+.site-header nav a{white-space:nowrap;color:#1b2a4a}
+.site-header nav a:hover{color:#b8863b}
+.site-header .site-contact{border:1px solid #1b2a4a;border-radius:3px;padding:9px 15px;background:transparent}
+.site-header .site-contact:hover{background:#f2eee4;color:#1b2a4a}
+.site-footer{display:block;padding:0;background:#132c3a;color:#c3d0d6;border-top:1px solid #29424f;font-size:12px}
+.site-footer-inner{max-width:1248px;margin:auto;padding:25px 48px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.site-footer strong{color:#fff;font-size:14px}.site-footer p{margin:5px 0 0;font-size:12px}.site-footer-meta{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.site-header a:focus-visible{outline-offset:5px}
+.primary{background:#e7c791;border-color:#e7c791;color:#182d39}.primary:hover{background:#dcb97e;border-color:#dcb97e;color:#182d39}
+.card{border-top-color:#b8863b}.badge{background:#f2eee4;color:#1b2a4a}.eyebrow{color:#9a722f}
+.choice:has(input:checked){border-color:#2e5fa3;background:#f1f4f7}
+.is-home main{max-width:none;padding:0;min-height:0}
+.is-home .hero{display:block;margin:0;background:#132c3a;color:#fff}
+.hero-inner{max-width:1160px;margin:auto;padding:70px 24px;display:grid;grid-template-columns:1.5fr 1fr;gap:64px;align-items:center}
+.is-home .hero h1{color:#fff;font-size:clamp(32px,4vw,48px);line-height:1.35}
+.is-home .hero p{color:#d1dce0}.is-home .hero .eyebrow{color:#d6c19a}
+.is-home .hero .badge{background:#ffffff0d;color:#e7c791;border:1px solid #ffffff24}
+.is-home .hero-aside{border-left:1px solid #e7c791;padding:10px 0 10px 28px}
+.is-home .hero-aside ol,.is-home .hero-aside small{color:#c3d0d6}
+.home-content{max-width:1160px;margin:auto;padding:40px 24px 64px}
+.home-content .note{background:#f2eee4;border-left-color:#b8863b}
+.report-summary{background:#f2eee4;border-left-color:#b8863b}.diagnosis-report section[id],.domain-interpretation{scroll-margin-top:110px}
+@media(max-width:1020px){.site-header-inner{align-items:flex-start;flex-direction:column;padding:16px 24px;gap:14px}.site-header nav{gap:12px 22px}.site-footer-inner{align-items:flex-start;flex-direction:column;gap:14px;padding:24px}.hero-inner{gap:32px}}
+@media(max-width:720px){.site-header-inner{padding:16px 20px}.site-brand strong{font-size:18px}.site-header nav{font-size:12px;gap:10px 16px}.site-header .site-contact{padding:5px 10px}.site-footer-inner{padding:22px 20px}.hero-inner{grid-template-columns:1fr;padding:40px 20px;gap:24px}.home-content{padding:28px 20px 44px}.is-home .hero-aside{padding-left:20px}.diagnosis-report section[id],.domain-interpretation{scroll-margin-top:170px}}
+@media print{.site-header,.site-footer{display:none!important}.report-summary{background:white}}
