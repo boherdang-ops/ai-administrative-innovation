@@ -60,3 +60,10 @@ Pages workflow `39193639354` 성공. 주소: https://boherdang-ops.github.io/ai-
 기존 홈페이지의 CMS `resourceLinks` 항목에 진단 시제품 링크 1개를 추가하는 최소 변경안을 준비함. CMS config의 해당 필드와 index.astro 렌더링을 확인함. `happybrain-site` 최신 트리를 기반으로 쓰기를 시도했으나 GitHub 연결이 `403 Resource not accessible by integration`으로 거부함. 변경·커밋·홈페이지 배포는 발생하지 않음. 자동 승인 심사 거절이 아닌 저장소 연결의 쓰기 권한 제한임.
 
 검토 가능한 정확한 변경안: `integration/homepage-entry.patch`. 기존 CMS에서 ‘첫 화면 → 자료 링크’에 같은 label·url을 추가하여 기존 게시 절차로 반영할 수 있음. 기존 법인 서비스 역할·인증·게시·콘텐츠·개인 포트폴리오는 보존.
+
+
+## 해석 개선 2026-10-19.4
+- 11개 기본 영역에 응답 상태·업무 영향·실행 제안·개선 확인 기준 추가.
+- 같은 응답 개수라도 우선순위 미정과 책임 미정의 해석을 분리.
+- 미확인·미응답은 부족으로 단정하지 않고 확인 행동 제안.
+- node --test diagnosis/tests/*.test.mjs: 35/35 통과. 문항·과정 판정 규칙 변경 없음.

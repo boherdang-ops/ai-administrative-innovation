@@ -1,6 +1,6 @@
 import {DEFAULT_DEFINITION,LINKS,validateDefinition} from './data/definition.mjs?v=20261019-3';
 import {newRun,evaluate,LABELS} from './engine.mjs?v=20261019-3';
-import {reportHTML} from './report-view.mjs?v=20261019-3';
+import {reportHTML} from './report-view.mjs?v=20261019-4';
 const root=document.querySelector('main');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE='public-ai-diagnosis.session.v1';let definition=structuredClone(DEFAULT_DEFINITION),run=null,page=0,result=null,autoSave=false,revisionHistory=[];
