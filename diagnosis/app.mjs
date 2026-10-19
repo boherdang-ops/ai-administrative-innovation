@@ -1,4 +1,4 @@
-import {DEFAULT_CONTENT,translateDOM,translateText,applySite,loadContent,connectPreview} from './cms-public.mjs?v=cms2';
+import {DEFAULT_CONTENT,translateDOM,translateText,applySite,loadContent,connectPreview} from './cms-public.mjs?v=cms3';
 import {setupDefaults,beginOrResume} from './session-flow.mjs?v=20261019-5';
 import {DEFAULT_DEFINITION,LINKS,validateDefinition} from './data/definition.mjs?v=cms1';
 import {evaluate} from './engine.mjs?v=20261019-3';

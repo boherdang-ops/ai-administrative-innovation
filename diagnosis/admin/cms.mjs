@@ -1,6 +1,6 @@
 import * as api from './api.mjs';
-import {DEFAULT_CONTENT,validateContent} from '../cms-content.mjs?v=cms2';
-import {COPY_CATALOG} from '../data/copy-catalog.mjs?v=cms2';
+import {DEFAULT_CONTENT,validateContent} from '../cms-content.mjs?v=cms3';
+import {COPY_CATALOG} from '../data/copy-catalog.mjs?v=cms3';
 const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let content,draftVersion,publishedVersion,dirty=false,section='site',selected=0,busy=false;
 const labels={site:'사이트 기본 정보',title:'제목 / 이름',eyebrow:'영문 표기',description:'소개 / 검색 설명',logoUrl:'로고 이미지 주소',nav:'상단 메뉴',label:'메뉴 이름',url:'연결 주소',visible:'표시',footerTitle:'푸터 사이트명',footerDescription:'푸터 설명',footerMeta:'푸터 안내',intro:'첫 화면 제목',text:'질문',purpose:'질문의 의도',criteria:'판단할 항목',hint:'응답 안내',topic:'결과의 핵심 주제',task:'권장 행동',doneWhen:'완료 확인 기준',evidence:'확인할 근거',owner:'담당',options:'답변 선택지',alternative:'대안 / 주의 안내',requirements:'과정 준비 문항',principle:'영역의 핵심 의미',risks:'문항별 보완 해석',next:'문항별 다음 행동',check:'개선 확인 기준',meaning:'영역에서 살피는 것',reasons:'행동을 권하는 이유',owners:'함께 확인할 담당',requests:'실무자가 먼저 할 일',source:'출처 설명',effect:'결과 반영 안내',unknown:'미확인 안내',operatorNote:'운영 검토 메모',sourceCommit:'교육 원본 기준 커밋',reviewState:'교육 원본 검토 상태',personal:'개인',organization:'기관·부서',courses:'교육 안내',home:'홈페이지',learning:'Learning Hub',practice:'실무지원'};

@@ -2,7 +2,7 @@ import {DEFAULT_DEFINITION,LINKS,validateDefinition} from './data/definition.mjs
 import {DOMAIN_PROFILES} from './domain-insights.mjs?v=cms1';
 import {DOMAIN_MEANING} from './analysis.mjs?v=cms1';
 import {DEFAULT_ADVICE} from './action-advice.mjs?v=cms1';
-import {COPY_CATALOG} from './data/copy-catalog.mjs?v=cms2';
+import {COPY_CATALOG} from './data/copy-catalog.mjs?v=cms3';
 export const DEFAULT_CONTENT={schemaVersion:1,
  site:{title:'공공 AI 역량진단',eyebrow:'PUBLIC AI READINESS',description:'공공 AI 역량과 과정 착수 준비도를 확인하는 예비 자가진단',logoUrl:'https://boherdang-ops.github.io/ai-administrative-innovation/diagnosis/diagnosis-mark.png?v=20261019-8',
  nav:[{label:'홈페이지',url:LINKS.home,visible:true},{label:'교육 안내',url:LINKS.courses,visible:true},{label:'Learning Hub',url:LINKS.learning,visible:true},{label:'실무지원',url:LINKS.practice,visible:true},{label:'사업 문의',url:LINKS.home+'contact/',visible:true}],
