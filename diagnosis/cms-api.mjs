@@ -1,0 +1,3 @@
+// 公開用キー。管理権限は Supabase Auth + cms_admins + RLS で判定します。
+export const CMS_CONFIG={url:'https://pkthcglmmsjoofocuarp.supabase.co',key:'sb_publishable_xDXYwAMNZg84Xy7NERjMRw_YzuaCZhR'};
+export async function publicContent(){const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),4500);try{const r=await fetch(CMS_CONFIG.url+'/rest/v1/diagnosis_cms_published?id=eq.main&select=content,version',{headers:{apikey:CMS_CONFIG.key},credentials:'omit',signal:controller.signal,cache:'no-store'});if(!r.ok)throw Error('콘텐츠를 불러오지 못했습니다.');return (await r.json())[0];}finally{clearTimeout(timer);}}

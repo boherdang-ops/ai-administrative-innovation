@@ -12,8 +12,9 @@ const profiles={
 '결과 검증과 책임':{principle:'원문·숫자를 확인하는 방법을 아는 것, 새 사례에서 재시험하는 것, 생성 결과와 독립된 근거로 판단하는 것은 서로 보완하는 검증 과정입니다.',risks:['검증 절차에 도움이 필요하면 문장 품질은 좋아도 숫자·인용·적용 조건의 오류를 놓칠 수 있습니다.','기존 예시에서 성공했어도 새 사례로 재시험한 경험이 부족하면 특정 자료에서만 통했던 방식을 일반화할 수 있습니다.','같은 AI의 재확인만으로 판단하는 선택은 처음 오류의 전제를 그대로 반복할 수 있습니다.'],next:['공개 문서 한 건의 숫자·인용·조건을 원문과 대조하고 최종 판단자를 명시하세요.','기존 사례와 조건이 다른 새 사례를 같은 절차로 처리하고 실패·수정 내역을 함께 기록하세요.','공식 원문이나 별도 계산 등 생성 답변과 독립된 근거를 확보한 뒤 채택 여부를 판단하세요.'],check:'새 사례의 검증 기록에서 어떤 근거로 채택·수정·보류했는지 다른 사람이 추적할 수 있어야 합니다.'},
 '업무 적용과 공유':{principle:'개인이 빠르게 초안을 만드는 것과 조직이 같은 품질로 반복하는 것은 다릅니다. 동료 재현과 전체 작업시간을 함께 확인해야 활용 효과를 설명할 수 있습니다.',risks:['재현 안내를 만들기 어렵다면 성과가 개인 요령에 의존해 담당자 교체 때 같은 결과를 얻기 어려울 수 있습니다.','전체 시간 비교 경험이 부족하면 초안 작성에서 절약한 시간이 검토·수정 단계에서 다시 쓰이는지 알기 어렵습니다.','초안 속도만으로 예산 효과를 확대하는 선택은 검토 부담과 다른 업무 조건을 빠뜨릴 수 있습니다.'],next:['입력 예시, 실행 순서, 검토 항목, 실패 시 처리 방법을 정리해 동료에게 설명 없이 재현해 달라고 요청하세요.','동일 업무에서 준비·생성·검토·수정·저장까지 시간을 기록하고 기존 방식과 비교하세요.','초안 시간 절약과 전체 업무 효과를 구분하고, 확인한 사례 범위와 한계를 결과에 함께 적으세요.'],check:'동료가 같은 품질을 재현하고 전체 시간·재작업 부담의 변화를 기록으로 설명할 수 있는지 확인하세요.'}
 };
-export function domainInsights(name,items){
- const p=profiles[name];if(!p)throw new Error(`영역 해석 정의 없음: ${name}`);
+export const DOMAIN_PROFILES=profiles;
+export function domainInsights(name,items,overrides){
+ const p=overrides?.[name]||profiles[name];if(!p)throw new Error(`영역 해석 정의 없음: ${name}`);
  const strong=items.filter(e=>e.category==='strong'),gaps=items.filter(e=>e.category==='develop'),pending=items.filter(e=>['unknown','skipped'].includes(e.category));
  const describe=e=>`‘${e.topic}’에서는 “${e.answer}”로 응답해 보완할 지점이 나타났습니다`;
  const state=[strong.length?`${strong.map(e=>`‘${e.topic}’`).join(', ')}에는 긍정적으로 응답했습니다. ${items[0].id.startsWith('O')?'준비 근거가 있다는 자기응답이며, 해당 기록의 내용과 현재 유효성을 직접 검증한 결과는 아닙니다.':'수행·경험·상황판단에 대한 응답이며, 실제 업무 수행을 직접 관찰한 결과는 아닙니다.'}`:'',...gaps.map(e=>describe(e)+'.'),pending.length?`${pending.map(e=>`‘${e.topic}’`).join(', ')}은 ${pending.some(e=>e.value==='conflict')?'응답 내용이 상충하거나 확인되지 않아':'확인되지 않아'} 판단을 보류합니다. 미확인·해당 없음·미응답을 부족으로 단정하지 않습니다.`:''].filter(Boolean).join(' ');
