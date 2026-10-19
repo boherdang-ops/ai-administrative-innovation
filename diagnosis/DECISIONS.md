@@ -5,7 +5,7 @@
 ## 조사한 기준
 
 - 첨부 개발 계획서와 작업 지시서 v1.0 전체 확인.
-- 원 작업 공간 `2026-10-03/referenced-chatgpt-conversation-this-is-an/AGENTS.md`와 `SITE-MANAGEMENT.md` 확인. 사이트 관리 문서는 현재 파일 자체에서 문자 깨짐이 관찰되어, 정상 영문 AGENTS·첨부 지시·최신 소스를 교차 확인함. 기존 파일은 변경하지 않음.
+- 원 작업 공간 `2026-10-03/referenced-chatgpt-conversation-this-is-an/AGENTS.md`와 `SITE-MANAGEMENT.md` 전체 확인. 최초 셸 출력의 한글 표시 문제는 UTF-8로 다시 읽어 해소했으며 원문 손상이 아님을 확인. 기존 파일은 변경하지 않음.
 - 교육·학습·실무지원 저장소: `boherdang-ops/ai-administrative-innovation`, main `fe350ba6032b006ebd695cf3087ce9f328e03ab9`. GitHub Pages workflow 39186715605 성공 확인. 상세 교육 원본 `courses/data/courses.json`; 브라우저 공개 목록·C06 상세 대조. C06~C10이 정식 코드이며 R01~R05는 사용하지 않음.
 - 법인 저장소: `boherdang-ops/happybrain-site`, main `b8570a896d150313f339e2355bf94018e0eb2563`. 공개 홈페이지와 최신 `src/pages/index.astro`, `display-home.json` 확인. Astro·Cloudflare Pages·Sveltia CMS 구성 유지.
 - 교육 CMS는 `config.js`·`shared.js`에 기존 공개 설정과 로그인·게시 코드가 있음. 인증·데이터베이스 설정을 재사용하거나 변경하지 않음. 이번 검증에서 관리자 로그인·실제 저장·실제 메일 수신은 시험하지 않음.
