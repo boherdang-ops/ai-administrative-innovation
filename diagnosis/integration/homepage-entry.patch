@@ -1,0 +1,11 @@
+--- a/src/data/display-home.json
++++ b/src/data/display-home.json
+@@
+     {
+       "label": "영상 콘텐츠",
+       "url": "/videos/"
++    },
++    {
++      "label": "공공 AI 역량진단 · 시제품",
++      "url": "https://boherdang-ops.github.io/ai-administrative-innovation/diagnosis/"
+     }
