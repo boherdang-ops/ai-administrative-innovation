@@ -10,7 +10,7 @@
   <div><b>LEARNING HUB CMS</b><span>Stable CMS v0.6.4</span><span class="system-state"><strong>연결 상태</strong><i id="stateDot"></i><em id="stateText">연결 확인 중</em></span></div>
   <div class="top-links"><a href="maintenance.html">운영 점검</a><a href="../index.html">공개 사이트 보기 →</a></div>
 </header>
-<div class="notice"><b>운영 상태:</b> Supabase 저장·게시·백업·복구·파일 관리가 연결되어 있습니다. 공개 상태 콘텐츠는 Learning Hub에 반영됩니다.</div>
+<div class="notice" id="remoteDataNotice" role="status">관리자 세션과 원격 데이터 연결을 확인한 뒤 운영 데이터를 표시합니다. 로컬 Seed는 화면 예시이며 현재 공개 데이터가 아닙니다.</div>
 <main class="admin-layout">
   <aside class="sidebar">
     <div class="side-head"><span id="contentCount">LEARNING STRUCTURE</span><input id="search" placeholder="콘텐츠 찾기">
@@ -104,7 +104,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
 <script src="supabase-adapter.js?v=150"></script>
-<script src="cms-seed.js?v=062"></script><script src="admin.js?v=20261010"></script>
+<script src="cms-seed.js?v=062"></script><script src="admin.js?v=20261028-readiness"></script>
 <script src="homepage-editor.js?v=20261008b"></script>
 </body></html>
 

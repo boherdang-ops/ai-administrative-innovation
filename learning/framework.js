@@ -95,7 +95,12 @@ async function render(){
  }
 
  if(document.getElementById('lessonTitle')){
-  const id=qs.get('id')||'03-01', x=D.contents.find(c=>c.id===id)||D.contents[0]; if(!x)return;
+  const id=qs.get('id')||'03-01', x=D.contents.find(c=>c.id===id);
+  if(!x){
+   document.title='학습 콘텐츠를 찾을 수 없습니다 | Learning Hub';
+   document.querySelector('main').innerHTML='<section class="content-shell"><h1>학습 콘텐츠를 찾을 수 없습니다</h1><p>주소가 바뀌었거나 아직 공개되지 않은 콘텐츠입니다. 학습 목록에서 다시 선택해 주세요.</p><a class="button" href="library.html">전체 학습콘텐츠 보기 →</a></section>';
+   return;
+  }
   document.title=x.title+' | Learning Hub';
   document.getElementById('lessonMeta').textContent=`TRACK ${x.track} · ${x.trackName} / ${x.id}${x.published?' · PUBLISHED':''}`;
   document.getElementById('lessonTitle').textContent=x.title;
