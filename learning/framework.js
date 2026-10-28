@@ -121,11 +121,11 @@ async function render(){
   } else {
    showResources('learnAsset','');showResources('exampleAsset','');showResources('practiceAsset','');showResources('reviewAsset','');showResources('missionAsset','');
   }
-  const workTasks={'02-01':{task:'report',name:'업무보고'},'02-03':{task:'press',name:'보도자료'}};
+  const workTasks={"02-01":{"task":"report","name":"업무보고"},"02-02":{"task":"plan","name":"추진계획"},"02-03":{"task":"press","name":"보도자료"},"02-04":{"task":"report","name":"업무보고"},"02-05":{"task":"notice","name":"안내·협조 요청"},"02-06":{"task":"meeting","name":"회의록·후속 조치"},"02-07":{"task":"reply","name":"민원·문의 답변"},"03-05":{"task":"compare","name":"자료·대안 비교"},"07-06":{"task":"handover","name":"업무 인수인계"}};
   const workTask=workTasks[x.id];
   if(workTask){
    const bridge=document.createElement('div');bridge.className='asset-card';
-   const intro=document.createElement('p');intro.textContent='학습한 방법으로 '+workTask.name+'를 작성하고, 확인된 자료와 대조해 검토하세요. 막힌 부분과 활용 경험도 남길 수 있습니다.';
+   const intro=document.createElement('p');intro.textContent='학습한 방법으로 '+workTask.name+' 문서를 작성하고, 확인된 자료와 대조해 검토하세요. 막힌 부분과 활용 경험도 남길 수 있습니다.';
    const link=document.createElement('a');link.className='button';link.href='../practice/?task='+workTask.task+'&lesson='+encodeURIComponent(x.id);link.textContent=workTask.name+' 실무에 적용하기 →';
    bridge.append(intro,link);document.getElementById('missionAsset').append(bridge);document.getElementById('missionAsset').hidden=false;
   }
@@ -137,4 +137,5 @@ async function render(){
 }
 render();
 })();
+
 
