@@ -111,7 +111,7 @@ function siteArrangeDraft(draft, legacy) {
       const body=[];
       for(const x of unique){
         // Keep role labels unless they literally repeat this heading.
-        const repeatedLabel=x.label===heading||(heading==='문제·검토 사항'&&x.label==='문제')||(heading==='예산·자원'&&x.label==='예산')||(heading==='출처·근거'&&x.label==='출처');
+        const repeatedLabel=x.label===heading||(heading==='문제·검토 사항'&&x.label==='문제')||(heading==='예산·자원'&&x.label==='예산')||(heading==='출처·근거'&&x.label==='출처')||(heading==='추진 현황'&&['현황','현재 상황'].includes(x.label))||(heading==='판단·결정 요청'&&['판단 요청','결정 요청'].includes(x.label));
         const text=repeatedLabel?x.value:x.label?x.label+': '+x.value:x.raw;
         sentences(text,heading==='예산·자원').forEach((part,i)=>body.push(i===0?'  ○ '+part:'    -'+(/^\s/.test(part)?'':' ')+part));
       }
@@ -121,16 +121,83 @@ function siteArrangeDraft(draft, legacy) {
     const explicit=choose(['보고 요지','핵심','요지']);
     const facts=choose(['현황','현재 상황','추진 현황','추진 경과','실적','진행 상황']);
     const decision=choose(['판단 요청','판단할 사항','결정 요청','요청 사항','검토·결정 요청','협의 사항']);
-    const summary=[...(explicit.length?explicit:facts),...decision];
+
+    function brief(value){
+      let text=value.trim().replace(/\.$/,'');
+      if(/중복\s*미확인/.test(text)&&/고유\s*인원(?:은|이|도)?\s*미확인/.test(text))return '중복·고유 인원 미확인';
+      return text
+        .replace(/^(.+?)가\s+(.+?)에서\s+누락된\s+사실\s+확인$/,'$1 누락 확인')
+        .replace(/^(.+?)(?:이|가)\s*가능하다는\s*안내가\s*부족함$/,'$1 가능 안내 부족')
+        .replace(/(\S+)\s+원인과\s+인과관계(?:는|가)?\s*미확인/g,'$1 원인·인과관계 미확인')
+        .replace(/는\s*제안이며\s*확정\s*아님/g,' 제안·미확정')
+        .replace(/은\s*아직\s*확인하지\s*않았음/g,' 미확인')
+        .replace(/예산과\s+(담당(?:자별)?\s*일정)/g,'예산·$1')
+        .replace(/^(\d+안)인\s+/,'$1 ')
+        .replace(/^(.+?)에\s+(.+?)\s*방법을\s*추가하는\s*보완안\s*승인\s*요청$/,'$1 $2 방법 추가 승인 요청')
+        .replace(/^(.+?)를\s*보완하고\s*(.+?)에\s*(.+?)\s*배포$/,'$1 보완·$2 $3 배포');
+    }
+    const clauses=value=>sentences(value,false).map(x=>x.trim()).filter(Boolean);
+    function factBrief(item){
+      const chunks=clauses(item.value),first=chunks[0]||item.value;
+      const totals=first.match(/^(?:회차별\s*)?신청\s*[\d,]+(?:[·/][\d,]+)*명\s*\(\s*연인원\s*([\d,]+(?:\.\d+)?명)\s*\)\s*,\s*참석\s*[\d,]+(?:[·/][\d,]+)*명\s*\(\s*연인원\s*([\d,]+(?:\.\d+)?명)\s*\)\.?$/);
+      let core;
+      if(totals)core='연인원 신청 '+totals[1]+'·참석 '+totals[2];
+      const series=first.match(/^(\d+회\s*교육)의\s*신청\s*([\d,]+(?:[·/][\d,]+)+명)\s*,\s*참석\s*([\d,]+(?:[·/][\d,]+)+명)\.?$/);
+      if(!core&&series)core=series[1]+' 신청 '+series[2]+'·참석 '+series[3];
+      const simple=first.match(/^(.+?(?:완료|진행\s*중|미완료)),\s*신청\s*([\d,]+명)\.?$/);
+      if(!core&&simple&&chunks.length===1){
+        const target=rows.find(x=>['대상','사업 대상','사업대상'].includes(x.label));
+        core=(target?'대상 '+target.value+' / ':'')+simple[1]+'·신청 '+simple[2];
+      }
+      if(!core)return brief(item.value);
+      const qualifiers=chunks.slice(1).map(brief);
+      return core+(qualifiers.length?' ('+qualifiers.join(' / ')+')':'');
+    }
+    function optionBrief(item){
+      const chunks=clauses(item.value),first=(chunks[0]||'').replace(/\.$/,'');
+      const pattern=/((?:\d+|[A-Z])안)(?:은|는)\s+(.+?)(?=,\s*(?:\d+|[A-Z])안(?:은|는)\s+|$)/g;
+      const options=Array.from(first.matchAll(pattern),m=>({label:m[1],text:m[2]}));
+      if(options.length<2||new Set(options.map(x=>x.label)).size!==options.length||first.replace(pattern,'').replace(/[,\s]/g,''))return brief(item.value);
+      const tail=chunks.slice(1).join(' ').replace(/\.$/,'');
+      const undecided=tail.match(/^(?:두|세|네|\d+)\s*안\s*모두\s*결정\s*전이며\s*/);
+      if(!undecided)return brief(item.value);
+      const costs=tail.slice(undecided[0].length).split(/,\s*/).map(part=>part.match(/^((?:\d+|[A-Z])안)의\s*추가\s*비용(?:\s*여부)?(?:는|은)\s*(미확인|미정|미확정)$/));
+      if(costs.length!==options.length||costs.some(x=>!x)||new Set(costs.map(x=>x[1])).size!==costs.length||options.some(x=>!costs.some(c=>c[1]===x.label)))return brief(item.value);
+      return '결정 전: '+options.map(x=>x.label+' '+x.text+'(추가비용 '+costs.find(c=>c[1]===x.label)[2]+')').join(' / ');
+    }
+    const summary=[];
+    if(explicit.length)summary.push(...explicit);
+    else{
+      const date=rows.find(x=>['기준일','자료 기준일','자료기준일','현황·기준일'].includes(x.label));
+      facts.forEach(x=>summary.push({label:'현황',value:(date?date.value+' 기준 ':'')+factBrief(x),raw:x.raw,index:-100}));
+    }
+    const issue=choose(['문제','문제점','문제·영향','확인된 어려움','쟁점','검토 사항']);
+    const issueText=issue.flatMap(x=>clauses(x.value).map(brief)).join(' / ');
+    const requestText=decision.map(x=>brief(x.value)).join(' / ');
+    const proposal=choose(['추가 조치안']);
+    if(decision.length)summary.push({label:issueText?'쟁점·요청':'판단 요청',value:(issueText?issueText+' / ':'')+requestText,raw:'',index:-101});
+    else if(issueText||proposal.length)summary.push({label:proposal.length?'쟁점·조치안':'쟁점',value:[issueText,...proposal.map(x=>brief(x.value))].filter(Boolean).join(' / '),raw:'',index:-101});
+    choose(['대안']).forEach(x=>summary.push({label:'대안·비용',value:optionBrief(x),raw:x.raw,index:-102}));
+    const confirmations=[];
+    for(const row of rows){
+      const budget=['예산','예산액','집행액','예산·자원','비용'].includes(row.label)||(!row.label&&/예산|담당|일정/.test(row.raw));
+      const follow=['후속 조치','향후 계획','추가 조치안','기한'].includes(row.label);
+      if(!budget&&!follow)continue;
+      const selected=clauses(row.value).filter(x=>budget?/미확인|미정|미확정|확인하지\s*않았음|산출\s*불가/.test(x):/미정|미확정|제안|확정\s*아님/.test(x));
+      const text=selected.map(brief).join('·');if(text&&!confirmations.includes(text))confirmations.push(text);
+    }
+    if(!decision.length)confirmations.push('판단·결정 요청은 원자료 확인 필요');
+    if(confirmations.length)summary.push({label:'확인요건',value:confirmations.join(' / '),raw:'',index:-103});
     emit('보고 요지',summary);
     if(!explicit.length&&!facts.length)missing.push('보고 요지에 사용할 명시 요지 또는 현황 확인');
-    if(!decision.length){missing.push('판단·결정 요청 미제공: 현황 보고인지 필요한 판단이 있는지 확인');out.push('확인할 사항: 보고에서 요청할 판단·결정을 원자료와 확인하세요.');}
+    if(!decision.length)missing.push('판단·결정 요청 미제공: 현황 보고인지 필요한 판단이 있는지 확인');
     if(explicit.some(x=>/^(?:미확인|미제공|미정|확인\s*필요|자료\s*없음)$/.test(x.value)))missing.push('명시된 보고 요지의 미확인 항목 확인');
     const group=(heading,keys)=>emit(heading,choose(keys));
     group('기준일',['기준일','자료 기준일','현황·기준일']);
     group('추진 배경',['배경','추진 배경','목적','목표']);
     group('추진 현황',['현황','현재 상황','추진 현황','추진 경과','실적','진행 상황']);
     group('문제·검토 사항',['문제','문제점','문제·영향','확인된 어려움','쟁점','검토 사항','대안','미결 사항']);
+    group('판단·결정 요청',['판단 요청','판단할 사항','결정 요청','요청 사항','검토·결정 요청','협의 사항']);
     group('예산·자원',['예산','예산액','집행액','예산·자원','비용']);
     group('후속 조치',['후속 조치','향후 계획','추가 조치안','담당','기한']);
     group('기관·역할',['기관','기관명','기관·부서','주관','주최','부서']);
