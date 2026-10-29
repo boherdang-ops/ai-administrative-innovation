@@ -58,6 +58,90 @@ function sitePracticeSample(kind,sample){
 
 function siteArrangeDraft(draft, legacy) {
   if (!['report','press','reply'].includes(draft.kind) || (draft.kind==='report' && /현안|검토|결과/.test(draft.audience||''))) return legacy;
+
+  if(draft.kind==='report'){
+    const rows=draft.source.split(/\r?\n/).map((raw,index)=>{const m=raw.match(/^\s*([^:：]{1,30})[:：]\s*(.+)$/);return {raw,index,label:m?m[1].trim():'',value:m?m[2]:raw};}).filter(x=>x.raw.trim());
+    if(!rows.some(x=>x.label))return {...legacy,missing:[...legacy.missing,'보고 요지에 사용할 현황·판단 요청 확인']};
+    const used=new Set(),out=[],missing=[...legacy.missing];
+    const isFlag=x=>/(?:가상|합성|연습용).*(?:자료|예시)|(?:실제\s*)?(?:민원\/)?(?:모집\/)?(?:발송|배포|게시)\s*금지/.test(x.raw);
+    const flags=rows.filter(isFlag);
+    const titleKeys=['제목','문서명','업무명','사업명','행사명','프로그램','회의명'];
+    const roleGroups=[['기준일','자료 기준일','자료기준일','현황·기준일'],['대상','사업 대상','사업대상'],['현황','현재 상황','추진 현황','추진 경과','실적','진행 상황'],['보고 요지','핵심','요지'],['판단 요청','판단요청','판단할 사항','결정 요청','결정요청','요청 사항','검토·결정 요청','협의 사항'],['문제','문제점','문제·영향','확인된 어려움','쟁점','검토 사항'],['예산','예산·자원'],['후속 조치','향후 계획','추가 조치안'],['출처','자료 출처','근거','관련 근거','작성 근거'],titleKeys];
+    const roles=new Set();
+    const ambiguous=rows.some(x=>{if(!x.label)return false;const group=roleGroups.findIndex(keys=>keys.includes(x.label)),key=group<0?'label:'+x.label:'role:'+group;if(roles.has(key))return true;roles.add(key);return false;});
+    const rawMeta=(value,keys)=>value&&value.trim()&&!rows.some(x=>keys.includes(x.label)&&x.value===value);
+    const org=[draft.organization,draft.department].filter(Boolean).join(' ');
+    if(ambiguous){
+      // Repeated source fields may belong to different contexts even when values match.
+      out.push(draft.source);
+      if(rawMeta(draft.title,titleKeys))out.push('문서 제목: '+draft.title);
+      if(rawMeta(org,['기관','기관명','기관·부서']))out.push('기관·부서: '+org);
+      if(rawMeta(draft.contact,['문의','문의처','공개 문의처','담당/문의처','담당·문의처']))out.push('문의처: '+draft.contact);
+      if(rawMeta(draft.basis,['출처','자료 출처','근거','관련 근거']))out.push('관련 근거\n'+draft.basis);
+      out.push('확인할 사항: 반복된 자료 항목의 문맥을 자동 판단하지 않고 원문 순서로 보존했습니다. 시점·대상·금액의 연결과 보고 요지 배치를 원자료와 확인하세요.');
+      return {text:out.join('\n\n'),missing:[...missing,'반복된 원자료 항목의 문맥과 보고 요지 배치 확인'],notes:[],structured:true};
+    }
+    flags.forEach(x=>{out.push(x.raw);used.add(x.index);});
+    const title=draft.title||rows.find(x=>titleKeys.includes(x.label))?.value||j.report.name;
+    if(title)out.push(title);
+    const titleSeen=new Set();rows.filter(x=>titleKeys.includes(x.label)).forEach(x=>{if(used.has(x.index))return;if(x.value!==title&&!titleSeen.has(x.label+'\u0000'+x.value)){out.push('원자료 '+x.label+': '+x.value);titleSeen.add(x.label+'\u0000'+x.value);}used.add(x.index);});
+    function sentences(value,budgetList){
+      const parts=[];let start=0,quote='',stack=[];
+      const opening={'(':')','[':']','{':'}','「':'」','『':'』','“':'”','‘':'’'};
+      for(let i=0;i<value.length;i++){
+        const ch=value[i];
+        if(quote){if(ch===quote&&value[i-1]!=='\\')quote='';continue;}
+        if((ch==='"'||ch==="'")&&value[i-1]!=='\\'){quote=ch;continue;}
+        if(opening[ch]){stack.push(opening[ch]);continue;}
+        if(stack.length&&ch===stack[stack.length-1]){stack.pop();continue;}
+        if(!stack.length&&budgetList&&ch===','&&/^\s+(?:예산액|집행액|잔액|집행률)\s*[:：]?\s*\d/.test(value.slice(i+1))){parts.push(value.slice(start,i));start=i+1;continue;}
+        if(stack.length||ch!=='.'||!/\s/.test(value[i+1]||''))continue;
+        const tail=value.slice(start,i).replace(/[)\]」』”’]+$/,'');
+        if(!/[가-힣]$/.test(tail)||/(?:^|\s)(?:예|등|참고|붙임)$/.test(tail))continue;
+        const next=value.slice(i+1).trimStart();
+        if(/^(?:다만|단[,\s]|그러나|하지만|따라서|이 경우|그 경우|승인\s*시|승인되면)/.test(next))continue;
+        parts.push(value.slice(start,i+1));start=i+1;
+      }
+      parts.push(value.slice(start));return parts;
+    }
+    function emit(heading,hits){
+      const unique=hits;
+      for(const x of hits)used.add(x.index);
+      if(!unique.length)return;
+      const body=[];
+      for(const x of unique){
+        // Keep role labels unless they literally repeat this heading.
+        const repeatedLabel=x.label===heading||(heading==='문제·검토 사항'&&x.label==='문제')||(heading==='예산·자원'&&x.label==='예산')||(heading==='출처·근거'&&x.label==='출처');
+        const text=repeatedLabel?x.value:x.label?x.label+': '+x.value:x.raw;
+        sentences(text,heading==='예산·자원').forEach((part,i)=>body.push(i===0?'  ○ '+part:'    -'+(/^\s/.test(part)?'':' ')+part));
+      }
+      out.push('□ '+heading+'\n'+body.join('\n'));
+    }
+    const choose=keys=>rows.filter(x=>!used.has(x.index)&&keys.includes(x.label));
+    const explicit=choose(['보고 요지','핵심','요지']);
+    const facts=choose(['현황','현재 상황','추진 현황','추진 경과','실적','진행 상황']);
+    const decision=choose(['판단 요청','판단할 사항','결정 요청','요청 사항','검토·결정 요청','협의 사항']);
+    const summary=[...(explicit.length?explicit:facts),...decision];
+    emit('보고 요지',summary);
+    if(!explicit.length&&!facts.length)missing.push('보고 요지에 사용할 명시 요지 또는 현황 확인');
+    if(!decision.length){missing.push('판단·결정 요청 미제공: 현황 보고인지 필요한 판단이 있는지 확인');out.push('확인할 사항: 보고에서 요청할 판단·결정을 원자료와 확인하세요.');}
+    if(explicit.some(x=>/^(?:미확인|미제공|미정|확인\s*필요|자료\s*없음)$/.test(x.value)))missing.push('명시된 보고 요지의 미확인 항목 확인');
+    const group=(heading,keys)=>emit(heading,choose(keys));
+    group('기준일',['기준일','자료 기준일','현황·기준일']);
+    group('추진 배경',['배경','추진 배경','목적','목표']);
+    group('추진 현황',['현황','현재 상황','추진 현황','추진 경과','실적','진행 상황']);
+    group('문제·검토 사항',['문제','문제점','문제·영향','확인된 어려움','쟁점','검토 사항','대안','미결 사항']);
+    group('예산·자원',['예산','예산액','집행액','예산·자원','비용']);
+    group('후속 조치',['후속 조치','향후 계획','추가 조치안','담당','기한']);
+    group('기관·역할',['기관','기관명','기관·부서','주관','주최','부서']);
+    group('담당·문의처',['담당/문의처','담당·문의처','공개 문의처','문의','문의처','연락처']);
+    if(rawMeta(org,['기관','기관명','기관·부서']))out.push('기관·부서: '+org);
+    if(rawMeta(draft.contact,['문의','문의처','공개 문의처','담당/문의처','담당·문의처']))out.push('문의처: '+draft.contact);
+    group('출처·근거',['출처','자료 출처','근거','관련 근거','작성 근거']);
+    if(rawMeta(draft.basis,['출처','자료 출처','근거','관련 근거']))emit('관련 근거',[{label:'',raw:draft.basis,value:draft.basis,index:-1}]);
+    const rest=rows.filter(x=>!used.has(x.index));if(rest.length)emit('추가 제공 내용',rest);
+    return {text:out.join('\n\n'),missing,notes:[],structured:true};
+  }
   const lines=draft.source.split(/\r?\n/).map((raw,index)=>{const m=raw.match(/^\s*([^:：]{1,30})[:：]\s*(.+)$/);return {raw,index,label:m?m[1].trim():'',value:m?m[2]:raw};}).filter(x=>x.raw.trim());
   if (!lines.some(x=>x.label)) return legacy;
   const used=new Set(),values=new Set(),out=[];
