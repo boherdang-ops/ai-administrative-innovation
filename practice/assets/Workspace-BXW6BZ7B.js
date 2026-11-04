@@ -293,25 +293,65 @@ function siteImportInstructions(draft) {
 }
 function siteReplyDispatchChecks(draft) {
   if (draft.kind !== 'reply') return [];
-  const source = [draft.source, draft.basis].filter(Boolean).join('\n');
-  const body = draft.output || '';
-  const lines = text => text.split(/\r?\n/).map(line => line.trim());
-  const refusal = line => /(?:거부|불허|불승인|반려)(?:처분|합니다|됩니다|되었습니다|하였|했|[.。]?$)/.test(line) &&
-    !/거부처분을 받은|거부처분에|예정|검토 중|미확정/.test(line);
-  if (![...lines(source), ...lines(body)].some(refusal)) return [];
+  const refusal = line => !/거부처분을 받은|거부처분에|예정|검토 중|미확정/.test(line) &&
+    /(?:거부|불허|불승인|반려)(?:처분|합니다|됩니다|되었습니다|하였|했|[.。]?$)|(?:허가|승인|수용|허용|받아들일|받아들여\s*드릴)(?:할)?\s*수\s*없(?:습니다|음|다)(?:[.。]|$)/.test(line);
+  const reason = /^(?:거부|불허|불승인|반려)\s*(?:사유|이유)\s*[:：]\s*\S|(?:따라|때문에|있어).*(?:거부|불허|불승인|반려|허가할 수 없)/;
+  const remedy = /^(?:구제\s*절차|불복\s*절차|이의신청)\s*[:：]\s*\S|(?:이의신청|행정심판|행정소송).*(?:제출|접수|청구|제기|할 수 있)/;
+  const sections = text => {
+    const items = [{label:'', lines:[], decision:''}];
+    for (const raw of text.split(/\r?\n/)) {
+      const line = raw.trim();
+      if (!line) continue;
+      const heading = line.match(/^(?:#{1,6}\s+)?((?:\d+[.)]|\d+\)|[가-하][.)]|항목\s*\d+\s*[:：])\s+\S.*)$/);
+      const outcome = /^(?:처리\s*(?:결과|판단)|결정|답변)\s*[:：]/.test(line);
+      const decision = refusal(line) && !/^(?:거부|불허|불승인|반려)\s*(?:사유|이유)\s*[:：]/.test(line) && !remedy.test(line) ? 'refused' :
+        /^(?:(?:처리\s*(?:결과|판단)|결정|답변)\s*[:：]\s*)?(?:수용|허가|승인)(?:[.。]|합니다|했습니다|$)/.test(line) ? 'accepted' : '';
+      let item = items.at(-1);
+      if (heading || (outcome && decision && item.decision)) {
+        item = {label:heading?.[1] || '', lines:[], decision:''};
+        items.push(item);
+      }
+      item.lines.push(line);
+      if (decision) item.decision = decision;
+    }
+    return items;
+  };
+  const sourceItems = sections(draft.source || '');
+  const basis = (draft.basis || '').split(/\r?\n/).map(line => line.trim());
+  if (sourceItems.length === 1) sourceItems[0].lines.push(...basis);
+  const body = (draft.output || '').trim();
+  const bodyItems = sections(body);
+  const sourceRefused = sourceItems.filter(item => item.decision === 'refused');
+  const bodyRefused = bodyItems.filter(item => item.decision === 'refused');
   const confirmed = line => {
     const value = line.replace(/^[^:：]{1,30}[:：]\s*/, '').trim();
     return !/미확인|확인 필요|확인 중|미정|미제공/.test(value) &&
       !/^(?:없음|해당 없음)[.。]?$|^\[.*\]$/.test(value);
   };
-  const reason = /^(?:거부|불허|불승인|반려)\s*(?:사유|이유)\s*[:：]\s*\S|(?:따라|때문에|있어).*(?:거부|불허|불승인|반려|허가할 수 없)/;
-  const remedy = /^(?:구제\s*절차|불복\s*절차|이의신청)\s*[:：]\s*\S|(?:이의신청|행정심판|행정소송).*(?:제출|접수|청구|제기|할 수 있)/;
-  const has = (text, pattern) => lines(text).some(line => confirmed(line) && pattern.test(line));
-  return [
+  const checks = [
     [reason, '거부 사유를 확인하세요. 확인 사실과 적용 근거를 대조하세요.'],
     [remedy, '구제절차를 확인하세요. 적용 절차, 기산점·기한, 제출 방법과 접수처를 대조하세요.'],
-  ].filter(([pattern]) => !has(source, pattern) || (body.trim() && !has(body, pattern)))
-    .map(([, message]) => message);
+  ];
+  const messages = new Set();
+  for (const items of [sourceRefused, bodyRefused]) {
+    for (const item of items) {
+      for (const [pattern, message] of checks) {
+        if (!item.lines.some(line => confirmed(line) && pattern.test(line))) {
+          messages.add(item.label ? item.label+' — '+message : message);
+        }
+      }
+    }
+  }
+  if (sourceRefused.length && body && !bodyRefused.length) {
+    for (const [, message] of checks) messages.add(message);
+  }
+  if (bodyRefused.length && !sourceRefused.length) {
+    const singleSource = sourceItems.length === 1 && !sourceItems[0].decision ? sourceItems[0].lines : [];
+    for (const [pattern, message] of checks) {
+      if (!singleSource.some(line => confirmed(line) && pattern.test(line))) messages.add(message);
+    }
+  }
+  return [...messages];
 }
 
 function siteDraftRequest(draft,revise) {
