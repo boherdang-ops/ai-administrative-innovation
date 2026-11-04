@@ -18,3 +18,7 @@ body.print-preview>header,body.print-preview>.prototype,body.print-preview>foote
 body.print-preview .reviewed-report .domain-bar-row{grid-template-columns:140px 1fr 230px;gap:8px}
 @media print{.reviewed-report .segment.assisted{background:#2e6b9b;print-color-adjust:exact;-webkit-print-color-adjust:exact}.reviewed-report .interpretation-scope{padding:8px;font-size:7.5pt;margin-bottom:12px}.reviewed-report .interpretation-scope p{font-size:7.5pt}.reviewed-report .domain-bar-row,body.print-preview .reviewed-report .domain-bar-row{grid-template-columns:115px 1fr 200px;gap:6px}.reviewed-report .bar-caption{font-size:7pt}.course-progress{font-size:7.5pt}}
 @media screen and (max-width:800px){body.print-preview .reviewed-report .domain-bar-row{grid-template-columns:1fr}}
+
+body.print-preview .diagnosis-report .no-print {
+  display: none !important;
+}

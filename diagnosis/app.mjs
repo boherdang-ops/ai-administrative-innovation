@@ -3,7 +3,7 @@ import {setupDefaults,beginOrResume,REVIEW_VERSION} from './review-session.mjs?v
 import {questionGuidance} from './question-guidance.mjs?v=review2';
 import {DEFAULT_DEFINITION,LINKS,validateDefinition} from './data/definition.mjs?v=cms1';
 import {evaluate} from './engine.mjs?v=20261019-3';
-import {reportHTML} from './review-report.mjs?v=review2';
+import {reportHTML} from './review-report.mjs?v=print-20261104';
 let content=structuredClone(DEFAULT_CONTENT),renderContent=content;
 const root=document.querySelector('main');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
