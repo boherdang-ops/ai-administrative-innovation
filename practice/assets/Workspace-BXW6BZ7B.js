@@ -299,7 +299,11 @@ function siteReplyDispatchChecks(draft) {
   const refusal = line => /(?:거부|불허|불승인|반려)(?:처분|합니다|됩니다|되었습니다|하였|했|[.。]?$)/.test(line) &&
     !/거부처분을 받은|거부처분에|예정|검토 중|미확정/.test(line);
   if (![...lines(source), ...lines(body)].some(refusal)) return [];
-  const confirmed = line => !/미확인|확인 필요|확인 중|미정|미제공|없음|^\s*\[.*\]\s*$/.test(line);
+  const confirmed = line => {
+    const value = line.replace(/^[^:：]{1,30}[:：]\s*/, '').trim();
+    return !/미확인|확인 필요|확인 중|미정|미제공/.test(value) &&
+      !/^(?:없음|해당 없음)[.。]?$|^\[.*\]$/.test(value);
+  };
   const reason = /^(?:거부|불허|불승인|반려)\s*(?:사유|이유)\s*[:：]\s*\S|(?:따라|때문에|있어).*(?:거부|불허|불승인|반려|허가할 수 없)/;
   const remedy = /^(?:구제\s*절차|불복\s*절차|이의신청)\s*[:：]\s*\S|(?:이의신청|행정심판|행정소송).*(?:제출|접수|청구|제기|할 수 있)/;
   const has = (text, pattern) => lines(text).some(line => confirmed(line) && pattern.test(line));
